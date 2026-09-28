@@ -188,3 +188,32 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({ error: "Failed to process password reset request" });
   }
 };
+
+/**
+ * GET /api/auth/google/callback
+ * Handles Passport Google OAuth callback.
+ * Issues JWT tokens and redirects user to frontend callback page.
+ */
+exports.googleCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+
+    if (!user) {
+      return res.redirect(`${clientUrl}/login?error=google_auth_failed`);
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    // Set refresh token as httpOnly cookie
+    res.cookie("celsa_refresh", refreshToken, getCookieOptions());
+
+    // Redirect to frontend auth callback page with accessToken
+    res.redirect(`${clientUrl}/auth/callback?token=${accessToken}`);
+  } catch (err) {
+    console.error("Google Callback Error:", err);
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    res.redirect(`${clientUrl}/login?error=google_auth_error`);
+  }
+};
+

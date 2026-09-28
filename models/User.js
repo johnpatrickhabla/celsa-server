@@ -18,7 +18,18 @@ const userSchema = new mongoose.Schema(
     },
     passwordHash: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.googleId;
+      },
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
+    },
+    avatar: {
+      type: String,
+      default: "",
     },
     role: {
       type: String,
@@ -52,7 +63,7 @@ const userSchema = new mongoose.Schema(
  * this hook replaces it with a bcrypt hash before saving.
  */
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("passwordHash")) return next();
+  if (!this.passwordHash || !this.isModified("passwordHash")) return next();
   this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
   next();
 });
@@ -61,6 +72,7 @@ userSchema.pre("save", async function (next) {
  * Instance method: compare a candidate password against the stored hash.
  */
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.passwordHash) return false;
   return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
@@ -75,3 +87,4 @@ userSchema.methods.toJSON = function () {
 };
 
 module.exports = mongoose.model("User", userSchema);
+

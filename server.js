@@ -20,6 +20,8 @@ const dashboardRoutes = require("./routes/dashboard");
 const uploadRoutes = require("./routes/upload");
 const notificationRoutes = require("./routes/notifications");
 
+const passport = require("./config/passport");
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -43,6 +45,7 @@ app.use(
 );
 app.use(morgan("dev"));
 app.use(cookieParser());
+app.use(passport.initialize());
 app.use(express.json({
   limit: "10mb",
   // Preserve raw body for webhook signature verification (PayMongo)
@@ -61,7 +64,11 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many attempts, please try again later." },
-  skip: (req) => req.path === "/me" || req.path === "/refresh" || req.path === "/logout",
+  skip: (req) =>
+    req.path === "/me" ||
+    req.path === "/refresh" ||
+    req.path === "/logout" ||
+    req.path.startsWith("/google"),
 });
 
 // ── API routes ───────────────────────────────────────────────────

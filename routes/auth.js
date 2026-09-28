@@ -1,5 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
+const passport = require("passport");
 const validate = require("../middleware/validate");
 const verifyToken = require("../middleware/auth");
 const authController = require("../controllers/authController");
@@ -31,6 +32,25 @@ router.post(
   authController.login
 );
 
+// GET /api/auth/google — initiate Google OAuth flow
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"], session: false })
+);
+
+// GET /api/auth/google/callback — handle Google OAuth callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: "/api/auth/google/failure" }),
+  authController.googleCallback
+);
+
+// GET /api/auth/google/failure
+router.get("/google/failure", (_req, res) => {
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+  res.redirect(`${clientUrl}/login?error=google_auth_failed`);
+});
+
 // POST /api/auth/refresh — exchange refresh cookie for new access token
 router.post("/refresh", authController.refresh);
 
@@ -49,3 +69,4 @@ router.post(
 );
 
 module.exports = router;
+
