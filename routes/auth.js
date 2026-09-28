@@ -47,7 +47,8 @@ router.get(
 
 // GET /api/auth/google/failure
 router.get("/google/failure", (_req, res) => {
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+  const rawClientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+  const clientUrl = rawClientUrl.replace(/\/+$/, "");
   res.redirect(`${clientUrl}/login?error=google_auth_failed`);
 });
 
