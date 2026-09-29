@@ -16,25 +16,37 @@ function generateTokens(user) {
     expiresIn: process.env.JWT_EXPIRES_IN || "15m",
   });
 
+  // Customer sessions expire in 1 day; staff/admin default to 7 days
+  const isCustomer = user.role === "customer";
+  const refreshExpiresIn = isCustomer
+    ? process.env.JWT_CUSTOMER_REFRESH_EXPIRES_IN || "1d"
+    : process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+
   const refreshToken = jwt.sign(
-    { sub: user._id },
+    { sub: user._id, role: user.role },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" }
+    { expiresIn: refreshExpiresIn }
   );
 
   return { accessToken, refreshToken };
 }
 
 /**
- * Get cookie configuration options based on environment.
+ * Get cookie configuration options based on environment and user role.
+ * Customers receive a 1-day cookie; staff/admin receive 7 days.
  */
-function getCookieOptions() {
+function getCookieOptions(role) {
   const isProd = process.env.NODE_ENV === "production";
+  const isCustomer = role === "customer";
+  const maxAge = isCustomer
+    ? 24 * 60 * 60 * 1000 // 1 day for customer portal
+    : 7 * 24 * 60 * 60 * 1000; // 7 days for staff/admin
+
   return {
     httpOnly: true,
     secure: isProd,
     sameSite: process.env.COOKIE_SAME_SITE || (isProd ? "none" : "lax"),
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge,
     path: "/",
   };
 }
@@ -66,7 +78,7 @@ exports.signup = async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(user);
 
     // Set refresh token as httpOnly cookie
-    res.cookie("celsa_refresh", refreshToken, getCookieOptions());
+    res.cookie("celsa_refresh", refreshToken, getCookieOptions(user.role));
 
     res.status(201).json({
       message: "Account created successfully",
@@ -103,7 +115,7 @@ exports.login = async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(user);
 
     // Set refresh token as httpOnly cookie
-    res.cookie("celsa_refresh", refreshToken, getCookieOptions());
+    res.cookie("celsa_refresh", refreshToken, getCookieOptions(user.role));
 
     res.json({
       accessToken,
@@ -135,7 +147,7 @@ exports.refresh = async (req, res) => {
     const tokens = generateTokens(user);
 
     // Rotate refresh token
-    res.cookie("celsa_refresh", tokens.refreshToken, getCookieOptions());
+    res.cookie("celsa_refresh", tokens.refreshToken, getCookieOptions(user.role));
 
     res.json({ accessToken: tokens.accessToken });
   } catch (err) {
@@ -211,7 +223,7 @@ exports.googleCallback = async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(user);
 
     // Set refresh token as httpOnly cookie
-    res.cookie("celsa_refresh", refreshToken, getCookieOptions());
+    res.cookie("celsa_refresh", refreshToken, getCookieOptions(user.role));
 
     // Redirect to frontend auth callback page with accessToken
     res.redirect(`${clientUrl}/auth/callback?token=${accessToken}`);

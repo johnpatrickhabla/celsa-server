@@ -27,12 +27,22 @@ export default function AuthModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setTab(initialTab);
     setError(null);
     setSuccessMsg(null);
     setShowPassword(false);
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("reason") === "idle_timeout") {
+        setNotice("You were automatically signed out after 15 minutes of inactivity.");
+      } else if (params.get("error") === "google_auth_failed") {
+        setError("Google authentication failed. Please try again.");
+      }
+    }
   }, [initialTab, isOpen]);
 
   if (!isOpen) return null;
@@ -263,6 +273,13 @@ export default function AuthModal({
                   </span>
                   <hr className="flex-grow-1 my-0 text-muted opacity-25" />
                 </div>
+
+                {notice && (
+                  <div className="alert alert-warning py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                    <i className="bi bi-clock-history fs-6 flex-shrink-0" />
+                    <span>{notice}</span>
+                  </div>
+                )}
 
                 {error && (
                   <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3">

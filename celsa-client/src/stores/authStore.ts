@@ -28,6 +28,11 @@ interface AuthState {
   refresh: () => Promise<boolean>;
 }
 
+function setClientCookie(token: string, role?: string) {
+  const maxAge = role === "customer" ? 86400 : 7 * 86400; // 1 day for customer, 7 days for staff/admin
+  document.cookie = `celsa_token=${token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   accessToken: null,
@@ -66,7 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { accessToken, user } = res.data;
 
     localStorage.setItem("celsa_access_token", accessToken);
-    document.cookie = `celsa_token=${accessToken}; path=/; SameSite=Lax`;
+    setClientCookie(accessToken, user?.role);
 
     set({
       user,
@@ -81,7 +86,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (accessToken) {
       localStorage.setItem("celsa_access_token", accessToken);
-      document.cookie = `celsa_token=${accessToken}; path=/; SameSite=Lax`;
+      setClientCookie(accessToken, user?.role);
 
       set({
         user,
@@ -112,7 +117,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const payload = jwtDecode<CelsaJwtPayload>(accessToken);
 
       localStorage.setItem("celsa_access_token", accessToken);
-      document.cookie = `celsa_token=${accessToken}; path=/; SameSite=Lax`;
+      setClientCookie(accessToken, payload.role);
 
       set({
         user: {
