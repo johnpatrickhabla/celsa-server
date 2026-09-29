@@ -8,8 +8,17 @@ export default function CustomerFooter() {
           {/* Brand Info */}
           <div className="col-lg-4 col-md-6">
             <div className="mb-3">
-              <div className="fw-bold fs-5 lh-1">CELSA</div>
-              <small className="text-uppercase d-block" style={{ letterSpacing: 1, fontSize: "0.6rem", color: "var(--celsa-gold)" }}>
+              <div className="fw-bold text-white fs-4 lh-1" style={{ letterSpacing: "1px" }}>
+                CELSA
+              </div>
+              <small
+                className="text-uppercase fw-semibold d-block mt-1"
+                style={{
+                  letterSpacing: "3px",
+                  fontSize: "0.72rem",
+                  color: "#e5be65",
+                }}
+              >
                 Handicrafts
               </small>
             </div>
