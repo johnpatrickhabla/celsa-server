@@ -175,13 +175,13 @@ export default function ProductsPage() {
                   href={`/products/${product.slug}`}
                   className="text-decoration-none text-dark"
                 >
-                  <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden" style={{ height: 180 }}>
+                  <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
                     {product.images.length > 0 ? (
                       <img
                         src={product.images[0].url}
                         alt={product.name}
                         className="d-block w-100 h-100"
-                        style={{ objectFit: "cover" }}
+                        style={{ objectFit: "contain" }}
                       />
                     ) : (
                       <i className="bi bi-image text-muted fs-1" />
@@ -191,19 +191,9 @@ export default function ProductsPage() {
                     <div className="text-muted mb-1" style={{ fontSize: "0.7rem" }}>
                       {getCategoryName(product)}
                     </div>
-                    <h3 className="product-title fw-bold text-dark fs-6 mb-1">{product.name}</h3>
-                    <p className="product-description text-muted small mb-2" style={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      fontSize: "0.75rem",
-                      minHeight: "36px"
-                    }}>
-                      {product.description}
-                    </p>
+                    <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={product.name}>{product.name}</h3>
                     <div className="product-price mb-2 d-flex align-items-center justify-content-between">
-                      <span className="price text-success fw-bold">
+                      <span className="price text-success fw-bold fs-6">
                         ₱{product.basePrice.toFixed(2)}
                       </span>
                       {product.isCustomizable && (

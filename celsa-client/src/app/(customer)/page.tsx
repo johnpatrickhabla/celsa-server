@@ -141,32 +141,22 @@ export default function HomePage() {
                 <div className="col-6 col-md-3" key={p._id}>
                   <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between">
                     <div>
-                      <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden" style={{ height: 160 }}>
+                      <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
                         {p.images.length > 0 ? (
                           <img
                             src={p.images[0].url}
                             alt={p.name}
                             className="d-block w-100 h-100"
-                            style={{ objectFit: "cover" }}
+                            style={{ objectFit: "contain" }}
                           />
                         ) : (
                           <i className="bi bi-image text-muted fs-1" />
                         )}
                       </div>
                       <div className="product-content">
-                        <h3 className="product-title fw-bold text-dark fs-6 mb-1">{p.name}</h3>
-                        <p className="product-description text-muted small mb-2" style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          fontSize: "0.75rem",
-                          minHeight: "36px"
-                        }}>
-                          {p.description}
-                        </p>
+                        <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={p.name}>{p.name}</h3>
                         <div className="product-price mb-3">
-                          <span className="price text-success fw-bold">₱{p.basePrice.toFixed(2)}</span>
+                          <span className="price text-success fw-bold fs-6">₱{p.basePrice.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
