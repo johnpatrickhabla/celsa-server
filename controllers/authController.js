@@ -195,7 +195,10 @@ exports.forgotPassword = async (req, res) => {
  * Issues JWT tokens and redirects user to frontend callback page.
  */
 exports.googleCallback = async (req, res) => {
-  const getClientUrl = () => (process.env.CLIENT_URL || "http://localhost:3000").replace(/\/+$/, "");
+  const getClientUrl = () => {
+    const raw = process.env.CLIENT_URL || "https://celsa-client-gznj.vercel.app";
+    return raw.split(",")[0].trim().replace(/\/+$/, "");
+  };
 
   try {
     const user = req.user;

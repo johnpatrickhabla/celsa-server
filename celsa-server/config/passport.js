@@ -13,7 +13,7 @@ if (clientID && clientSecret) {
         clientSecret,
         callbackURL:
           process.env.GOOGLE_CALLBACK_URL ||
-          "http://localhost:5000/api/auth/google/callback",
+          "https://celsa-server.onrender.com/api/auth/google/callback",
       },
       async (_accessToken, _refreshToken, profile, done) => {
         try {

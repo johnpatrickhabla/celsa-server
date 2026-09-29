@@ -195,9 +195,14 @@ exports.forgotPassword = async (req, res) => {
  * Issues JWT tokens and redirects user to frontend callback page.
  */
 exports.googleCallback = async (req, res) => {
+  const getClientUrl = () => {
+    const raw = process.env.CLIENT_URL || "https://celsa-client-gznj.vercel.app";
+    return raw.split(",")[0].trim().replace(/\/+$/, "");
+  };
+
   try {
     const user = req.user;
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    const clientUrl = getClientUrl();
 
     if (!user) {
       return res.redirect(`${clientUrl}/login?error=google_auth_failed`);
@@ -212,7 +217,7 @@ exports.googleCallback = async (req, res) => {
     res.redirect(`${clientUrl}/auth/callback?token=${accessToken}`);
   } catch (err) {
     console.error("Google Callback Error:", err);
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    const clientUrl = getClientUrl();
     res.redirect(`${clientUrl}/login?error=google_auth_error`);
   }
 };
