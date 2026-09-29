@@ -109,14 +109,11 @@ export default function CustomerNavbar() {
     <>
       <header className="celsa-navbar">
         <div className="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
-          <Link href="/" className="d-flex align-items-center gap-2 text-decoration-none">
-            <i className="bi bi-flower1 fs-3 celsa-logo-mark" />
-            <div>
-              <div className="fw-bold text-dark lh-1">CELSA</div>
-              <small className="text-uppercase celsa-logo-mark" style={{ letterSpacing: 1, fontSize: "0.65rem" }}>
-                Handicrafts
-              </small>
-            </div>
+          <Link href="/" className="text-decoration-none">
+            <div className="fw-bold text-dark lh-1 fs-5">CELSA</div>
+            <small className="text-uppercase celsa-logo-mark d-block" style={{ letterSpacing: 1, fontSize: "0.65rem" }}>
+              Handicrafts
+            </small>
           </Link>
 
           <nav className="d-none d-lg-flex gap-4">

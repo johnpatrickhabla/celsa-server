@@ -7,14 +7,11 @@ export default function CustomerFooter() {
         <div className="row g-4">
           {/* Brand Info */}
           <div className="col-lg-4 col-md-6">
-            <div className="d-flex align-items-center gap-2 mb-3">
-              <i className="bi bi-flower1 fs-3" style={{ color: "var(--celsa-gold)" }} />
-              <div>
-                <div className="fw-bold fs-5 lh-1">CELSA</div>
-                <small className="text-uppercase" style={{ letterSpacing: 1, fontSize: "0.6rem", color: "var(--celsa-gold)" }}>
-                  Handicrafts
-                </small>
-              </div>
+            <div className="mb-3">
+              <div className="fw-bold fs-5 lh-1">CELSA</div>
+              <small className="text-uppercase d-block" style={{ letterSpacing: 1, fontSize: "0.6rem", color: "var(--celsa-gold)" }}>
+                Handicrafts
+              </small>
             </div>
             <p className="small mb-3" style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.7 }}>
               Celsa Handicrafts offers unique and high-quality handcrafted products crafted with passion and tradition.
@@ -72,7 +69,7 @@ export default function CustomerFooter() {
               </li>
               <li className="d-flex align-items-start gap-2">
                 <i className="bi bi-geo-alt-fill mt-1" style={{ fontSize: "0.75rem" }} />
-                <span>Poblacion Centro, Barangay,<br />Alcala, Philippines</span>
+                <span>Sitio Comon, Barangay Bangate,<br />Barcelona, Sorsogon City</span>
               </li>
             </ul>
           </div>
