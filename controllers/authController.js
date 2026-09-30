@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { sendPasswordResetEmail } = require("../utils/email");
 
 /**
  * Generate an access token (short-lived) and a refresh token (long-lived).
@@ -210,9 +211,11 @@ exports.forgotPassword = async (req, res) => {
     user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
     await user.save();
 
+    // Send verification code to user's registered email address
+    await sendPasswordResetEmail(user.email, resetCode, user.name);
+
     res.json({
-      message: "A 6-digit password reset verification code has been generated.",
-      resetCode,
+      message: "A 6-digit verification code has been sent to your email address.",
     });
   } catch (err) {
     console.error("Forgot password error:", err);

@@ -104,11 +104,8 @@ export default function AuthModal({
 
     try {
       const res = await api.post("/auth/forgot-password", { email });
-      if (res.data.resetCode) {
-        setResetCode(res.data.resetCode);
-      }
       setForgotStep("verify");
-      setSuccessMsg(res.data.message || "A 6-digit verification code has been generated. Please enter it below.");
+      setSuccessMsg(res.data.message || "A 6-digit verification code has been sent to your email.");
       setLoading(false);
     } catch (err: any) {
       setLoading(false);
@@ -257,7 +254,7 @@ export default function AuthModal({
                       </div>
                       <h6 className="fw-bold text-dark mb-1">Forgot Your Password?</h6>
                       <p className="text-muted small mb-0">
-                        Enter your registered email address and we&apos;ll issue a 6-digit verification reset code.
+                        Enter your registered email address and we&apos;ll send a 6-digit verification code to your email inbox.
                       </p>
                     </div>
 
@@ -297,7 +294,7 @@ export default function AuthModal({
                         {loading ? (
                           <>
                             <span className="spinner-border spinner-border-sm me-2" />
-                            Generating Code…
+                            Sending Code…
                           </>
                         ) : (
                           "Send Verification Code"
@@ -331,7 +328,7 @@ export default function AuthModal({
                       </div>
                       <h6 className="fw-bold text-dark mb-1">Reset Password</h6>
                       <p className="text-muted small mb-0">
-                        Enter the 6-digit code for <strong>{email}</strong> and your new password.
+                        Enter the 6-digit code sent to <strong>{email}</strong> and choose a new password.
                       </p>
                     </div>
 
