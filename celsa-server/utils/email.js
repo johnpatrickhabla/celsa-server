@@ -3,11 +3,24 @@ const nodemailer = require("nodemailer");
 /**
  * Creates and returns a Nodemailer transporter based on environment variables.
  */
+function isPlaceholder(val) {
+  if (!val) return true;
+  const s = val.toLowerCase().trim();
+  return (
+    s.includes("your-gmail") ||
+    s.includes("your-email") ||
+    s.includes("example.com") ||
+    s.includes("your16char") ||
+    s.includes("your-app-password") ||
+    s.includes("changeme")
+  );
+}
+
 function createTransporter() {
   const user = process.env.SMTP_USER || process.env.EMAIL_USER;
   const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
 
-  if (!user || !pass) {
+  if (!user || !pass || isPlaceholder(user) || isPlaceholder(pass)) {
     return null;
   }
 
@@ -15,7 +28,7 @@ function createTransporter() {
   if (process.env.SMTP_SERVICE) {
     return nodemailer.createTransport({
       service: process.env.SMTP_SERVICE,
-      auth: { user, pass },
+      auth: { user: user.trim(), pass: pass.trim().replace(/\s+/g, "") },
     });
   }
 
@@ -24,7 +37,7 @@ function createTransporter() {
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
     secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-    auth: { user, pass },
+    auth: { user: user.trim(), pass: pass.trim().replace(/\s+/g, "") },
     tls: {
       rejectUnauthorized: false, // Prevents self-signed certificate rejection
     },
@@ -83,10 +96,13 @@ async function sendPasswordResetEmail(toEmail, resetCode, recipientName = "Value
     const textContent = `CELSA Handicrafts - Password Reset Code\n\nHello ${recipientName || "Valued Customer"},\n\nYour password reset verification code is: ${resetCode}\n\nThis code will expire in 15 minutes.\n\nIf you did not request this reset, please ignore this email.`;
 
     if (!transporter) {
-      console.warn(
-        `[EMAIL SERVICE] SMTP credentials not set (SMTP_USER / SMTP_PASS). Simulation Mode:\nTo: ${toEmail}\nCode: ${resetCode}`
-      );
-      return { success: true, simulated: true };
+      console.log("\n========================================================");
+      console.log("🔑 [CELSA PASSWORD RESET CODE - SIMULATION/DEV MODE]");
+      console.log(`📧 Recipient: ${toEmail}`);
+      console.log(`🔢 6-Digit Code: ${resetCode}`);
+      console.log("⏰ Valid for 15 minutes");
+      console.log("========================================================\n");
+      return { success: true, simulated: true, code: resetCode };
     }
 
     const info = await transporter.sendMail({
