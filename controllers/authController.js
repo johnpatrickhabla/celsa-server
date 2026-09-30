@@ -182,22 +182,90 @@ exports.me = async (req, res) => {
 
 /**
  * POST /api/auth/forgot-password
- * Handles customer password reset request.
+ * Generates a 6-digit verification code for password reset.
  */
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user || !user.isActive) {
       return res.status(404).json({ error: "No account found with this email address." });
     }
 
+    if (user.googleId && !user.passwordHash) {
+      return res.status(400).json({
+        error: "This account was registered using Google Sign-In. Please log in with Google.",
+      });
+    }
+
+    // Generate secure 6-digit code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetCode = resetCode;
+    user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
+    await user.save();
+
     res.json({
-      message: `A password reset link has been sent to ${email}. Please check your inbox.`,
+      message: "A 6-digit password reset verification code has been generated.",
+      resetCode,
     });
   } catch (err) {
     console.error("Forgot password error:", err);
     res.status(500).json({ error: "Failed to process password reset request" });
+  }
+};
+
+/**
+ * POST /api/auth/reset-password
+ * Verifies the 6-digit code and updates the user's password.
+ */
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: "Email, 6-digit code, and new password are required." });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters." });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user || !user.isActive) {
+      return res.status(404).json({ error: "No account found with this email address." });
+    }
+
+    if (
+      !user.resetCode ||
+      user.resetCode !== code.trim() ||
+      !user.resetCodeExpires ||
+      user.resetCodeExpires < new Date()
+    ) {
+      return res.status(400).json({
+        error: "Invalid or expired verification code. Please request a new code.",
+      });
+    }
+
+    // Update password (pre-save hook will hash it)
+    user.passwordHash = newPassword;
+    user.resetCode = null;
+    user.resetCodeExpires = null;
+    await user.save();
+
+    res.json({
+      message: "Your password has been updated successfully! You can now log in with your new password.",
+    });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ error: "Failed to reset password. Please try again." });
   }
 };
 

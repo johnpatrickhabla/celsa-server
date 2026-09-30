@@ -29,11 +29,23 @@ export default function AuthModal({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // Forgot / Reset Password flow states
+  const [forgotStep, setForgotStep] = useState<"request" | "verify">("request");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
   useEffect(() => {
     setTab(initialTab);
     setError(null);
     setSuccessMsg(null);
     setShowPassword(false);
+    setShowNewPassword(false);
+    setForgotStep("request");
+    setResetCode("");
+    setNewPassword("");
+    setConfirmPassword("");
 
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -92,11 +104,54 @@ export default function AuthModal({
 
     try {
       const res = await api.post("/auth/forgot-password", { email });
-      setSuccessMsg(res.data.message || "A password reset link has been dispatched to your email.");
+      if (res.data.resetCode) {
+        setResetCode(res.data.resetCode);
+      }
+      setForgotStep("verify");
+      setSuccessMsg(res.data.message || "A 6-digit verification code has been generated. Please enter it below.");
       setLoading(false);
     } catch (err: any) {
       setLoading(false);
       const msg = err.response?.data?.error || "Could not process request. Please verify your email.";
+      setError(msg);
+    }
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!resetCode.trim()) {
+      setError("Please enter the 6-digit verification code.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setError("New password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match. Please re-check.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await api.post("/auth/reset-password", {
+        email,
+        code: resetCode.trim(),
+        newPassword,
+      });
+      setLoading(false);
+      setSuccessMsg(res.data.message || "Your password has been updated! Please log in with your new password.");
+      setTab("login");
+      setForgotStep("request");
+      setResetCode("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      setLoading(false);
+      const msg = err.response?.data?.error || "Failed to reset password. Please verify the code and try again.";
       setError(msg);
     }
   }
@@ -139,7 +194,9 @@ export default function AuthModal({
                     ? "Welcome back! Log in to your account"
                     : tab === "signup"
                     ? "Create your customer account"
-                    : "Recover account access"}
+                    : forgotStep === "verify"
+                    ? "Set a new password for your account"
+                    : "Recover your account access"}
                 </small>
               </div>
               <button
@@ -160,6 +217,7 @@ export default function AuthModal({
                 }`}
                 onClick={() => {
                   setTab("login");
+                  setForgotStep("request");
                   setError(null);
                   setSuccessMsg(null);
                 }}
@@ -173,6 +231,7 @@ export default function AuthModal({
                 }`}
                 onClick={() => {
                   setTab("signup");
+                  setForgotStep("request");
                   setError(null);
                   setSuccessMsg(null);
                 }}
@@ -187,62 +246,209 @@ export default function AuthModal({
             {tab === "forgot" ? (
               /* Forgot Password View */
               <div>
-                <div className="text-center mb-3">
-                  <div
-                    className="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-2"
-                    style={{ width: 44, height: 44 }}
-                  >
-                    <i className="bi bi-shield-lock-fill fs-4" />
-                  </div>
-                  <h6 className="fw-bold text-dark mb-1">Forgot Your Password?</h6>
-                  <p className="text-muted small mb-0">
-                    Enter your email address and we&apos;ll send you password recovery instructions.
-                  </p>
-                </div>
+                {forgotStep === "request" ? (
+                  <>
+                    <div className="text-center mb-3">
+                      <div
+                        className="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-2"
+                        style={{ width: 44, height: 44 }}
+                      >
+                        <i className="bi bi-shield-lock-fill fs-4" />
+                      </div>
+                      <h6 className="fw-bold text-dark mb-1">Forgot Your Password?</h6>
+                      <p className="text-muted small mb-0">
+                        Enter your registered email address and we&apos;ll issue a 6-digit verification reset code.
+                      </p>
+                    </div>
 
-                {successMsg && (
-                  <div className="alert alert-success py-2 px-3 small rounded-3 mb-3">
-                    <i className="bi bi-check-circle-fill me-1" />
-                    {successMsg}
-                  </div>
-                )}
-
-                {error && (
-                  <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3">
-                    <i className="bi bi-exclamation-circle me-1" />
-                    {error}
-                  </div>
-                )}
-
-                <form onSubmit={handleForgotPassword} autoComplete="off">
-                  <div className="mb-3">
-                    <label className="form-label small fw-semibold text-dark">Registered Email</label>
-                    <input
-                      type="email"
-                      className="form-control rounded-3"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="off"
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" />
-                        Sending reset instructions…
-                      </>
-                    ) : (
-                      "Send Reset Instructions"
+                    {successMsg && (
+                      <div className="alert alert-success py-2 px-3 small rounded-3 mb-3">
+                        <i className="bi bi-check-circle-fill me-1" />
+                        {successMsg}
+                      </div>
                     )}
-                  </button>
-                </form>
+
+                    {error && (
+                      <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                        <i className="bi bi-exclamation-circle me-1" />
+                        {error}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleForgotPassword} autoComplete="off">
+                      <div className="mb-3">
+                        <label className="form-label small fw-semibold text-dark">Registered Email</label>
+                        <input
+                          type="email"
+                          className="form-control rounded-3"
+                          placeholder="Enter your email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          autoComplete="off"
+                          required
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-2"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                            Generating Code…
+                          </>
+                        ) : (
+                          "Send Verification Code"
+                        )}
+                      </button>
+
+                      <div className="text-center mt-3 pt-2 border-top">
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-muted small p-0"
+                          onClick={() => {
+                            setTab("login");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          <i className="bi bi-arrow-left me-1" />
+                          Back to Log In
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-center mb-3">
+                      <div
+                        className="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-2"
+                        style={{ width: 44, height: 44 }}
+                      >
+                        <i className="bi bi-key-fill fs-4" />
+                      </div>
+                      <h6 className="fw-bold text-dark mb-1">Reset Password</h6>
+                      <p className="text-muted small mb-0">
+                        Enter the 6-digit code for <strong>{email}</strong> and your new password.
+                      </p>
+                    </div>
+
+                    {successMsg && (
+                      <div className="alert alert-success py-2 px-3 small rounded-3 mb-3">
+                        <i className="bi bi-check-circle-fill me-1" />
+                        {successMsg}
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                        <i className="bi bi-exclamation-circle me-1" />
+                        {error}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleResetPassword} autoComplete="off">
+                      <div className="mb-3">
+                        <label className="form-label small fw-semibold text-dark">6-Digit Verification Code</label>
+                        <input
+                          type="text"
+                          className="form-control rounded-3 text-center fw-bold fs-5"
+                          placeholder="123456"
+                          maxLength={6}
+                          value={resetCode}
+                          onChange={(e) => setResetCode(e.target.value)}
+                          autoComplete="off"
+                          required
+                          style={{ letterSpacing: "4px" }}
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label small fw-semibold text-dark">New Password</label>
+                        <div className="input-group">
+                          <input
+                            type={showNewPassword ? "text" : "password"}
+                            className="form-control rounded-start-3"
+                            placeholder="At least 8 characters"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            autoComplete="new-password"
+                            required
+                            minLength={8}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary rounded-end-3 px-3 bg-white border-start-0 d-flex align-items-center justify-content-center"
+                            style={{ borderColor: "#dee2e6" }}
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            title={showNewPassword ? "Hide password" : "Show password"}
+                            aria-label={showNewPassword ? "Hide password" : "Show password"}
+                          >
+                            <i className={`bi ${showNewPassword ? "bi-eye-slash text-secondary" : "bi-eye text-muted"} fs-6`} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label small fw-semibold text-dark">Confirm New Password</label>
+                        <input
+                          type={showNewPassword ? "text" : "password"}
+                          className="form-control rounded-3"
+                          placeholder="Re-enter new password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          autoComplete="new-password"
+                          required
+                          minLength={8}
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-2"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                            Updating Password…
+                          </>
+                        ) : (
+                          "Update Password"
+                        )}
+                      </button>
+
+                      <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-muted small p-0"
+                          onClick={() => {
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          <i className="bi bi-arrow-left me-1" />
+                          Change Email / Resend
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-success small p-0"
+                          onClick={() => {
+                            setTab("login");
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          Back to Log In
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                )}
               </div>
             ) : (
               /* Login & Signup Form Views */

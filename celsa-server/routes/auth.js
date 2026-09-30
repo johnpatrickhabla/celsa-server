@@ -69,5 +69,20 @@ router.post(
   authController.forgotPassword
 );
 
+// POST /api/auth/reset-password — verify code and update password
+router.post(
+  "/reset-password",
+  [
+    body("email").isEmail().withMessage("Valid email is required"),
+    body("code").trim().notEmpty().withMessage("Verification code is required"),
+    body("newPassword")
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters"),
+  ],
+  validate,
+  authController.resetPassword
+);
+
 module.exports = router;
+
 
