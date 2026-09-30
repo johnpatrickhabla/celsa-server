@@ -211,11 +211,16 @@ exports.forgotPassword = async (req, res) => {
     user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
     await user.save();
 
-    // Send verification code to user's registered email address
-    await sendPasswordResetEmail(user.email, resetCode, user.name);
+    // Send verification code to user's registered email address (non-blocking)
+    const emailResult = await sendPasswordResetEmail(user.email, resetCode, user.name);
+    if (!emailResult.success && !emailResult.simulated) {
+      console.error("[WARN] Email delivery failed, but code was saved to DB. User may need to retry.", emailResult.error);
+    }
 
     res.json({
-      message: "A 6-digit verification code has been sent to your email address.",
+      message: emailResult.simulated
+        ? "Verification code generated (email not configured on server). Check server logs for the code."
+        : "A 6-digit verification code has been sent to your email address. Please check your inbox.",
     });
   } catch (err) {
     console.error("Forgot password error:", err);
