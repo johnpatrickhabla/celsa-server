@@ -249,6 +249,37 @@ exports.getById = async (req, res) => {
 };
 
 /**
+ * GET /api/orders/track/:orderNumber
+ * Public endpoint to allow anyone to track an order by order number without login.
+ */
+exports.trackOrder = async (req, res) => {
+  try {
+    const { orderNumber } = req.params;
+    if (!orderNumber || !orderNumber.trim()) {
+      return res.status(400).json({ error: "Order number is required" });
+    }
+
+    const cleanOrderNumber = orderNumber.trim();
+    const order = await Order.findOne({
+      orderNumber: { $regex: new RegExp(`^${cleanOrderNumber}$`, "i") },
+    })
+      .populate("user", "name email")
+      .populate("assignedTo", "name");
+
+    if (!order) {
+      return res.status(404).json({
+        error: `No order found with order number "${cleanOrderNumber}". Please verify and try again.`,
+      });
+    }
+
+    res.json({ order });
+  } catch (err) {
+    console.error("Order tracking error:", err);
+    res.status(500).json({ error: "Failed to track order" });
+  }
+};
+
+/**
  * PATCH /api/orders/:id/status — admin/staff: update order status.
  */
 exports.updateStatus = async (req, res) => {

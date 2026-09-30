@@ -19,6 +19,9 @@ router.get(
   orderController.list
 );
 
+// Public: track order by order number (no login required)
+router.get("/track/:orderNumber", orderController.trackOrder);
+
 // Any authenticated user: get order detail (controller checks ownership for customers)
 router.get("/:id", verifyToken, orderController.getById);
 
