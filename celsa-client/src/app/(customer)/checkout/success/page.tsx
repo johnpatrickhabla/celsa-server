@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
 function SuccessContent() {
