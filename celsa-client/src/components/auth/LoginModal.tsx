@@ -62,14 +62,30 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
       <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 400 }}>
         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
           {/* Header */}
-          <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+          <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-start">
             <div>
-              <h5 className="fw-bold text-dark mb-0">Log in to Celsa</h5>
-              <small className="text-muted">Welcome back.</small>
+              <div className="d-flex flex-column mb-1">
+                <span className="fw-bold text-dark fs-4 lh-1" style={{ letterSpacing: "1px" }}>
+                  CELSA
+                </span>
+                <span
+                  className="text-uppercase fw-semibold mt-1"
+                  style={{
+                    letterSpacing: "3px",
+                    fontSize: "0.72rem",
+                    color: "#73511f",
+                  }}
+                >
+                  Handicrafts
+                </span>
+              </div>
+              <small className="text-muted d-block" style={{ fontSize: "0.75rem" }}>
+                Welcome back! Log in to your account
+              </small>
             </div>
             <button
               type="button"
-              className="btn-close"
+              className="btn-close mt-1"
               onClick={onClose}
               aria-label="Close"
             />
