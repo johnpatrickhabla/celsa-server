@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardTopbar from "@/components/shared/DashboardTopbar";
@@ -21,6 +21,8 @@ interface CustomOptionInput {
 
 export default function NewProductPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +35,11 @@ export default function NewProductPage() {
     stock: "10",
     lowStockThreshold: "5",
     isFeatured: false,
-    imageUrl: "",
   });
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [options, setOptions] = useState<CustomOptionInput[]>([]);
 
@@ -52,6 +57,62 @@ export default function NewProductPage() {
     }
     loadCats();
   }, []);
+
+  function handleFileSelect(file: File | undefined) {
+    if (!file) return;
+
+    // Validate image format
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file (PNG, JPG, JPEG, WEBP, or GIF).");
+      return;
+    }
+
+    // Validate size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size exceeds 5MB. Please choose a smaller picture.");
+      return;
+    }
+
+    setError(null);
+    setImageFile(file);
+
+    // Create local preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    handleFileSelect(file);
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    handleFileSelect(file);
+  }
+
+  function removeImage() {
+    setImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
 
   function addOption() {
     setOptions([
@@ -87,6 +148,21 @@ export default function NewProductPage() {
     setError(null);
 
     try {
+      let finalImageUrl = "";
+
+      // Upload image attachment from device if selected
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        formData.append("folder", "celsa/products");
+
+        const uploadRes = await api.post("/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        finalImageUrl = uploadRes.data?.url || "";
+      }
+
       const payload = {
         name: form.name,
         description: form.description,
@@ -95,7 +171,7 @@ export default function NewProductPage() {
         stock: parseInt(form.stock) || 0,
         lowStockThreshold: parseInt(form.lowStockThreshold) || 5,
         isFeatured: form.isFeatured,
-        images: form.imageUrl ? [{ url: form.imageUrl }] : [],
+        images: finalImageUrl ? [{ url: finalImageUrl }] : [],
         customizationOptions: options,
       };
 
@@ -196,13 +272,97 @@ export default function NewProductPage() {
               </div>
 
               <div className="col-12">
-                <label className="form-label small">Image URL</label>
+                <label className="form-label small fw-semibold text-dark d-flex align-items-center justify-content-between">
+                  <span>Product Picture Attachment</span>
+                  <span className="text-muted" style={{ fontSize: "0.75rem" }}>
+                    Image files only (PNG, JPG, WEBP, GIF up to 5MB)
+                  </span>
+                </label>
+
+                {/* Hidden File Input for Device/Desktop Picture Picker */}
                 <input
-                  className="form-control form-control-sm"
-                  placeholder="https://res.cloudinary.com/..."
-                  value={form.imageUrl}
-                  onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                  className="d-none"
+                  onChange={handleFileChange}
                 />
+
+                {!imagePreview ? (
+                  <div
+                    className={`border border-2 border-dashed rounded-3 p-4 text-center cursor-pointer transition-all ${
+                      isDragging
+                        ? "border-success bg-success bg-opacity-10"
+                        : "border-secondary border-opacity-25 bg-light"
+                    }`}
+                    style={{ cursor: "pointer", transition: "all 0.2s ease" }}
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <i className="bi bi-cloud-arrow-up fs-1 text-success mb-2 d-block" />
+                    <div className="fw-bold text-dark small mb-1">
+                      Click to choose picture from your device or drag &amp; drop here
+                    </div>
+                    <div className="text-muted" style={{ fontSize: "0.75rem" }}>
+                      Supports PNG, JPG, JPEG, WEBP, or GIF (Max 5MB)
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-success mt-3 px-3 py-1 rounded-3"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <i className="bi bi-folder2-open me-1" /> Browse Desktop / Device
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border rounded-3 p-3 bg-light d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div className="d-flex align-items-center gap-3">
+                      <div
+                        className="bg-white border rounded-2 p-1 overflow-hidden d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                        style={{ width: 80, height: 80 }}
+                      >
+                        <img
+                          src={imagePreview}
+                          alt="Product preview"
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        />
+                      </div>
+                      <div>
+                        <div className="fw-semibold text-dark small text-truncate" style={{ maxWidth: 300 }}>
+                          {imageFile?.name || "Attached Picture"}
+                        </div>
+                        <div className="text-muted" style={{ fontSize: "0.75rem" }}>
+                          {imageFile ? `${(imageFile.size / 1024 / 1024).toFixed(2)} MB` : "Ready"} •{" "}
+                          <span className="text-success fw-semibold">
+                            <i className="bi bi-check-circle-fill me-1" /> Attached
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        Change Picture
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={removeImage}
+                        title="Remove Picture"
+                      >
+                        <i className="bi bi-trash" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="col-12">
