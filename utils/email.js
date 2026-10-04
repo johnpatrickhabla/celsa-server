@@ -75,40 +75,123 @@ async function sendPasswordResetEmail(toEmail, resetCode, recipientName = "Value
       process.env.SMTP_FROM ||
       `"CELSA Handicrafts" <${process.env.SMTP_USER || process.env.EMAIL_USER || "noreply@celsahandicrafts.com"}>`;
 
-    const htmlContent = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-        <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #edf2f7;">
-          <h1 style="color: #1a202c; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px;">CELSA</h1>
-          <span style="color: #73511f; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 3px; display: block; margin-top: 4px;">Handicrafts</span>
-        </div>
+    const year = new Date().getFullYear();
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Your Password – CELSA Handicrafts</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;">
 
-        <div style="padding: 24px 0;">
-          <h2 style="color: #2d3748; font-size: 20px; margin-top: 0; font-weight: 700;">Password Reset Request</h2>
-          <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
-            Hello <strong>${recipientName || "there"}</strong>,
-          </p>
-          <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
-            We received a request to reset your password for your CELSA Handicrafts account. Use the verification code below to complete your password reset:
-          </p>
+          <!-- HEADER / BRAND -->
+          <tr>
+            <td style="background-color:#1a1a1a;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+              <div style="display:inline-block;">
+                <span style="font-size:28px;font-weight:900;color:#ffffff;letter-spacing:4px;text-transform:uppercase;">CELSA</span>
+                <span style="display:block;font-size:10px;font-weight:600;color:#8b6914;letter-spacing:5px;text-transform:uppercase;margin-top:3px;">HANDICRAFTS</span>
+              </div>
+            </td>
+          </tr>
 
-          <div style="background-color: #f7fafc; border: 2px dashed #cbd5e0; border-radius: 10px; padding: 20px; text-align: center; margin: 24px 0;">
-            <span style="display: block; font-size: 13px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Verification Code</span>
-            <span style="font-size: 34px; font-weight: 800; color: #2f855a; letter-spacing: 8px; font-family: monospace;">${resetCode}</span>
-            <span style="display: block; font-size: 13px; color: #e53e3e; margin-top: 10px; font-weight: 500;">Valid for 15 minutes</span>
-          </div>
+          <!-- MAIN CARD -->
+          <tr>
+            <td style="background-color:#ffffff;padding:40px 40px 32px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">
 
-          <p style="color: #718096; font-size: 13px; line-height: 1.5; margin-top: 24px;">
-            If you did not request this password reset, please ignore this email or reach out to our support team if you suspect unauthorized access.
-          </p>
-        </div>
+              <!-- Icon -->
+              <div style="text-align:center;margin-bottom:24px;">
+                <div style="display:inline-block;background-color:#f0fdf4;border-radius:50%;width:64px;height:64px;line-height:64px;text-align:center;">
+                  <span style="font-size:32px;">🔐</span>
+                </div>
+              </div>
 
-        <div style="padding-top: 20px; border-top: 1px solid #edf2f7; text-align: center; color: #a0aec0; font-size: 12px;">
-          <p style="margin: 0;">&copy; ${new Date().getFullYear()} CELSA Handicrafts. All rights reserved.</p>
-        </div>
-      </div>
-    `;
+              <!-- Heading -->
+              <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#111827;text-align:center;">Reset Your Password</h1>
+              <p style="margin:0 0 28px;font-size:15px;color:#6b7280;text-align:center;line-height:1.6;">
+                Hi <strong style="color:#111827;">${recipientName || "there"}</strong>, we received a request to reset your CELSA Handicrafts account password.
+              </p>
 
-    const textContent = `CELSA Handicrafts - Password Reset Code\n\nHello ${recipientName || "Valued Customer"},\n\nYour password reset verification code is: ${resetCode}\n\nThis code will expire in 15 minutes.\n\nIf you did not request this reset, please ignore this email.`;
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid #f3f4f6;margin:0 0 28px;" />
+
+              <!-- OTP Label -->
+              <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:#6b7280;text-align:center;text-transform:uppercase;letter-spacing:1.5px;">Your verification code</p>
+
+              <!-- OTP Box -->
+              <div style="background-color:#f9fafb;border:2px solid #e5e7eb;border-radius:12px;padding:24px 16px;text-align:center;margin-bottom:12px;">
+                <span style="font-size:42px;font-weight:800;color:#15803d;letter-spacing:14px;font-family:'Courier New',Courier,monospace;">${resetCode}</span>
+              </div>
+
+              <!-- Expiry notice -->
+              <p style="margin:0 0 28px;font-size:13px;color:#ef4444;text-align:center;font-weight:500;">
+                ⏱ This code expires in <strong>15 minutes</strong>
+              </p>
+
+              <!-- Steps -->
+              <div style="background-color:#fafafa;border-radius:10px;padding:20px 24px;margin-bottom:28px;">
+                <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#374151;">How to reset your password:</p>
+                <ol style="margin:0;padding-left:18px;color:#4b5563;font-size:14px;line-height:1.8;">
+                  <li>Go back to the CELSA Handicrafts website</li>
+                  <li>Enter the 6-digit code above</li>
+                  <li>Create and confirm your new password</li>
+                </ol>
+              </div>
+
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid #f3f4f6;margin:0 0 20px;" />
+
+              <!-- Security warning -->
+              <div style="background-color:#fef9ec;border:1px solid #fcd34d;border-radius:8px;padding:14px 18px;">
+                <p style="margin:0;font-size:13px;color:#92400e;line-height:1.6;">
+                  <strong>⚠️ Didn't request this?</strong> If you didn't ask to reset your password, you can safely ignore this email. Your account is still secure.
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:12px;color:#9ca3af;">This email was sent by CELSA Handicrafts. Do not reply to this email.</p>
+              <p style="margin:0;font-size:12px;color:#d1d5db;">&copy; ${year} CELSA Handicrafts. All rights reserved.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    const textContent = `CELSA Handicrafts – Reset Your Password
+
+Hi ${recipientName || "Valued Customer"},
+
+We received a request to reset your CELSA Handicrafts account password.
+
+Your 6-digit verification code is:
+
+  ${resetCode}
+
+This code expires in 15 minutes.
+
+Steps to reset your password:
+1. Go back to the CELSA Handicrafts website
+2. Enter the 6-digit code above
+3. Create and confirm your new password
+
+If you didn't request a password reset, you can safely ignore this email.
+
+© ${year} CELSA Handicrafts. All rights reserved.`;
+
+
 
     if (!transporter) {
       console.log("\n========================================================");
