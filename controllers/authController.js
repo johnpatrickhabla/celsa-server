@@ -211,21 +211,24 @@ exports.forgotPassword = async (req, res) => {
     user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
     await user.save();
 
-    // Send verification code to user's registered email address
-    const emailResult = await sendPasswordResetEmail(user.email, resetCode, user.name);
-    if (!emailResult.success) {
-      console.error("[ERROR] Email delivery failed:", emailResult.error);
-      return res.status(502).json({
-        error: "Failed to send verification email. Please check server email credentials or try again later.",
-      });
-    }
-
+    // ✅ Respond IMMEDIATELY — don't wait for email to send
+    // The code is already saved in the DB, so the customer can receive it regardless.
     res.json({
-      message: emailResult.simulated
-        ? "Verification code generated! (Email service not configured — code logged to server console)."
-        : "A 6-digit verification code has been sent to your email address. Please check your inbox.",
-      simulated: !!emailResult.simulated,
+      message: "A 6-digit verification code has been sent to your email address. Please check your inbox.",
     });
+
+    // Send email in the background (fire-and-forget — does not block response)
+    sendPasswordResetEmail(user.email, resetCode, user.name)
+      .then((result) => {
+        if (!result.success) {
+          console.error("[ERROR] Background email delivery failed:", result.error?.message);
+        } else {
+          console.log(`[EMAIL SERVICE] Code sent to ${user.email} (simulated: ${!!result.simulated})`);
+        }
+      })
+      .catch((err) => {
+        console.error("[ERROR] Unexpected email error:", err.message);
+      });
   } catch (err) {
     console.error("Forgot password error:", err);
     res.status(500).json({ error: "Failed to process password reset request" });

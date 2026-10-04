@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 /**
- * Creates and returns a Nodemailer transporter based on environment variables.
+ * Checks if a value is a placeholder/default (not real credentials).
  */
 function isPlaceholder(val) {
   if (!val) return true;
@@ -16,32 +16,47 @@ function isPlaceholder(val) {
   );
 }
 
-function createTransporter() {
-  const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+/**
+ * Singleton pooled transporter — created once, reused for all emails.
+ * Pooling avoids the ~4–5s TCP handshake cost on every send.
+ */
+let _transporter = null;
+
+function getTransporter() {
+  if (_transporter) return _transporter;
+
+  const user = (process.env.SMTP_USER || process.env.EMAIL_USER || "").trim();
+  const pass = (process.env.SMTP_PASS || process.env.EMAIL_PASS || "").replace(/\s+/g, "");
 
   if (!user || !pass || isPlaceholder(user) || isPlaceholder(pass)) {
     return null;
   }
 
-  // If a specific service like "gmail" is provided
-  if (process.env.SMTP_SERVICE) {
-    return nodemailer.createTransport({
-      service: process.env.SMTP_SERVICE,
-      auth: { user: user.trim(), pass: pass.trim().replace(/\s+/g, "") },
+  const service = process.env.SMTP_SERVICE;
+
+  if (service) {
+    _transporter = nodemailer.createTransport({
+      service,
+      pool: true,          // Reuse SMTP connection — avoids reconnect delay
+      maxConnections: 3,   // Allow up to 3 simultaneous sends
+      maxMessages: 100,    // Recycle connection after 100 messages
+      auth: { user, pass },
+    });
+  } else {
+    _transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
+      secure: process.env.SMTP_SECURE === "true",
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 100,
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false },
     });
   }
 
-  // Standard SMTP configuration (e.g. Hostinger, SendGrid, Gmail SMTP, Mailgun)
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
-    secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-    auth: { user: user.trim(), pass: pass.trim().replace(/\s+/g, "") },
-    tls: {
-      rejectUnauthorized: false, // Prevents self-signed certificate rejection
-    },
-  });
+  console.log("[EMAIL SERVICE] Pooled SMTP transporter initialized.");
+  return _transporter;
 }
 
 /**
@@ -54,7 +69,7 @@ function createTransporter() {
  */
 async function sendPasswordResetEmail(toEmail, resetCode, recipientName = "Valued Customer") {
   try {
-    const transporter = createTransporter();
+    const transporter = getTransporter();
     const fromAddress =
       process.env.EMAIL_FROM ||
       process.env.SMTP_FROM ||
@@ -116,7 +131,7 @@ async function sendPasswordResetEmail(toEmail, resetCode, recipientName = "Value
     console.log(`[EMAIL SERVICE] Password reset email sent to ${toEmail}. Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error(`[EMAIL SERVICE ERROR] Failed to send email to ${toEmail}:`, error);
+    console.error(`[EMAIL SERVICE ERROR] Failed to send email to ${toEmail}:`, error.message);
     return { success: false, error };
   }
 }
