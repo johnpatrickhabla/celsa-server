@@ -132,14 +132,24 @@ export default function HomePage() {
                   {slides.map((slide, idx) => (
                     <Carousel.Item key={slide._id || idx}>
                       {slide.type === "video" ? (
-                        <div style={{ height: "380px", width: "100%", position: "relative", backgroundColor: "#000" }}>
+                        <div
+                          style={{
+                            height: "380px",
+                            width: "100%",
+                            position: "relative",
+                            backgroundColor: "#000",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
                           <video
                             src={slide.mediaUrl}
                             autoPlay
                             loop
                             muted
                             playsInline
-                            style={{ height: "380px", width: "100%", objectFit: "cover" }}
+                            style={{ height: "100%", width: "100%", objectFit: "contain" }}
                           />
                         </div>
                       ) : (

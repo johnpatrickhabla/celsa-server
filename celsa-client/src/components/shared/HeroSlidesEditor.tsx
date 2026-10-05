@@ -351,7 +351,7 @@ export default function HeroSlidesEditor({ role }: Props) {
                             src={slide.mediaUrl}
                             muted
                             playsInline
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            style={{ width: "100%", height: "100%", objectFit: "contain" }}
                           />
                         ) : (
                           <img
@@ -644,7 +644,7 @@ export default function HeroSlidesEditor({ role }: Props) {
                             muted
                             playsInline
                             controls
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            style={{ width: "100%", height: "100%", objectFit: "contain" }}
                           />
                         ) : (
                           <img
