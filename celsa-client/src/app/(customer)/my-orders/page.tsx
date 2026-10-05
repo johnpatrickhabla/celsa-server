@@ -507,7 +507,7 @@ function MyOrdersContent() {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
-          <h4 className="fw-bold mb-1 text-dark">My Orders &amp; Tracking</h4>
+          <h4 className="fw-bold mb-1 text-dark">Orders &amp; Tracking</h4>
           <p className="text-muted small mb-0">
             Track real-time fulfillment, production progress, and order details.
           </p>

@@ -53,7 +53,7 @@ function SuccessContent() {
           href={orderNumber !== "N/A" ? `/my-orders?orderNumber=${encodeURIComponent(orderNumber)}` : "/my-orders"}
           className="btn btn-success"
         >
-          View My Orders
+          View Orders
         </Link>
         <Link href="/products" className="btn btn-outline-secondary">
           Continue Shopping

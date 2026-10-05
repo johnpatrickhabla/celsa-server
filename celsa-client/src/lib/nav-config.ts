@@ -34,6 +34,6 @@ export const CUSTOMER_NAV: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
   { label: "Customization", href: "/custom-orders" },
-  { label: "My Orders", href: "/my-orders" },
+  { label: "Orders", href: "/my-orders" },
   { label: "About Us", href: "/about" },
 ];

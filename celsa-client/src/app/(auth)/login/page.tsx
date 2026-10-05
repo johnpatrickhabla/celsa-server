@@ -51,7 +51,7 @@ function LoginPageContent() {
             </p>
             <div className="d-flex flex-column gap-2">
               <Link href="/my-orders" className="btn btn-success btn-sm py-2 rounded-3 small">
-                View My Orders
+                View Orders
               </Link>
               <Link href="/" className="btn btn-outline-secondary btn-sm py-2 rounded-3 small">
                 Go to Homepage
