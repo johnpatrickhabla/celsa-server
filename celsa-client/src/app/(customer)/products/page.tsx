@@ -114,7 +114,7 @@ export default function ProductsPage() {
             {/* Left: Title & Subtitle */}
             <div>
               <h4 className="fw-bold mb-1">
-                Our <span style={{ color: "#198754" }}>Products</span>
+                <span style={{ color: "#198754" }}>Products</span>
               </h4>
               <p className="text-muted small mb-0">
                 Browse our handcrafted collection
