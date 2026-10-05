@@ -277,7 +277,7 @@ export default function AuthModal({
       tabIndex={-1}
       style={{ zIndex: 1060 }}
     >
-      <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 430 }}>
+      <div className="modal-dialog modal-dialog-centered mx-auto px-3" style={{ maxWidth: 430, width: "100%" }}>
         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-white">
           {/* Header */}
           <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex flex-column align-items-stretch">
@@ -415,7 +415,7 @@ export default function AuthModal({
                     )}
 
                     <form onSubmit={handleVerifyCode} autoComplete="off">
-                      <div className="d-flex justify-content-center gap-2 mb-3">
+                      <div className="d-flex justify-content-center gap-1 gap-sm-2 mb-3">
                         {codeDigits.map((digit, i) => (
                           <input
                             key={i}
@@ -431,10 +431,13 @@ export default function AuthModal({
                             onChange={(e) => handleCodeChange(i, e.target.value)}
                             onKeyDown={(e) => handleCodeKeyDown(i, e)}
                             onFocus={(e) => e.target.select()}
-                            className={`form-control text-center fw-bold fs-4 rounded-3 ${
+                            className={`form-control text-center fw-bold fs-4 rounded-3 p-0 ${
                               digit ? "border-success" : ""
                             }`}
-                            style={{ width: 48, height: 56 }}
+                            style={{
+                              width: "clamp(36px, 11vw, 48px)",
+                              height: "clamp(46px, 13vw, 56px)",
+                            }}
                             aria-label={`Digit ${i + 1}`}
                           />
                         ))}
