@@ -233,20 +233,8 @@ export default function HomePage() {
       </section>
 
       {/* Why choose us */}
-      <section className="container-fluid px-4 pb-5">
+      <section className="container-fluid px-4 py-4">
         <div className="text-center mb-4">
-          <span
-            className="text-uppercase fw-bold d-inline-block px-3 py-1 rounded-pill mb-2 shadow-sm"
-            style={{
-              fontSize: "0.72rem",
-              letterSpacing: "2px",
-              backgroundColor: "rgba(25, 135, 84, 0.1)",
-              color: "#198754",
-              border: "1px solid rgba(25, 135, 84, 0.2)",
-            }}
-          >
-            Our Commitment
-          </span>
           <h4 className="fw-bold text-dark mb-1">
             Why Choose <span style={{ color: "#198754" }}>Celsa Handicrafts</span>?
           </h4>
@@ -267,6 +255,42 @@ export default function HomePage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Our Commitment - Separate Container */}
+      <section className="container-fluid px-4 pb-5">
+        <div
+          className="rounded-4 p-4 p-md-5"
+          style={{
+            backgroundColor: "#fcfaf6",
+            border: "1px solid #ebdcc5",
+          }}
+        >
+          <div className="text-center mb-4">
+            <h4 className="fw-bold text-dark mb-1">
+              Our <span style={{ color: "#b8863b" }}>Commitment</span>
+            </h4>
+            <p className="text-muted small mb-0">
+              Our promise to deliver quality, trust, and peace of mind with every order
+            </p>
+          </div>
+
+          <div className="row g-3 text-center">
+            {whyChooseUsBottom.map((item) => (
+              <div className="col-12 col-md-4" key={item.title}>
+                <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center shadow-sm bg-white">
+                  <div className="icon-wrapper mb-3">
+                    <i className={`bi ${item.icon} fs-3`} />
+                  </div>
+                  <div className="fw-bold small why-choose-title">{item.title}</div>
+                  <div className="text-muted mt-1" style={{ fontSize: "0.78rem" }}>
+                    {item.subtitle}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
