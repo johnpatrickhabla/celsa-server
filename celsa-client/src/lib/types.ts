@@ -190,3 +190,18 @@ export interface Notification {
   updatedAt: string;
 }
 
+export interface HeroSlide {
+  _id: string;
+  type: "image" | "video";
+  mediaUrl: string;
+  title?: string;
+  subtitle?: string;
+  linkUrl?: string;
+  order: number;
+  isActive: boolean;
+  publicId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+

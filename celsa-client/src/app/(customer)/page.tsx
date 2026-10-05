@@ -5,7 +5,7 @@ import Link from "next/link";
 import api from "@/lib/api";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { useCartStore } from "@/stores/cartStore";
-import type { Product } from "@/lib/types";
+import type { Product, HeroSlide } from "@/lib/types";
 import { Carousel } from "react-bootstrap";
 import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
 
@@ -16,9 +16,40 @@ const whyChooseUsTop = [
   { icon: "bi-truck", title: "Secure Delivery", subtitle: "Safe and reliable shipping" },
 ];
 
+const defaultSlides: HeroSlide[] = [
+  {
+    _id: "default-1",
+    type: "image",
+    mediaUrl: "/images/hero-basket.png",
+    title: "Handcrafted Buri Basket",
+    subtitle: "Woven by master artisans",
+    order: 1,
+    isActive: true,
+  },
+  {
+    _id: "default-2",
+    type: "image",
+    mediaUrl: "/images/hero-bag.png",
+    title: "Native Abaca Handbag",
+    subtitle: "Eco-friendly, durable, and stylish",
+    order: 2,
+    isActive: true,
+  },
+  {
+    _id: "default-3",
+    type: "image",
+    mediaUrl: "/images/hero-tray.png",
+    title: "Decorative Handicraft Tray",
+    subtitle: "Perfect centerpiece for your home",
+    order: 3,
+    isActive: true,
+  },
+];
+
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [slides, setSlides] = useState<HeroSlide[]>(defaultSlides);
   const addItem = useCartStore((s) => s.addItem);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -36,7 +67,20 @@ export default function HomePage() {
         setLoading(false);
       }
     }
+
+    async function fetchHeroSlides() {
+      try {
+        const res = await api.get("/hero-slides");
+        if (res.data?.slides && res.data.slides.length > 0) {
+          setSlides(res.data.slides);
+        }
+      } catch (err) {
+        console.error("Failed to fetch hero slides:", err);
+      }
+    }
+
     fetchFeatured();
+    fetchHeroSlides();
   }, []);
 
   function handleQuickAdd(product: Product) {
@@ -83,32 +127,50 @@ export default function HomePage() {
               </div>
             </div>
             <div className="col-lg-6">
-              <div className="shadow rounded-4 overflow-hidden">
-                <Carousel controls={false} indicators={false} interval={4000} pause={false}>
-                  <Carousel.Item>
-                    <img
-                      src="/images/hero-basket.png"
-                      className="d-block w-100"
-                      alt="Handcrafted Buri Basket"
-                      style={{ height: "380px", objectFit: "cover" }}
-                    />
-                  </Carousel.Item>
-                  <Carousel.Item>
-                    <img
-                      src="/images/hero-bag.png"
-                      className="d-block w-100"
-                      alt="Native Abaca Handbag"
-                      style={{ height: "380px", objectFit: "cover" }}
-                    />
-                  </Carousel.Item>
-                  <Carousel.Item>
-                    <img
-                      src="/images/hero-tray.png"
-                      className="d-block w-100"
-                      alt="Decorative Handicraft Tray"
-                      style={{ height: "380px", objectFit: "cover" }}
-                    />
-                  </Carousel.Item>
+              <div className="shadow rounded-4 overflow-hidden position-relative bg-dark" style={{ height: "380px" }}>
+                <Carousel controls={slides.length > 1} indicators={slides.length > 1} interval={5000} pause="hover">
+                  {slides.map((slide, idx) => (
+                    <Carousel.Item key={slide._id || idx}>
+                      {slide.type === "video" ? (
+                        <div style={{ height: "380px", width: "100%", position: "relative", backgroundColor: "#000" }}>
+                          <video
+                            src={slide.mediaUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            style={{ height: "380px", width: "100%", objectFit: "cover" }}
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={slide.mediaUrl}
+                          className="d-block w-100"
+                          alt={slide.title || "Handcrafted item"}
+                          style={{ height: "380px", objectFit: "cover" }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/images/hero-basket.png";
+                          }}
+                        />
+                      )}
+                      {(slide.title || slide.subtitle) && (
+                        <Carousel.Caption
+                          className="rounded-3 px-3 py-2 text-start"
+                          style={{
+                            backgroundColor: "rgba(0, 0, 0, 0.55)",
+                            backdropFilter: "blur(4px)",
+                            bottom: "20px",
+                            left: "20px",
+                            right: "auto",
+                            maxWidth: "80%",
+                          }}
+                        >
+                          {slide.title && <h5 className="fw-bold mb-1 text-white">{slide.title}</h5>}
+                          {slide.subtitle && <p className="small mb-0 text-white-50">{slide.subtitle}</p>}
+                        </Carousel.Caption>
+                      )}
+                    </Carousel.Item>
+                  ))}
                 </Carousel>
               </div>
             </div>

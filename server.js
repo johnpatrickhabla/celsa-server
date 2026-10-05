@@ -19,6 +19,7 @@ const inventoryRoutes = require("./routes/inventory");
 const dashboardRoutes = require("./routes/dashboard");
 const uploadRoutes = require("./routes/upload");
 const notificationRoutes = require("./routes/notifications");
+const heroSlideRoutes = require("./routes/heroSlides");
 
 const passport = require("./config/passport");
 
@@ -82,6 +83,7 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/hero-slides", heroSlideRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {

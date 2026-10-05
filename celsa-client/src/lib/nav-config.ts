@@ -16,6 +16,7 @@ export const ADMIN_NAV: NavItem[] = [
   { label: "Customers", href: "/admin/customers", icon: "bi-people" },
   { label: "Reports", href: "/admin/reports", icon: "bi-bar-chart" },
   { label: "Users", href: "/admin/users", icon: "bi-person-badge" },
+  { label: "Hero Slides", href: "/admin/hero-slides", icon: "bi-film" },
   { label: "Settings", href: "/admin/settings", icon: "bi-sliders" },
 ];
 
@@ -26,6 +27,7 @@ export const STAFF_NAV: NavItem[] = [
   { label: "Customization", href: "/staff/customization", icon: "bi-palette" },
   { label: "Production", href: "/staff/production", icon: "bi-gear" },
   { label: "Inventory", href: "/staff/inventory", icon: "bi-clipboard-data" },
+  { label: "Hero Slides", href: "/staff/hero-slides", icon: "bi-film" },
 ];
 
 export const CUSTOMER_NAV: NavItem[] = [
