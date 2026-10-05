@@ -277,7 +277,7 @@ export default function AuthModal({
       tabIndex={-1}
       style={{ zIndex: 1060 }}
     >
-      <div className="modal-dialog modal-dialog-centered mx-auto px-3" style={{ maxWidth: 430, width: "100%" }}>
+      <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 430 }}>
         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-white">
           {/* Header */}
           <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex flex-column align-items-stretch">
@@ -415,7 +415,7 @@ export default function AuthModal({
                     )}
 
                     <form onSubmit={handleVerifyCode} autoComplete="off">
-                      <div className="d-flex justify-content-center gap-1 gap-sm-2 mb-3">
+                      <div className="d-flex justify-content-center gap-2 mb-3">
                         {codeDigits.map((digit, i) => (
                           <input
                             key={i}
@@ -431,13 +431,10 @@ export default function AuthModal({
                             onChange={(e) => handleCodeChange(i, e.target.value)}
                             onKeyDown={(e) => handleCodeKeyDown(i, e)}
                             onFocus={(e) => e.target.select()}
-                            className={`form-control text-center fw-bold fs-4 rounded-3 p-0 ${
+                            className={`form-control text-center fw-bold fs-4 rounded-3 ${
                               digit ? "border-success" : ""
                             }`}
-                            style={{
-                              width: "clamp(36px, 11vw, 48px)",
-                              height: "clamp(46px, 13vw, 56px)",
-                            }}
+                            style={{ width: 48, height: 56 }}
                             aria-label={`Digit ${i + 1}`}
                           />
                         ))}
@@ -460,7 +457,7 @@ export default function AuthModal({
                       <button
                         id="verify-code-btn"
                         type="submit"
-                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-0"
+                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-2"
                         disabled={loading || resetCode.length !== 6}
                       >
                         {loading ? (
@@ -472,6 +469,33 @@ export default function AuthModal({
                           "Verify Code"
                         )}
                       </button>
+
+                      <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-muted small p-0"
+                          onClick={() => {
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          <i className="bi bi-arrow-left me-1" />
+                          Change Email
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-success small p-0"
+                          onClick={() => {
+                            setTab("login");
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          Back to Log In
+                        </button>
+                      </div>
                     </form>
                   </>
                 ) : (

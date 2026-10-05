@@ -1,15 +1,7 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import "@/styles/globals.css";
 import BootstrapClient from "@/components/shared/BootstrapClient";
 import IdleTimeoutHandler from "@/components/shared/IdleTimeoutHandler";
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
-  viewportFit: "cover",
-  themeColor: "#1f3320",
-};
 
 export const metadata: Metadata = {
   title: "Celsa Handicrafts",

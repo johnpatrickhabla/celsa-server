@@ -108,7 +108,7 @@ export default function CustomerNavbar() {
   return (
     <>
       <header className="celsa-navbar sticky-top shadow-sm">
-        <div className="container-fluid px-3 px-sm-4 py-2 py-sm-3 d-flex align-items-center justify-content-between">
+        <div className="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
           <Link href="/" className="text-decoration-none d-flex flex-column">
             <span className="fw-bold text-dark fs-4 lh-1" style={{ letterSpacing: "1px" }}>
               CELSA
@@ -179,7 +179,7 @@ export default function CustomerNavbar() {
                 {notifOpen && (
                   <div
                     className="card shadow-lg border-0 rounded-4 position-absolute end-0 mt-2 overflow-hidden bg-white"
-                    style={{ width: "min(340px, calc(100vw - 2rem))", zIndex: 1050 }}
+                    style={{ width: 340, zIndex: 1050 }}
                   >
                     <div className="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                       <div className="d-flex align-items-center gap-2">
@@ -363,8 +363,7 @@ export default function CustomerNavbar() {
 
             {/* Mobile menu toggle */}
             <button
-              className="btn btn-link text-dark d-lg-none p-2 d-flex align-items-center justify-content-center"
-              style={{ minWidth: 42, minHeight: 42 }}
+              className="btn btn-link text-dark d-lg-none p-0"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Menu"
             >

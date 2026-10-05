@@ -113,10 +113,10 @@ export default function HomePage() {
             backgroundColor: "rgba(255, 255, 255, 0.75)",
           }}
         />
-        <div className="container-fluid px-3 px-sm-4 py-4 py-md-5" style={{ position: "relative", zIndex: 1 }}>
+        <div className="container-fluid px-4 py-5" style={{ position: "relative", zIndex: 1 }}>
           <div className="row align-items-center g-4">
             <div className="col-lg-6">
-              <h1 className="fw-bold mb-3 text-dark fs-2 fs-md-1 display-md-4">Handcrafted with Love,<br />Made for You.</h1>
+              <h1 className="display-4 fw-bold mb-3 text-dark">Handcrafted with Love,<br />Made for You.</h1>
               <p className="text-muted fs-5 mb-4">
                 Explore our unique handmade products and request your own custom design.
               </p>
@@ -127,14 +127,14 @@ export default function HomePage() {
               </div>
             </div>
             <div className="col-lg-6">
-              <div className="shadow rounded-4 overflow-hidden position-relative bg-dark" style={{ minHeight: "260px", height: "clamp(260px, 45vw, 380px)" }}>
+              <div className="shadow rounded-4 overflow-hidden position-relative bg-dark" style={{ height: "380px" }}>
                 <Carousel controls={slides.length > 1} indicators={slides.length > 1} interval={5000} pause="hover">
                   {slides.map((slide, idx) => (
                     <Carousel.Item key={slide._id || idx}>
                       {slide.type === "video" ? (
                         <div
                           style={{
-                            height: "clamp(260px, 45vw, 380px)",
+                            height: "380px",
                             width: "100%",
                             position: "relative",
                             overflow: "hidden",
@@ -185,7 +185,7 @@ export default function HomePage() {
                           src={slide.mediaUrl}
                           className="d-block w-100"
                           alt="Handcrafted item"
-                          style={{ height: "clamp(260px, 45vw, 380px)", objectFit: "cover" }}
+                          style={{ height: "380px", objectFit: "cover" }}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/images/hero-basket.png";
                           }}
@@ -201,7 +201,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured products */}
-      <section className="container-fluid px-3 px-sm-4 py-4">
+      <section className="container-fluid px-4 py-4">
         <div
           className="rounded-4 p-4 p-md-5"
           style={{
@@ -257,7 +257,7 @@ export default function HomePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="product-actions d-flex flex-column flex-sm-row gap-1 gap-sm-2">
+                    <div className="product-actions d-flex gap-2">
                       <button
                         className="btn btn-success btn-sm flex-grow-1 small"
                         onClick={() => handleQuickAdd(p)}
@@ -283,7 +283,7 @@ export default function HomePage() {
       </section>
 
       {/* Promo cards */}
-      <section className="container-fluid px-3 px-sm-4 pb-4 pb-md-5">
+      <section className="container-fluid px-4 pb-5">
         <div className="row g-3">
           <div className="col-md-6">
             <div className="rounded p-4 d-flex justify-content-between align-items-center h-100 shadow-sm" style={{ backgroundColor: "var(--celsa-cream)" }}>
@@ -329,7 +329,7 @@ export default function HomePage() {
       </section>
 
       {/* Why choose us */}
-      <section className="container-fluid px-3 px-sm-4 pb-4 pb-md-5">
+      <section className="container-fluid px-4 pb-5">
         <div
           className="rounded-4 p-4 p-md-5"
           style={{
