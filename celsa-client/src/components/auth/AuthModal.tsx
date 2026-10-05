@@ -113,23 +113,34 @@ export default function AuthModal({
     }
   }
 
-  async function handleForgotPassword(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleForgotPassword(e?: React.FormEvent, overrideEmail?: string) {
+    if (e) e.preventDefault();
+    const targetEmail = (overrideEmail || email || "").trim();
+
+    if (!targetEmail) {
+      setTab("forgot");
+      setForgotStep("request");
+      setError("Please enter your registered email address.");
+      return;
+    }
+
+    setTab("forgot");
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
 
     try {
-      const res = await api.post("/auth/forgot-password", { email });
+      const res = await api.post("/auth/forgot-password", { email: targetEmail });
       setForgotStep("code");
       setCodeDigits(["", "", "", "", "", ""]);
       setResendCooldown(60);
-      setSuccessMsg(res.data.message || "A 6-digit verification code has been sent to your email.");
-      setLoading(false);
+      setSuccessMsg(res.data.message || `A 6-digit verification code has been sent to ${targetEmail}.`);
     } catch (err: any) {
-      setLoading(false);
+      setForgotStep("request");
       const msg = err.response?.data?.error || "Could not process request. Please verify your email.";
       setError(msg);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -718,9 +729,14 @@ export default function AuthModal({
                           className="btn btn-link p-0 text-success text-decoration-none small"
                           style={{ fontSize: "0.75rem" }}
                           onClick={() => {
-                            setTab("forgot");
-                            setError(null);
-                            setSuccessMsg(null);
+                            if (email && email.trim().includes("@")) {
+                              handleForgotPassword(undefined, email.trim());
+                            } else {
+                              setTab("forgot");
+                              setForgotStep("request");
+                              setError(null);
+                              setSuccessMsg(null);
+                            }
                           }}
                         >
                           Forgot password?
