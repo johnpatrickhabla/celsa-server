@@ -137,19 +137,47 @@ export default function HomePage() {
                             height: "380px",
                             width: "100%",
                             position: "relative",
-                            backgroundColor: "#000",
+                            overflow: "hidden",
+                            backgroundColor: "#0b0f0c",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                           }}
                         >
+                          {/* Ambient blurred backdrop for portrait / vertical videos */}
                           <video
                             src={slide.mediaUrl}
                             autoPlay
                             loop
                             muted
                             playsInline
-                            style={{ height: "100%", width: "100%", objectFit: "contain" }}
+                            aria-hidden="true"
+                            style={{
+                              position: "absolute",
+                              inset: "-20px",
+                              width: "calc(100% + 40px)",
+                              height: "calc(100% + 40px)",
+                              objectFit: "cover",
+                              filter: "blur(24px) brightness(0.55)",
+                              transform: "scale(1.15)",
+                              pointerEvents: "none",
+                              zIndex: 0,
+                            }}
+                          />
+                          {/* Crisp uncropped unstretched foreground video */}
+                          <video
+                            src={slide.mediaUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            style={{
+                              position: "relative",
+                              zIndex: 1,
+                              height: "100%",
+                              width: "100%",
+                              objectFit: "contain",
+                            }}
                           />
                         </div>
                       ) : (

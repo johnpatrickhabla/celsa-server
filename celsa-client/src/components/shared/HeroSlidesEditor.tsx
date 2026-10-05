@@ -637,15 +637,47 @@ export default function HeroSlidesEditor({ role }: Props) {
                         style={{ height: "240px" }}
                       >
                         {formData.type === "video" ? (
-                          <video
-                            src={formData.mediaUrl}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            controls
-                            style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                          />
+                          <div
+                            className="w-100 h-100 position-relative overflow-hidden d-flex align-items-center justify-content-center"
+                            style={{ backgroundColor: "#0b0f0c" }}
+                          >
+                            {/* Blurred ambient background clone */}
+                            <video
+                              src={formData.mediaUrl}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              aria-hidden="true"
+                              style={{
+                                position: "absolute",
+                                inset: "-20px",
+                                width: "calc(100% + 40px)",
+                                height: "calc(100% + 40px)",
+                                objectFit: "cover",
+                                filter: "blur(24px) brightness(0.55)",
+                                transform: "scale(1.15)",
+                                pointerEvents: "none",
+                                zIndex: 0,
+                              }}
+                            />
+                            {/* Sharp foreground video */}
+                            <video
+                              src={formData.mediaUrl}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              controls
+                              style={{
+                                position: "relative",
+                                zIndex: 1,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </div>
                         ) : (
                           <img
                             src={formData.mediaUrl}
