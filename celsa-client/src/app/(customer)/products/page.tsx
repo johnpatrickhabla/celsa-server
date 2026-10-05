@@ -101,17 +101,26 @@ export default function ProductsPage() {
 
   return (
     <div className="container-fluid px-4 py-5">
-      {/* Combined Header & Filters Container */}
-      <div className="mb-4">
-        <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-          {/* Left: Title & Subtitle */}
-          <div>
-            <h4 className="fw-bold mb-1">Our Products</h4>
-            <p className="text-muted small mb-0">
-              Browse our handcrafted collection
-              {pagination && ` — ${pagination.total} products`}
-            </p>
-          </div>
+      <div
+        className="rounded-4 p-4 p-md-5"
+        style={{
+          backgroundColor: "#fcfaf6",
+          border: "1px solid #ebdcc5",
+        }}
+      >
+        {/* Combined Header & Filters Container */}
+        <div className="mb-4">
+          <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            {/* Left: Title & Subtitle */}
+            <div>
+              <h4 className="fw-bold mb-1">
+                Our <span style={{ color: "#198754" }}>Products</span>
+              </h4>
+              <p className="text-muted small mb-0">
+                Browse our handcrafted collection
+                {pagination && ` — ${pagination.total} products`}
+              </p>
+            </div>
 
           {/* Right Corner: Filters */}
           <div className="d-flex flex-wrap align-items-center gap-2">
@@ -153,7 +162,7 @@ export default function ProductsPage() {
         <div className="row g-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <div className="col-6 col-md-4 col-lg-3" key={i}>
-              <div className="border rounded p-3 h-100">
+              <div className="border rounded p-3 h-100 bg-white shadow-sm">
                 <div className="celsa-skeleton" style={{ height: 180, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
                 <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
                 <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
@@ -170,7 +179,7 @@ export default function ProductsPage() {
         <div className="row g-3">
           {products.map((product) => (
             <div className="col-6 col-md-4 col-lg-3" key={product._id}>
-              <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between">
+              <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm">
                 <Link
                   href={`/products/${product.slug}`}
                   className="text-decoration-none text-dark"
@@ -282,6 +291,7 @@ export default function ProductsPage() {
           </ul>
         </nav>
       )}
+      </div>
 
       <ProductDetailsModal
         product={selectedProduct}
