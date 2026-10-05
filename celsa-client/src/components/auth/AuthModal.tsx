@@ -415,7 +415,7 @@ export default function AuthModal({
                     )}
 
                     <form onSubmit={handleVerifyCode} autoComplete="off">
-                      <div className="d-flex justify-content-center gap-2 mb-3">
+                      <div className="d-flex justify-content-center gap-1 gap-sm-2 mb-3">
                         {codeDigits.map((digit, i) => (
                           <input
                             key={i}
@@ -431,7 +431,7 @@ export default function AuthModal({
                             onChange={(e) => handleCodeChange(i, e.target.value)}
                             onKeyDown={(e) => handleCodeKeyDown(i, e)}
                             onFocus={(e) => e.target.select()}
-                            className={`form-control text-center fw-bold fs-4 rounded-3 ${
+                            className={`form-control text-center fw-bold fs-4 rounded-3 p-0 otp-digit-input ${
                               digit ? "border-success" : ""
                             }`}
                             style={{ width: 48, height: 56 }}

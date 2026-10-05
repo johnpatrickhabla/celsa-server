@@ -123,7 +123,7 @@ export default function ProductsPage() {
             </div>
 
           {/* Right Corner: Filters */}
-          <div className="d-flex flex-wrap align-items-center gap-2">
+          <div className="products-filter-bar d-flex flex-wrap align-items-center gap-2">
             <form onSubmit={handleSearch} className="input-group input-group-sm" style={{ width: "200px" }}>
               <input
                 type="text"

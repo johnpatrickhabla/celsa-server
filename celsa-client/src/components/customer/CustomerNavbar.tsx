@@ -178,7 +178,7 @@ export default function CustomerNavbar() {
                 {/* Notifications Popover Dropdown */}
                 {notifOpen && (
                   <div
-                    className="card shadow-lg border-0 rounded-4 position-absolute end-0 mt-2 overflow-hidden bg-white"
+                    className="notif-popover card shadow-lg border-0 rounded-4 position-absolute end-0 mt-2 overflow-hidden bg-white"
                     style={{ width: 340, zIndex: 1050 }}
                   >
                     <div className="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
@@ -363,7 +363,8 @@ export default function CustomerNavbar() {
 
             {/* Mobile menu toggle */}
             <button
-              className="btn btn-link text-dark d-lg-none p-0"
+              className="btn btn-link text-dark d-lg-none p-2 d-flex align-items-center justify-content-center"
+              style={{ minWidth: 42, minHeight: 42 }}
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Menu"
             >

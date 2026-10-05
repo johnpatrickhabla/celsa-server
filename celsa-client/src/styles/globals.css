@@ -259,4 +259,115 @@ input::-ms-clear {
   color: #198754;
 }
 
+/* ==========================================================================
+   Android & iOS Mobile Responsiveness & Touch Optimization
+   Strictly scoped to mobile devices (max-width: 767.98px) so desktop
+   layout, styling, and responsiveness remain 100% untouched.
+   ========================================================================== */
+@media (max-width: 767.98px) {
+  /* 1. Prevent mobile horizontal viewport jiggle and enable smooth momentum scrolling */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* 2. Critical iOS Safari Fix: Prevent auto-zoom when tapping inputs (requires >= 16px) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    font-size: 16px !important;
+  }
+
+  /* 3. Mobile screen padding */
+  .container-fluid {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* 4. Styled card containers (Featured Products & Our Products) on phones */
+  .rounded-4.p-4.p-md-5 {
+    padding: 1.25rem 1rem !important;
+    border-radius: 1rem !important;
+  }
+
+  /* 5. Product card action buttons: stack vertically on mobile to prevent clipping */
+  .product-actions {
+    flex-direction: column !important;
+    gap: 0.35rem !important;
+  }
+  .product-actions .btn {
+    width: 100% !important;
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* 6. Products catalog filter bar: full width on mobile */
+  .products-filter-bar {
+    width: 100% !important;
+  }
+  .products-filter-bar form {
+    width: 100% !important;
+  }
+  .products-filter-bar select {
+    width: 100% !important;
+  }
+
+  /* 7. Hero Section display heading scaling for small screens */
+  .display-4 {
+    font-size: 2rem !important;
+    line-height: 1.25 !important;
+  }
+
+  /* 8. Modals: ensure mobile dialog fits phone width with safe margin */
+  .modal-dialog {
+    margin: 0.75rem auto !important;
+    max-width: min(430px, calc(100vw - 1.5rem)) !important;
+  }
+
+  /* 9. OTP 6-digit input boxes responsive scaling on small screens */
+  .otp-digit-input {
+    width: clamp(36px, 11vw, 48px) !important;
+    height: clamp(46px, 13vw, 56px) !important;
+  }
+
+  /* 10. Navbar notification popover constraint on mobile */
+  .notif-popover {
+    width: min(340px, calc(100vw - 2rem)) !important;
+  }
+
+  /* 11. Admin & Staff Sidebar: Drawer overlay on mobile screens */
+  .app-sidebar {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1050 !important;
+    height: 100vh !important;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.15);
+  }
+
+  /* 12. Momentum scrolling for data tables on mobile */
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 13. Mobile touch-action to eliminate tap delay */
+  .btn, .nav-link, .page-link {
+    touch-action: manipulation;
+  }
+}
+
 
