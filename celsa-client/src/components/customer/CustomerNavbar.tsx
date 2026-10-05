@@ -107,7 +107,7 @@ export default function CustomerNavbar() {
 
   return (
     <>
-      <header className="celsa-navbar">
+      <header className="celsa-navbar sticky-top shadow-sm">
         <div className="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
           <Link href="/" className="text-decoration-none d-flex flex-column">
             <span className="fw-bold text-dark fs-4 lh-1" style={{ letterSpacing: "1px" }}>
