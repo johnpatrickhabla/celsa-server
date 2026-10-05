@@ -2,7 +2,7 @@ export default function CustomerFooter() {
   return (
     <footer className="mt-5" style={{ backgroundColor: "var(--celsa-green-dark)", color: "#e9efe9" }}>
       <div className="container-fluid px-4 py-5">
-        <div className="row g-4">
+        <div className="row g-4 justify-content-between">
           {/* Brand Info */}
           <div className="col-lg-5 col-md-6">
             <div className="mb-3">
@@ -57,7 +57,7 @@ export default function CustomerFooter() {
           </div>
 
           {/* Contact Us */}
-          <div className="col-lg-3 col-md-6">
+          <div className="col-lg-3 col-md-6 col-6 ms-lg-auto">
             <div className="fw-semibold mb-3">Contact Us</div>
             <ul className="list-unstyled small d-flex flex-column gap-2" style={{ color: "rgba(255,255,255,0.6)" }}>
               <li className="d-flex align-items-start gap-2">
