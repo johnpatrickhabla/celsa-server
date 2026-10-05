@@ -27,7 +27,14 @@ export default function CustomerFooter() {
             </p>
             {/* Social Icons */}
             <div className="d-flex gap-3">
-              <a href="#" className="text-decoration-none" style={{ color: "rgba(255,255,255,0.6)" }} aria-label="Facebook">
+              <a
+                href="https://www.facebook.com/share/1Dn7EWtx8w/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-decoration-none"
+                style={{ color: "rgba(255,255,255,0.6)" }}
+                aria-label="Facebook"
+              >
                 <i className="bi bi-facebook fs-5" />
               </a>
               <a href="#" className="text-decoration-none" style={{ color: "rgba(255,255,255,0.6)" }} aria-label="Instagram">
