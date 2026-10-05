@@ -60,6 +60,51 @@ function getTransporter() {
 }
 
 /**
+ * Parses a "Name <email@x.com>" string into { name, email } for the Brevo API.
+ */
+function parseAddress(raw, fallbackEmail) {
+  const s = (raw || "").trim().replace(/^"|"$/g, "");
+  const m = s.match(/^\s*"?([^"<]*)"?\s*<\s*([^>]+)\s*>\s*$/);
+  if (m) return { name: m[1].trim() || "CELSA Handicrafts", email: m[2].trim() };
+  if (s.includes("@")) return { name: "CELSA Handicrafts", email: s };
+  return { name: "CELSA Handicrafts", email: fallbackEmail };
+}
+
+/**
+ * Sends an email via Brevo's HTTPS API (port 443).
+ * Used in production because Render's free tier blocks outbound SMTP ports (25/465/587).
+ */
+async function sendViaBrevo({ to, toName, subject, html, text }) {
+  const apiKey = (process.env.BREVO_API_KEY || "").trim();
+  const sender = parseAddress(
+    process.env.BREVO_SENDER || process.env.EMAIL_FROM || process.env.SMTP_FROM,
+    process.env.SMTP_USER || process.env.EMAIL_USER
+  );
+
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": apiKey,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      sender,
+      to: [{ email: to, name: toName || undefined }],
+      subject,
+      htmlContent: html,
+      textContent: text,
+    }),
+  });
+
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(`Brevo API ${res.status}: ${body.message || body.code || "unknown error"}`);
+  }
+  return body.messageId;
+}
+
+/**
  * Sends a password reset verification code email.
  *
  * @param {string} toEmail - Recipient email
@@ -193,9 +238,26 @@ If you didn't request a password reset, you can safely ignore this email.
 
 
 
+    const subject = `Your CELSA Handicrafts Password Reset Code: ${resetCode}`;
+
+    // 1) Preferred: Brevo HTTPS API (works on Render free tier)
+    if (process.env.BREVO_API_KEY && !isPlaceholder(process.env.BREVO_API_KEY)) {
+      const messageId = await sendViaBrevo({
+        to: toEmail,
+        toName: recipientName,
+        subject,
+        html: htmlContent,
+        text: textContent,
+      });
+      console.log(`[EMAIL SERVICE] Password reset email sent via Brevo to ${toEmail}. Message ID: ${messageId}`);
+      return { success: true, messageId };
+    }
+
+    // 2) Fallback: SMTP (local development)
     if (!transporter) {
       console.log("\n========================================================");
       console.log("🔑 [CELSA PASSWORD RESET CODE - SIMULATION/DEV MODE]");
+      console.log("⚠️  No BREVO_API_KEY or SMTP credentials configured — email NOT sent.");
       console.log(`📧 Recipient: ${toEmail}`);
       console.log(`🔢 6-Digit Code: ${resetCode}`);
       console.log("⏰ Valid for 15 minutes");
@@ -206,7 +268,7 @@ If you didn't request a password reset, you can safely ignore this email.
     const info = await transporter.sendMail({
       from: fromAddress,
       to: toEmail,
-      subject: `Your CELSA Handicrafts Password Reset Code: ${resetCode}`,
+      subject,
       text: textContent,
       html: htmlContent,
     });
