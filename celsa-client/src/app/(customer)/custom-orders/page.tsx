@@ -550,7 +550,7 @@ export default function CustomOrdersPage() {
                   ) : (
                     <>
                       <i className="bi bi-cart-plus me-2" />
-                      Add Custom Order to Cart
+                      Add Customization to Cart
                     </>
                   )}
                 </button>

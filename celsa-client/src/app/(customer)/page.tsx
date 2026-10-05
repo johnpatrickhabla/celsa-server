@@ -288,12 +288,12 @@ export default function HomePage() {
           <div className="col-md-6">
             <div className="rounded p-4 d-flex justify-content-between align-items-center h-100 shadow-sm" style={{ backgroundColor: "var(--celsa-cream)" }}>
               <div className="pe-3" style={{ flex: 1 }}>
-                <h6 className="fw-bold mb-2">Custom Orders</h6>
+                <h6 className="fw-bold mb-2">Customization</h6>
                 <p className="small text-muted mb-3" style={{ fontSize: "0.8rem" }}>
                   Have a specific design in mind? We create personalized handicrafts just for you. Choose your own colors, materials, and sizes.
                 </p>
                 <Link href="/custom-orders" className="btn btn-success btn-sm px-3 rounded-3 fw-semibold">
-                  Create Custom Order
+                  Start Customization
                 </Link>
               </div>
               <div className="d-none d-sm-block rounded overflow-hidden shadow-sm" style={{ width: 120, height: 120, flexShrink: 0 }}>

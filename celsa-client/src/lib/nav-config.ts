@@ -33,7 +33,7 @@ export const STAFF_NAV: NavItem[] = [
 export const CUSTOMER_NAV: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
-  { label: "Custom Orders", href: "/custom-orders" },
+  { label: "Customization", href: "/custom-orders" },
   { label: "My Orders", href: "/my-orders" },
   { label: "About Us", href: "/about" },
 ];

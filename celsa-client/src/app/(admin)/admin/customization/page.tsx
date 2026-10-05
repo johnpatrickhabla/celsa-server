@@ -87,7 +87,7 @@ export default function AdminCustomizationPage() {
               className={`btn ${filter === "all" ? "btn-success" : "btn-outline-secondary"}`}
               onClick={() => setFilter("all")}
             >
-              All Custom Orders ({orders.length})
+              All Customizations ({orders.length})
             </button>
             <button
               className={`btn ${filter === "pending" ? "btn-success" : "btn-outline-secondary"} position-relative`}

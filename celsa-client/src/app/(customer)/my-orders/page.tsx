@@ -58,7 +58,7 @@ function OrderCard({ order, isExpanded, onToggle }: OrderCardProps) {
               className="badge bg-purple text-white rounded-pill px-2 py-1"
               style={{ backgroundColor: "#6f42c1", fontSize: "0.7rem" }}
             >
-              Custom Order
+              Customization
             </span>
           )}
           {order.orderType === "pre-order" && (

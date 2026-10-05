@@ -31,7 +31,7 @@ export default function AboutPage() {
               Browse Collection
             </Link>
             <Link href="/custom-orders" className="btn btn-outline-success px-4 py-2">
-              Create Custom Order
+              Start Customization
             </Link>
           </div>
         </div>

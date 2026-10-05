@@ -219,7 +219,7 @@ export default function CheckoutPage() {
               {hasCustomItem ? (
                 <div className="p-3 border border-success bg-success bg-opacity-10 rounded">
                   <div className="d-flex align-items-center gap-2 mb-1">
-                    <span className="badge bg-success">Custom Order</span>
+                    <span className="badge bg-success">Customization</span>
                     <span className="fw-semibold small">Customized Handicraft Request</span>
                   </div>
                   <p className="text-muted mb-0" style={{ fontSize: "0.75rem" }}>
