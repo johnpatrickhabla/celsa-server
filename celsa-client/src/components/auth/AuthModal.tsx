@@ -318,40 +318,6 @@ export default function AuthModal({
                 title="Close"
               />
             </div>
-
-            {/* Tab Pill Switcher - hidden on 'Set a new password' step */}
-            {!(tab === "forgot" && forgotStep === "password") && (
-              <div className="nav nav-pills nav-fill bg-light p-1 rounded-3 border">
-                <button
-                  type="button"
-                  className={`nav-link rounded-2 py-2 small fw-semibold transition-all ${
-                    tab === "login" ? "active bg-success text-white shadow-sm" : "text-dark"
-                  }`}
-                  onClick={() => {
-                    setTab("login");
-                    setForgotStep("request");
-                    setError(null);
-                    setSuccessMsg(null);
-                  }}
-                >
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  className={`nav-link rounded-2 py-2 small fw-semibold transition-all ${
-                    tab === "signup" ? "active bg-success text-white shadow-sm" : "text-dark"
-                  }`}
-                  onClick={() => {
-                    setTab("signup");
-                    setForgotStep("request");
-                    setError(null);
-                    setSuccessMsg(null);
-                  }}
-                >
-                  Create Account
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Form Body */}
