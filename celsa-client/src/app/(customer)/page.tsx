@@ -128,7 +128,7 @@ export default function HomePage() {
             </div>
             <div className="col-lg-6">
               <div className="shadow rounded-4 overflow-hidden position-relative bg-dark" style={{ height: "380px" }}>
-                <Carousel controls={slides.length > 1} indicators={slides.length > 1} interval={5000} pause="hover">
+                <Carousel controls={false} indicators={slides.length > 1} interval={5000} pause="hover">
                   {slides.map((slide, idx) => (
                     <Carousel.Item key={slide._id || idx}>
                       {slide.type === "video" ? (
@@ -218,10 +218,9 @@ export default function HomePage() {
             </div>
             <Link
               href="/products"
-              className="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
+              className="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold shadow-sm"
             >
-              <span>View All</span>
-              <i className="bi bi-arrow-right" />
+              View All
             </Link>
           </div>
           <div className="row g-3">
