@@ -28,6 +28,8 @@ export default function HeroSlidesEditor({ role }: Props) {
     publicId: "",
   });
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadedSize, setUploadedSize] = useState<{ loaded: string; total: string }>({ loaded: "0", total: "0" });
   const [saving, setSaving] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -91,18 +93,50 @@ export default function HeroSlidesEditor({ role }: Props) {
 
     if (!isVideo && !isImage) {
       setError("Please select a valid image or video file.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Limit video size to 30MB, images to 15MB
+    const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
+    const MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15MB
+
+    if (isVideo && file.size > MAX_VIDEO_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      setError(`Selected video is ${sizeMB}MB. The maximum video size allowed is 30MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (isImage && file.size > MAX_IMAGE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      setError(`Selected image is ${sizeMB}MB. The maximum image size allowed is 15MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     try {
       setUploading(true);
+      setUploadProgress(0);
+      setUploadedSize({ loaded: "0", total: (file.size / (1024 * 1024)).toFixed(1) });
       setError(null);
+
       const data = new FormData();
       data.append("file", file);
       data.append("folder", isVideo ? "celsa/hero_videos" : "celsa/hero_slides");
 
       const res = await api.post("/upload", data, {
         headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percent = Math.min(100, Math.round((progressEvent.loaded * 100) / progressEvent.total));
+            setUploadProgress(percent);
+            setUploadedSize({
+              loaded: (progressEvent.loaded / (1024 * 1024)).toFixed(1),
+              total: (progressEvent.total / (1024 * 1024)).toFixed(1),
+            });
+          }
+        },
       });
 
       setFormData((prev) => ({
@@ -118,6 +152,8 @@ export default function HeroSlidesEditor({ role }: Props) {
       setError(err?.response?.data?.error || "Failed to upload media file.");
     } finally {
       setUploading(false);
+      setUploadProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -500,9 +536,14 @@ export default function HeroSlidesEditor({ role }: Props) {
 
                   {/* File Upload or Direct URL */}
                   <div className="mb-4">
-                    <label className="form-label fw-bold text-dark small text-uppercase">
-                      {formData.type === "video" ? "Upload Video or Enter URL" : "Upload Picture or Enter URL"}
-                    </label>
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <label className="form-label fw-bold text-dark small text-uppercase mb-0">
+                        {formData.type === "video" ? "Upload Video or Enter URL" : "Upload Picture or Enter URL"}
+                      </label>
+                      <span className="badge bg-secondary bg-opacity-10 text-secondary border">
+                        {formData.type === "video" ? "Max 30MB" : "Max 15MB"}
+                      </span>
+                    </div>
 
                     {/* Upload button */}
                     <div className="d-flex gap-2 mb-2">
@@ -527,11 +568,40 @@ export default function HeroSlidesEditor({ role }: Props) {
                         ) : (
                           <>
                             <i className="bi bi-cloud-arrow-up-fill" />
-                            <span>Upload {formData.type === "video" ? "Video File" : "Image File"}</span>
+                            <span>Upload {formData.type === "video" ? "Video File (Max 30MB)" : "Image File"}</span>
                           </>
                         )}
                       </button>
                     </div>
+
+                    {/* Real-time upload progress card */}
+                    {uploading && (
+                      <div className="card bg-light border-0 p-3 mb-3 rounded-3 shadow-sm">
+                        <div className="d-flex justify-content-between align-items-center mb-1 small fw-semibold">
+                          <span className="d-flex align-items-center gap-2">
+                            <span className="spinner-border spinner-border-sm text-success" role="status" />
+                            <span>
+                              {uploadProgress < 100
+                                ? `Transferring ${formData.type}: ${uploadedSize.loaded}MB / ${uploadedSize.total}MB`
+                                : "Upload complete! Processing & optimizing on Cloudinary..."}
+                            </span>
+                          </span>
+                          <span className="text-success fw-bold">{uploadProgress}%</span>
+                        </div>
+                        <div className="progress" style={{ height: "8px" }}>
+                          <div
+                            className="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                            role="progressbar"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                        <small className="text-muted mt-2 d-block" style={{ fontSize: "0.75rem" }}>
+                          {uploadProgress < 100
+                            ? "Uploading directly to server. Please keep this dialog open."
+                            : "Cloudinary is converting and streaming your media for smooth web playback. Almost done!"}
+                        </small>
+                      </div>
+                    )}
 
                     {/* Direct URL input */}
                     <div className="input-group">
