@@ -128,7 +128,7 @@ export default function HomePage() {
             </div>
             <div className="col-lg-6">
               <div className="shadow rounded-4 overflow-hidden position-relative bg-dark" style={{ height: "380px" }}>
-                <Carousel controls={false} indicators={slides.length > 1} interval={5000} pause="hover">
+                <Carousel controls={slides.length > 1} indicators={slides.length > 1} interval={5000} pause="hover">
                   {slides.map((slide, idx) => (
                     <Carousel.Item key={slide._id || idx}>
                       {slide.type === "video" ? (
