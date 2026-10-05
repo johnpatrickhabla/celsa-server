@@ -60,48 +60,66 @@ function getTransporter() {
 }
 
 /**
- * Parses a "Name <email@x.com>" string into { name, email } for the Brevo API.
+ * Returns true when Gmail API (OAuth2) credentials are configured.
  */
-function parseAddress(raw, fallbackEmail) {
-  const s = (raw || "").trim().replace(/^"|"$/g, "");
-  const m = s.match(/^\s*"?([^"<]*)"?\s*<\s*([^>]+)\s*>\s*$/);
-  if (m) return { name: m[1].trim() || "CELSA Handicrafts", email: m[2].trim() };
-  if (s.includes("@")) return { name: "CELSA Handicrafts", email: s };
-  return { name: "CELSA Handicrafts", email: fallbackEmail };
+function hasGmailApiConfig() {
+  const id = process.env.GMAIL_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const secret = process.env.GMAIL_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  const refresh = process.env.GMAIL_REFRESH_TOKEN;
+  return !!(id && secret && refresh && !isPlaceholder(refresh));
 }
 
 /**
- * Sends an email via Brevo's HTTPS API (port 443).
- * Used in production because Render's free tier blocks outbound SMTP ports (25/465/587).
+ * Sends an email via the Gmail REST API over HTTPS (port 443) using an OAuth2 refresh token.
+ * Free, uses the existing Gmail account, and is NOT blocked by Render's free tier
+ * (which blocks outbound SMTP ports 25/465/587).
  */
-async function sendViaBrevo({ to, toName, subject, html, text }) {
-  const apiKey = (process.env.BREVO_API_KEY || "").trim();
-  const sender = parseAddress(
-    process.env.BREVO_SENDER || process.env.EMAIL_FROM || process.env.SMTP_FROM,
-    process.env.SMTP_USER || process.env.EMAIL_USER
-  );
+async function sendViaGmailApi({ from, to, subject, html, text }) {
+  const clientId = process.env.GMAIL_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN.trim();
 
-  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+  // 1) Exchange refresh token for a short-lived access token
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
-    headers: {
-      "api-key": apiKey,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      sender,
-      to: [{ email: to, name: toName || undefined }],
-      subject,
-      htmlContent: html,
-      textContent: text,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
     }),
   });
-
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(`Brevo API ${res.status}: ${body.message || body.code || "unknown error"}`);
+  const tokenBody = await tokenRes.json().catch(() => ({}));
+  if (!tokenRes.ok || !tokenBody.access_token) {
+    throw new Error(
+      `Gmail OAuth token error ${tokenRes.status}: ${tokenBody.error || ""} ${tokenBody.error_description || ""}`.trim()
+    );
   }
-  return body.messageId;
+
+  // 2) Build the raw MIME message with nodemailer (stream transport = no network)
+  const composer = nodemailer.createTransport({ streamTransport: true, buffer: true, newline: "unix" });
+  const { message } = await composer.sendMail({ from, to, subject, html, text });
+  const raw = Buffer.from(message)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  // 3) Send via Gmail API
+  const sendRes = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${tokenBody.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ raw }),
+  });
+  const sendBody = await sendRes.json().catch(() => ({}));
+  if (!sendRes.ok) {
+    throw new Error(`Gmail API ${sendRes.status}: ${sendBody.error?.message || "unknown error"}`);
+  }
+  return sendBody.id;
 }
 
 /**
@@ -240,24 +258,23 @@ If you didn't request a password reset, you can safely ignore this email.
 
     const subject = `Your CELSA Handicrafts Password Reset Code: ${resetCode}`;
 
-    // 1) Preferred: Brevo HTTPS API (works on Render free tier)
-    if (process.env.BREVO_API_KEY && !isPlaceholder(process.env.BREVO_API_KEY)) {
-      const messageId = await sendViaBrevo({
+    // 1) Preferred in production: Gmail API over HTTPS (works on Render free tier)
+    if (hasGmailApiConfig()) {
+      const messageId = await sendViaGmailApi({
+        from: fromAddress,
         to: toEmail,
-        toName: recipientName,
         subject,
         html: htmlContent,
         text: textContent,
       });
-      console.log(`[EMAIL SERVICE] Password reset email sent via Brevo to ${toEmail}. Message ID: ${messageId}`);
+      console.log(`[EMAIL SERVICE] Password reset email sent via Gmail API to ${toEmail}. Message ID: ${messageId}`);
       return { success: true, messageId };
     }
 
-    // 2) Fallback: SMTP (local development)
+    // 2) Fallback: SMTP (local development — blocked on Render free tier)
     if (!transporter) {
       console.log("\n========================================================");
       console.log("🔑 [CELSA PASSWORD RESET CODE - SIMULATION/DEV MODE]");
-      console.log("⚠️  No BREVO_API_KEY or SMTP credentials configured — email NOT sent.");
       console.log(`📧 Recipient: ${toEmail}`);
       console.log(`🔢 6-Digit Code: ${resetCode}`);
       console.log("⏰ Valid for 15 minutes");
