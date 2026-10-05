@@ -97,13 +97,13 @@ export default function HeroSlidesEditor({ role }: Props) {
       return;
     }
 
-    // Limit video size to 30MB, images to 15MB
-    const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
+    // Limit video size to 60MB, images to 15MB
+    const MAX_VIDEO_SIZE = 60 * 1024 * 1024; // 60MB
     const MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15MB
 
     if (isVideo && file.size > MAX_VIDEO_SIZE) {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-      setError(`Selected video is ${sizeMB}MB. The maximum video size allowed is 30MB.`);
+      setError(`Selected video is ${sizeMB}MB. The maximum video size allowed is 60MB.`);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -541,7 +541,7 @@ export default function HeroSlidesEditor({ role }: Props) {
                         {formData.type === "video" ? "Upload Video or Enter URL" : "Upload Picture or Enter URL"}
                       </label>
                       <span className="badge bg-secondary bg-opacity-10 text-secondary border">
-                        {formData.type === "video" ? "Max 30MB" : "Max 15MB"}
+                        {formData.type === "video" ? "Max 60MB" : "Max 15MB"}
                       </span>
                     </div>
 
@@ -568,7 +568,7 @@ export default function HeroSlidesEditor({ role }: Props) {
                         ) : (
                           <>
                             <i className="bi bi-cloud-arrow-up-fill" />
-                            <span>Upload {formData.type === "video" ? "Video File (Max 30MB)" : "Image File"}</span>
+                            <span>Upload {formData.type === "video" ? "Video File (Max 60MB)" : "Image File"}</span>
                           </>
                         )}
                       </button>

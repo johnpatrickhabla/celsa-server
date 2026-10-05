@@ -8,7 +8,7 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 30 * 1024 * 1024 }, // 30MB maximum limit
+  limits: { fileSize: 60 * 1024 * 1024 }, // 60MB maximum limit
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
       cb(null, true);
@@ -22,7 +22,7 @@ router.post("/", verifyToken, (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {
       if (err.code === "LIMIT_FILE_SIZE") {
-        return res.status(400).json({ error: "File exceeds the 30MB limit. Please upload a video under 30MB." });
+        return res.status(400).json({ error: "File exceeds the 60MB limit. Please upload a video under 60MB." });
       }
       return res.status(400).json({ error: err.message || "File upload error" });
     }
@@ -37,8 +37,8 @@ router.post("/", verifyToken, (req, res, next) => {
       return res.status(400).json({ error: "No media file provided" });
     }
 
-    if (req.file.size > 30 * 1024 * 1024) {
-      return res.status(400).json({ error: "Video exceeds 30MB limit." });
+    if (req.file.size > 60 * 1024 * 1024) {
+      return res.status(400).json({ error: "Video exceeds 60MB limit." });
     }
 
     const isVideo = req.file.mimetype.startsWith("video/");
