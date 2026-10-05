@@ -117,66 +117,85 @@ export default function HomePage() {
       </section>
 
       {/* Featured products */}
-      <section className="container-fluid px-4 py-5">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="fw-bold mb-0">Featured Products</h5>
-          <Link href="/products" className="small">View All</Link>
-        </div>
-        <div className="row g-3">
-          {loading
-            ? Array.from({ length: 4 }).map((_, i) => (
-              <div className="col-6 col-md-3" key={i}>
-                <div className="border rounded p-3 h-100">
-                  <div className="celsa-skeleton" style={{ height: 140, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
-                  <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
-                  <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
+      <section className="container-fluid px-4 py-4">
+        <div
+          className="rounded-4 p-4 p-md-5"
+          style={{
+            backgroundColor: "#fcfaf6",
+            border: "1px solid #ebdcc5",
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 className="fw-bold text-dark mb-1">
+                Featured <span style={{ color: "#198754" }}>Products</span>
+              </h4>
+              <p className="text-muted small mb-0">Explore our most popular handcrafted items</p>
+            </div>
+            <Link
+              href="/products"
+              className="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
+            >
+              <span>View All</span>
+              <i className="bi bi-arrow-right" />
+            </Link>
+          </div>
+          <div className="row g-3">
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                <div className="col-6 col-md-3" key={i}>
+                  <div className="border rounded p-3 h-100 bg-white shadow-sm">
+                    <div className="celsa-skeleton" style={{ height: 140, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
+                    <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
+                    <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
+                  </div>
                 </div>
-              </div>
-            ))
-            : featured.map((p) => (
-              <div className="col-6 col-md-3" key={p._id}>
-                <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between">
-                  <div>
-                    <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
-                      {p.images.length > 0 ? (
-                        <img
-                          src={p.images[0].url}
-                          alt={p.name}
-                          className="d-block w-100 h-100"
-                          style={{ objectFit: "contain" }}
-                        />
-                      ) : (
-                        <i className="bi bi-image text-muted fs-1" />
-                      )}
-                    </div>
-                    <div className="product-content">
-                      <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={p.name}>{p.name}</h3>
-                      <div className="product-price mb-3">
-                        <span className="price text-success fw-bold fs-6">₱{p.basePrice.toFixed(2)}</span>
+              ))
+              : featured.map((p) => (
+                <div className="col-6 col-md-3" key={p._id}>
+                  <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm">
+                    <div>
+                      <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
+                        {p.images.length > 0 ? (
+                          <img
+                            src={p.images[0].url}
+                            alt={p.name}
+                            className="d-block w-100 h-100"
+                            style={{ objectFit: "contain" }}
+                          />
+                        ) : (
+                          <i className="bi bi-image text-muted fs-1" />
+                        )}
+                      </div>
+                      <div className="product-content">
+                        <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={p.name}>{p.name}</h3>
+                        <div className="product-price mb-3">
+                          <span className="price text-success fw-bold fs-6">₱{p.basePrice.toFixed(2)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="product-actions d-flex gap-2">
-                    <button
-                      className="btn btn-success btn-sm flex-grow-1 small"
-                      onClick={() => handleQuickAdd(p)}
-                    >
-                      Add to Cart
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm flex-grow-1 small"
-                      onClick={() => {
-                        setSelectedProduct(p);
-                        setModalOpen(true);
-                      }}
-                    >
-                      View Details
-                    </button>
+                    <div className="product-actions d-flex gap-2">
+                      <button
+                        className="btn btn-success btn-sm flex-grow-1 small"
+                        onClick={() => handleQuickAdd(p)}
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm flex-grow-1 small"
+                        onClick={() => {
+                          setSelectedProduct(p);
+                          setModalOpen(true);
+                        }}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </div>
       </section>
 
