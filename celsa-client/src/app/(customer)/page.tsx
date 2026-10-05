@@ -234,14 +234,36 @@ export default function HomePage() {
 
       {/* Why choose us */}
       <section className="container-fluid px-4 pb-5">
-        <h5 className="text-center fw-bold mb-4">Why Choose Celsa Handicrafts?</h5>
+        <div className="text-center mb-4">
+          <span
+            className="text-uppercase fw-bold d-inline-block px-3 py-1 rounded-pill mb-2 shadow-sm"
+            style={{
+              fontSize: "0.72rem",
+              letterSpacing: "2px",
+              backgroundColor: "rgba(25, 135, 84, 0.1)",
+              color: "#198754",
+              border: "1px solid rgba(25, 135, 84, 0.2)",
+            }}
+          >
+            Our Commitment
+          </span>
+          <h4 className="fw-bold text-dark mb-1">
+            Why Choose <span style={{ color: "#198754" }}>Celsa Handicrafts</span>?
+          </h4>
+          <p className="text-muted small mb-0">Crafted with passion, dedication, and cultural heritage</p>
+        </div>
+
         <div className="row g-3 text-center">
           {whyChooseUsTop.map((item) => (
             <div className="col-6 col-md-3" key={item.title}>
-              <div className="border rounded p-4 h-100 bg-white">
-                <i className={`bi ${item.icon} fs-2 celsa-logo-mark`} />
-                <div className="fw-semibold small mt-2">{item.title}</div>
-                <div className="text-muted" style={{ fontSize: "0.75rem" }}>{item.subtitle}</div>
+              <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center shadow-sm">
+                <div className="icon-wrapper mb-3">
+                  <i className={`bi ${item.icon} fs-3`} />
+                </div>
+                <div className="fw-bold small why-choose-title">{item.title}</div>
+                <div className="text-muted mt-1" style={{ fontSize: "0.78rem" }}>
+                  {item.subtitle}
+                </div>
               </div>
             </div>
           ))}
