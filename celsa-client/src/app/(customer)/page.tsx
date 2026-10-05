@@ -16,12 +16,6 @@ const whyChooseUsTop = [
   { icon: "bi-truck", title: "Secure Delivery", subtitle: "Safe and reliable shipping" },
 ];
 
-const whyChooseUsBottom = [
-  { icon: "bi-shield-check", title: "Secure Payments", subtitle: "Via GCash, COD & more" },
-  { icon: "bi-arrow-counterclockwise", title: "Easy Returns", subtitle: "Hassle-free returns" },
-  { icon: "bi-headset", title: "Customer Support", subtitle: "We're here to help" },
-];
-
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,26 +86,26 @@ export default function HomePage() {
               <div className="shadow rounded-4 overflow-hidden">
                 <Carousel controls={false} indicators={false} interval={4000} pause={false}>
                   <Carousel.Item>
-                    <img 
-                      src="/images/hero-basket.png" 
-                      className="d-block w-100" 
-                      alt="Handcrafted Buri Basket" 
+                    <img
+                      src="/images/hero-basket.png"
+                      className="d-block w-100"
+                      alt="Handcrafted Buri Basket"
                       style={{ height: "380px", objectFit: "cover" }}
                     />
                   </Carousel.Item>
                   <Carousel.Item>
-                    <img 
-                      src="/images/hero-bag.png" 
-                      className="d-block w-100" 
-                      alt="Native Abaca Handbag" 
+                    <img
+                      src="/images/hero-bag.png"
+                      className="d-block w-100"
+                      alt="Native Abaca Handbag"
                       style={{ height: "380px", objectFit: "cover" }}
                     />
                   </Carousel.Item>
                   <Carousel.Item>
-                    <img 
-                      src="/images/hero-tray.png" 
-                      className="d-block w-100" 
-                      alt="Decorative Handicraft Tray" 
+                    <img
+                      src="/images/hero-tray.png"
+                      className="d-block w-100"
+                      alt="Decorative Handicraft Tray"
                       style={{ height: "380px", objectFit: "cover" }}
                     />
                   </Carousel.Item>
@@ -131,58 +125,58 @@ export default function HomePage() {
         <div className="row g-3">
           {loading
             ? Array.from({ length: 4 }).map((_, i) => (
-                <div className="col-6 col-md-3" key={i}>
-                  <div className="border rounded p-3 h-100">
-                    <div className="celsa-skeleton" style={{ height: 140, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
-                    <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
-                    <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
-                  </div>
+              <div className="col-6 col-md-3" key={i}>
+                <div className="border rounded p-3 h-100">
+                  <div className="celsa-skeleton" style={{ height: 140, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
+                  <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
+                  <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
                 </div>
-              ))
+              </div>
+            ))
             : featured.map((p) => (
-                <div className="col-6 col-md-3" key={p._id}>
-                  <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between">
-                    <div>
-                      <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
-                        {p.images.length > 0 ? (
-                          <img
-                            src={p.images[0].url}
-                            alt={p.name}
-                            className="d-block w-100 h-100"
-                            style={{ objectFit: "contain" }}
-                          />
-                        ) : (
-                          <i className="bi bi-image text-muted fs-1" />
-                        )}
-                      </div>
-                      <div className="product-content">
-                        <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={p.name}>{p.name}</h3>
-                        <div className="product-price mb-3">
-                          <span className="price text-success fw-bold fs-6">₱{p.basePrice.toFixed(2)}</span>
-                        </div>
-                      </div>
+              <div className="col-6 col-md-3" key={p._id}>
+                <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between">
+                  <div>
+                    <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
+                      {p.images.length > 0 ? (
+                        <img
+                          src={p.images[0].url}
+                          alt={p.name}
+                          className="d-block w-100 h-100"
+                          style={{ objectFit: "contain" }}
+                        />
+                      ) : (
+                        <i className="bi bi-image text-muted fs-1" />
+                      )}
                     </div>
-                    <div className="product-actions d-flex gap-2">
-                      <button
-                        className="btn btn-success btn-sm flex-grow-1 small"
-                        onClick={() => handleQuickAdd(p)}
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm flex-grow-1 small"
-                        onClick={() => {
-                          setSelectedProduct(p);
-                          setModalOpen(true);
-                        }}
-                      >
-                        View Details
-                      </button>
+                    <div className="product-content">
+                      <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={p.name}>{p.name}</h3>
+                      <div className="product-price mb-3">
+                        <span className="price text-success fw-bold fs-6">₱{p.basePrice.toFixed(2)}</span>
+                      </div>
                     </div>
                   </div>
+                  <div className="product-actions d-flex gap-2">
+                    <button
+                      className="btn btn-success btn-sm flex-grow-1 small"
+                      onClick={() => handleQuickAdd(p)}
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary btn-sm flex-grow-1 small"
+                      onClick={() => {
+                        setSelectedProduct(p);
+                        setModalOpen(true);
+                      }}
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              ))}
+              </div>
+            ))}
         </div>
       </section>
 
@@ -233,32 +227,6 @@ export default function HomePage() {
       </section>
 
       {/* Why choose us */}
-      <section className="container-fluid px-4 py-4">
-        <div className="text-center mb-4">
-          <h4 className="fw-bold text-dark mb-1">
-            Why Choose <span style={{ color: "#198754" }}>Celsa Handicrafts</span>?
-          </h4>
-          <p className="text-muted small mb-0">Crafted with passion, dedication, and cultural heritage</p>
-        </div>
-
-        <div className="row g-3 text-center">
-          {whyChooseUsTop.map((item) => (
-            <div className="col-6 col-md-3" key={item.title}>
-              <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center shadow-sm">
-                <div className="icon-wrapper mb-3">
-                  <i className={`bi ${item.icon} fs-3`} />
-                </div>
-                <div className="fw-bold small why-choose-title">{item.title}</div>
-                <div className="text-muted mt-1" style={{ fontSize: "0.78rem" }}>
-                  {item.subtitle}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Our Commitment - Separate Container */}
       <section className="container-fluid px-4 pb-5">
         <div
           className="rounded-4 p-4 p-md-5"
@@ -269,16 +237,14 @@ export default function HomePage() {
         >
           <div className="text-center mb-4">
             <h4 className="fw-bold text-dark mb-1">
-              Our <span style={{ color: "#b8863b" }}>Commitment</span>
+              Why Choose <span style={{ color: "#198754" }}>Celsa Handicrafts</span>?
             </h4>
-            <p className="text-muted small mb-0">
-              Our promise to deliver quality, trust, and peace of mind with every order
-            </p>
+            <p className="text-muted small mb-0">Crafted with passion, dedication, and cultural heritage</p>
           </div>
 
           <div className="row g-3 text-center">
-            {whyChooseUsBottom.map((item) => (
-              <div className="col-12 col-md-4" key={item.title}>
+            {whyChooseUsTop.map((item) => (
+              <div className="col-6 col-md-3" key={item.title}>
                 <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center shadow-sm bg-white">
                   <div className="icon-wrapper mb-3">
                     <i className={`bi ${item.icon} fs-3`} />
