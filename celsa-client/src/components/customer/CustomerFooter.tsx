@@ -1,12 +1,10 @@
-import Link from "next/link";
-
 export default function CustomerFooter() {
   return (
     <footer className="mt-5" style={{ backgroundColor: "var(--celsa-green-dark)", color: "#e9efe9" }}>
       <div className="container-fluid px-4 py-5">
         <div className="row g-4">
           {/* Brand Info */}
-          <div className="col-lg-4 col-md-6">
+          <div className="col-lg-5 col-md-6">
             <div className="mb-3">
               <div className="fw-bold text-white fs-4 lh-1" style={{ letterSpacing: "1px" }}>
                 CELSA
@@ -22,7 +20,7 @@ export default function CustomerFooter() {
                 Handicrafts
               </small>
             </div>
-            <p className="small mb-3" style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.7 }}>
+            <p className="small mb-3" style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.7, maxWidth: 380 }}>
               Celsa Handicrafts offers unique and high-quality handcrafted products crafted with passion and tradition.
             </p>
             {/* Social Icons */}
@@ -44,19 +42,6 @@ export default function CustomerFooter() {
                 <i className="bi bi-tiktok fs-5" />
               </a>
             </div>
-          </div>
-
-          {/* Quick Links */}
-          <div className="col-lg-2 col-md-6 col-6">
-            <div className="fw-semibold mb-3">Quick Links</div>
-            <ul className="list-unstyled small d-flex flex-column gap-2" style={{ color: "rgba(255,255,255,0.6)" }}>
-              <li><Link href="/" className="text-decoration-none" style={{ color: "inherit" }}>Home</Link></li>
-              <li><Link href="/products" className="text-decoration-none" style={{ color: "inherit" }}>Products</Link></li>
-              <li><Link href="/custom-orders" className="text-decoration-none" style={{ color: "inherit" }}>Custom Orders</Link></li>
-              <li><Link href="/my-orders" className="text-decoration-none" style={{ color: "inherit" }}>My Orders</Link></li>
-              <li><Link href="/about" className="text-decoration-none" style={{ color: "inherit" }}>About Us</Link></li>
-              <li><Link href="/contact" className="text-decoration-none" style={{ color: "inherit" }}>Contact Us</Link></li>
-            </ul>
           </div>
 
           {/* Customer Service */}
