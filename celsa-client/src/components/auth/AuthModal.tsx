@@ -382,21 +382,6 @@ export default function AuthModal({
                           "Send Verification Code"
                         )}
                       </button>
-
-                      <div className="text-center mt-3 pt-2 border-top">
-                        <button
-                          type="button"
-                          className="btn btn-link text-decoration-none text-muted small p-0"
-                          onClick={() => {
-                            setTab("login");
-                            setError(null);
-                            setSuccessMsg(null);
-                          }}
-                        >
-                          <i className="bi bi-arrow-left me-1" />
-                          Back to Log In
-                        </button>
-                      </div>
                     </form>
                   </>
                 ) : forgotStep === "code" ? (
