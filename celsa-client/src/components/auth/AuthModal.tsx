@@ -270,12 +270,20 @@ export default function AuthModal({
     window.location.href = `${backendUrl}/auth/google`;
   }
 
+  function handleInputFocus(e: React.FocusEvent<HTMLInputElement>) {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      const el = e.target;
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }
 
   return (
     <div
       className="modal fade show d-block bg-black bg-opacity-50"
       tabIndex={-1}
-      style={{ zIndex: 1060 }}
+      style={{ zIndex: 1060, overflowY: "auto" }}
     >
       <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 430 }}>
         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-white">
@@ -363,6 +371,7 @@ export default function AuthModal({
                           placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
+                          onFocus={handleInputFocus}
                           autoComplete="off"
                           required
                         />
@@ -430,7 +439,10 @@ export default function AuthModal({
                             value={digit}
                             onChange={(e) => handleCodeChange(i, e.target.value)}
                             onKeyDown={(e) => handleCodeKeyDown(i, e)}
-                            onFocus={(e) => e.target.select()}
+                            onFocus={(e) => {
+                              e.target.select();
+                              handleInputFocus(e);
+                            }}
                             className={`form-control text-center fw-bold fs-4 rounded-3 p-0 otp-digit-input ${
                               digit ? "border-success" : ""
                             }`}
@@ -511,6 +523,7 @@ export default function AuthModal({
                             placeholder="At least 8 characters"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
+                            onFocus={handleInputFocus}
                             autoComplete="new-password"
                             required
                             minLength={8}
@@ -536,6 +549,7 @@ export default function AuthModal({
                           placeholder="Re-enter new password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
+                          onFocus={handleInputFocus}
                           autoComplete="new-password"
                           required
                           minLength={8}
@@ -627,6 +641,7 @@ export default function AuthModal({
                         placeholder="Juan Dela Cruz"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onFocus={handleInputFocus}
                         autoComplete="off"
                         required
                       />
@@ -641,6 +656,7 @@ export default function AuthModal({
                       placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      onFocus={handleInputFocus}
                       autoComplete="off"
                       required
                     />
@@ -676,6 +692,7 @@ export default function AuthModal({
                         placeholder={tab === "signup" ? "At least 8 characters" : "Enter your password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onFocus={handleInputFocus}
                         autoComplete="new-password"
                         required
                         minLength={tab === "signup" ? 8 : 1}

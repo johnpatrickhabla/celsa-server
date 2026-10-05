@@ -331,10 +331,33 @@ input::-ms-clear {
     line-height: 1.25 !important;
   }
 
-  /* 8. Modals: ensure mobile dialog fits phone width with safe margin */
+  /* 8. Modals on mobile: Top-align dialog with clearance so virtual keyboard does not cover password inputs */
+  .modal {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-top: max(0.5rem, env(safe-area-inset-top)) !important;
+    padding-bottom: 45vh !important; /* Ample scroll clearance above pop-up keyboard */
+  }
+
   .modal-dialog {
-    margin: 0.75rem auto !important;
+    margin: 0.25rem auto 0 !important;
+    align-self: flex-start !important;
     max-width: min(430px, calc(100vw - 1.5rem)) !important;
+    transform: none !important;
+  }
+
+  .modal-dialog-centered {
+    display: flex !important;
+    align-items: flex-start !important;
+    min-height: auto !important;
+  }
+
+  .modal-dialog-centered::before {
+    display: none !important;
+    height: 0 !important;
   }
 
   /* 9. OTP 6-digit input boxes responsive scaling on small screens */
