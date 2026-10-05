@@ -274,7 +274,6 @@ export default function HeroSlidesEditor({ role }: Props) {
                 <th style={{ width: "80px" }}>Order</th>
                 <th style={{ width: "160px" }}>Media Preview</th>
                 <th>Type</th>
-                <th>Title &amp; Subtitle</th>
                 <th>Target Link</th>
                 <th>Status</th>
                 <th className="text-end" style={{ width: "140px" }}>Actions</th>
@@ -283,14 +282,14 @@ export default function HeroSlidesEditor({ role }: Props) {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-5 text-muted">
+                  <td colSpan={6} className="text-center py-5 text-muted">
                     <div className="spinner-border spinner-border-sm text-success me-2" role="status" />
                     Loading slides...
                   </td>
                 </tr>
               ) : slides.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-5 text-muted">
+                  <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-images fs-1 d-block text-secondary mb-2" />
                     No hero slides found. Click &quot;Add Slide / Video&quot; above to create one.
                   </td>
@@ -351,18 +350,6 @@ export default function HeroSlidesEditor({ role }: Props) {
                           <i className="bi bi-image me-1" />
                           Picture
                         </span>
-                      )}
-                    </td>
-
-                    {/* Title & Subtitle */}
-                    <td>
-                      <div className="fw-semibold text-dark">
-                        {slide.title || <span className="text-muted fst-italic">Untitled</span>}
-                      </div>
-                      {slide.subtitle && (
-                        <div className="small text-muted text-truncate" style={{ maxWidth: 260 }}>
-                          {slide.subtitle}
-                        </div>
                       )}
                     </td>
 
@@ -599,50 +586,9 @@ export default function HeroSlidesEditor({ role }: Props) {
                             }}
                           />
                         )}
-                        {/* Title overlay simulation */}
-                        {(formData.title || formData.subtitle) && (
-                          <div
-                            className="position-absolute bottom-0 start-0 end-0 p-3"
-                            style={{
-                              background: "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
-                              color: "#fff",
-                            }}
-                          >
-                            <h6 className="fw-bold mb-1">{formData.title}</h6>
-                            <p className="small mb-0 text-white-50">{formData.subtitle}</p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   )}
-
-                  {/* Title & Subtitle */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-6">
-                      <label className="form-label fw-bold text-dark small text-uppercase">
-                        Title / Caption (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="e.g. Handcrafted Buri Basket"
-                        value={formData.title}
-                        onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-bold text-dark small text-uppercase">
-                        Subtitle (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="e.g. 100% natural, woven by local artisans"
-                        value={formData.subtitle}
-                        onChange={(e) => setFormData((p) => ({ ...p, subtitle: e.target.value }))}
-                      />
-                    </div>
-                  </div>
 
                   {/* Link URL, Order, and Active */}
                   <div className="row g-3">

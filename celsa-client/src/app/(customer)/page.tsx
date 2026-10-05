@@ -146,28 +146,12 @@ export default function HomePage() {
                         <img
                           src={slide.mediaUrl}
                           className="d-block w-100"
-                          alt={slide.title || "Handcrafted item"}
+                          alt="Handcrafted item"
                           style={{ height: "380px", objectFit: "cover" }}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/images/hero-basket.png";
                           }}
                         />
-                      )}
-                      {(slide.title || slide.subtitle) && (
-                        <Carousel.Caption
-                          className="rounded-3 px-3 py-2 text-start"
-                          style={{
-                            backgroundColor: "rgba(0, 0, 0, 0.55)",
-                            backdropFilter: "blur(4px)",
-                            bottom: "20px",
-                            left: "20px",
-                            right: "auto",
-                            maxWidth: "80%",
-                          }}
-                        >
-                          {slide.title && <h5 className="fw-bold mb-1 text-white">{slide.title}</h5>}
-                          {slide.subtitle && <p className="small mb-0 text-white-50">{slide.subtitle}</p>}
-                        </Carousel.Caption>
                       )}
                     </Carousel.Item>
                   ))}
