@@ -308,37 +308,39 @@ export default function AuthModal({
               />
             </div>
 
-            {/* Tab Pill Switcher */}
-            <div className="nav nav-pills nav-fill bg-light p-1 rounded-3 border">
-              <button
-                type="button"
-                className={`nav-link rounded-2 py-2 small fw-semibold transition-all ${
-                  tab === "login" ? "active bg-success text-white shadow-sm" : "text-dark"
-                }`}
-                onClick={() => {
-                  setTab("login");
-                  setForgotStep("request");
-                  setError(null);
-                  setSuccessMsg(null);
-                }}
-              >
-                Log In
-              </button>
-              <button
-                type="button"
-                className={`nav-link rounded-2 py-2 small fw-semibold transition-all ${
-                  tab === "signup" ? "active bg-success text-white shadow-sm" : "text-dark"
-                }`}
-                onClick={() => {
-                  setTab("signup");
-                  setForgotStep("request");
-                  setError(null);
-                  setSuccessMsg(null);
-                }}
-              >
-                Create Account
-              </button>
-            </div>
+            {/* Tab Pill Switcher - hidden on 'Set a new password' step */}
+            {!(tab === "forgot" && forgotStep === "password") && (
+              <div className="nav nav-pills nav-fill bg-light p-1 rounded-3 border">
+                <button
+                  type="button"
+                  className={`nav-link rounded-2 py-2 small fw-semibold transition-all ${
+                    tab === "login" ? "active bg-success text-white shadow-sm" : "text-dark"
+                  }`}
+                  onClick={() => {
+                    setTab("login");
+                    setForgotStep("request");
+                    setError(null);
+                    setSuccessMsg(null);
+                  }}
+                >
+                  Log In
+                </button>
+                <button
+                  type="button"
+                  className={`nav-link rounded-2 py-2 small fw-semibold transition-all ${
+                    tab === "signup" ? "active bg-success text-white shadow-sm" : "text-dark"
+                  }`}
+                  onClick={() => {
+                    setTab("signup");
+                    setForgotStep("request");
+                    setError(null);
+                    setSuccessMsg(null);
+                  }}
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Form Body */}
@@ -476,6 +478,20 @@ export default function AuthModal({
                         ))}
                       </div>
 
+                      {/* Resend button placed directly below the 6-Digit Verification Code */}
+                      <div className="text-center small text-muted mb-3">
+                        Didn&apos;t get the code?{" "}
+                        <button
+                          id="resend-code-btn"
+                          type="button"
+                          className="btn btn-link text-decoration-none text-success small p-0 fw-semibold align-baseline"
+                          onClick={handleResendCode}
+                          disabled={resendCooldown > 0 || loading}
+                        >
+                          {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+                        </button>
+                      </div>
+
                       <button
                         id="verify-code-btn"
                         type="submit"
@@ -491,19 +507,6 @@ export default function AuthModal({
                           "Verify Code"
                         )}
                       </button>
-
-                      <div className="text-center small text-muted mb-1">
-                        Didn&apos;t get the code?{" "}
-                        <button
-                          id="resend-code-btn"
-                          type="button"
-                          className="btn btn-link text-decoration-none text-success small p-0 align-baseline"
-                          onClick={handleResendCode}
-                          disabled={resendCooldown > 0 || loading}
-                        >
-                          {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
-                        </button>
-                      </div>
 
                       <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
                         <button
@@ -618,33 +621,6 @@ export default function AuthModal({
                           "Update Password"
                         )}
                       </button>
-
-                      <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-                        <button
-                          type="button"
-                          className="btn btn-link text-decoration-none text-muted small p-0"
-                          onClick={() => {
-                            setForgotStep("code");
-                            setError(null);
-                            setSuccessMsg(null);
-                          }}
-                        >
-                          <i className="bi bi-arrow-left me-1" />
-                          Back
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-link text-decoration-none text-success small p-0"
-                          onClick={() => {
-                            setTab("login");
-                            setForgotStep("request");
-                            setError(null);
-                            setSuccessMsg(null);
-                          }}
-                        >
-                          Back to Log In
-                        </button>
-                      </div>
                     </form>
                   </>
                 )}
