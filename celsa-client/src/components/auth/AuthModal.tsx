@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/lib/api";
 
@@ -30,8 +30,11 @@ export default function AuthModal({
   const [notice, setNotice] = useState<string | null>(null);
 
   // Forgot / Reset Password flow states
-  const [forgotStep, setForgotStep] = useState<"request" | "verify">("request");
-  const [resetCode, setResetCode] = useState("");
+  const [forgotStep, setForgotStep] = useState<"request" | "code" | "password">("request");
+  const [codeDigits, setCodeDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const codeInputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const resetCode = codeDigits.join("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -43,7 +46,7 @@ export default function AuthModal({
     setShowPassword(false);
     setShowNewPassword(false);
     setForgotStep("request");
-    setResetCode("");
+    setCodeDigits(["", "", "", "", "", ""]);
     setNewPassword("");
     setConfirmPassword("");
 
@@ -56,6 +59,20 @@ export default function AuthModal({
       }
     }
   }, [initialTab, isOpen]);
+
+  // Countdown for the "Resend code" button
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
+  // Autofocus first code box when entering the code step
+  useEffect(() => {
+    if (forgotStep === "code") {
+      setTimeout(() => codeInputsRef.current[0]?.focus(), 50);
+    }
+  }, [forgotStep]);
 
   if (!isOpen) return null;
 
@@ -104,7 +121,9 @@ export default function AuthModal({
 
     try {
       const res = await api.post("/auth/forgot-password", { email });
-      setForgotStep("verify");
+      setForgotStep("code");
+      setCodeDigits(["", "", "", "", "", ""]);
+      setResendCooldown(60);
       setSuccessMsg(res.data.message || "A 6-digit verification code has been sent to your email.");
       setLoading(false);
     } catch (err: any) {
@@ -114,10 +133,87 @@ export default function AuthModal({
     }
   }
 
+  async function handleResendCode() {
+    if (resendCooldown > 0 || loading) return;
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      await api.post("/auth/forgot-password", { email });
+      setCodeDigits(["", "", "", "", "", ""]);
+      setResendCooldown(60);
+      setSuccessMsg("A new 6-digit code has been sent to your email.");
+      codeInputsRef.current[0]?.focus();
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Could not resend code. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleCodeChange(index: number, value: string) {
+    const digits = value.replace(/\D/g, "");
+    const next = [...codeDigits];
+
+    if (digits.length > 1) {
+      // Handle paste / autofill of multiple digits
+      for (let i = 0; i < 6 - index && i < digits.length; i++) {
+        next[index + i] = digits[i];
+      }
+      setCodeDigits(next);
+      const focusIdx = Math.min(index + digits.length, 5);
+      codeInputsRef.current[focusIdx]?.focus();
+      return;
+    }
+
+    next[index] = digits;
+    setCodeDigits(next);
+    if (digits && index < 5) codeInputsRef.current[index + 1]?.focus();
+  }
+
+  function handleCodeKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Backspace" && !codeDigits[index] && index > 0) {
+      codeInputsRef.current[index - 1]?.focus();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      codeInputsRef.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      codeInputsRef.current[index + 1]?.focus();
+    }
+  }
+
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(resetCode)) {
+      setError("Please enter the complete 6-digit verification code.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await api.post("/auth/verify-reset-code", { email, code: resetCode });
+      setSuccessMsg(res.data.message || "Code verified! You can now set a new password.");
+      setForgotStep("password");
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.details?.[0]?.message ||
+        err.response?.data?.error ||
+        "Invalid verification code. Please try again.";
+      setError(msg);
+      setCodeDigits(["", "", "", "", "", ""]);
+      codeInputsRef.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
-    if (!resetCode.trim()) {
+    if (!/^\d{6}$/.test(resetCode)) {
       setError("Please enter the 6-digit verification code.");
+      setForgotStep("code");
       return;
     }
     if (newPassword.length < 8) {
@@ -143,13 +239,18 @@ export default function AuthModal({
       setSuccessMsg(res.data.message || "Your password has been updated! Please log in with your new password.");
       setTab("login");
       setForgotStep("request");
-      setResetCode("");
+      setCodeDigits(["", "", "", "", "", ""]);
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
       setLoading(false);
       const msg = err.response?.data?.error || "Failed to reset password. Please verify the code and try again.";
       setError(msg);
+      // Code likely expired/invalid — send user back to the code step
+      if (err.response?.status === 400 && /code/i.test(msg)) {
+        setForgotStep("code");
+        setCodeDigits(["", "", "", "", "", ""]);
+      }
     }
   }
 
@@ -191,7 +292,9 @@ export default function AuthModal({
                     ? "Welcome back! Log in to your account"
                     : tab === "signup"
                     ? "Create your customer account"
-                    : forgotStep === "verify"
+                    : forgotStep === "code"
+                    ? "Verify it's really you"
+                    : forgotStep === "password"
                     ? "Set a new password for your account"
                     : "Recover your account access"}
                 </small>
@@ -317,7 +420,121 @@ export default function AuthModal({
                       </div>
                     </form>
                   </>
+                ) : forgotStep === "code" ? (
+                  /* ── Step 2: Enter the 6-digit code ── */
+                  <>
+                    <div className="text-center mb-3">
+                      <div
+                        className="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-2"
+                        style={{ width: 44, height: 44 }}
+                      >
+                        <i className="bi bi-envelope-check-fill fs-4" />
+                      </div>
+                      <h6 className="fw-bold text-dark mb-1">Enter Verification Code</h6>
+                      <p className="text-muted small mb-0">
+                        We sent a 6-digit code to <strong>{email}</strong>. It expires in 15 minutes.
+                      </p>
+                    </div>
+
+                    {successMsg && (
+                      <div className="alert alert-success py-2 px-3 small rounded-3 mb-3">
+                        <i className="bi bi-check-circle-fill me-1" />
+                        {successMsg}
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                        <i className="bi bi-exclamation-circle me-1" />
+                        {error}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleVerifyCode} autoComplete="off">
+                      <div className="d-flex justify-content-center gap-2 mb-3">
+                        {codeDigits.map((digit, i) => (
+                          <input
+                            key={i}
+                            id={`reset-code-digit-${i}`}
+                            ref={(el) => {
+                              codeInputsRef.current[i] = el;
+                            }}
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete={i === 0 ? "one-time-code" : "off"}
+                            maxLength={i === 0 ? 6 : 1}
+                            value={digit}
+                            onChange={(e) => handleCodeChange(i, e.target.value)}
+                            onKeyDown={(e) => handleCodeKeyDown(i, e)}
+                            onFocus={(e) => e.target.select()}
+                            className={`form-control text-center fw-bold fs-4 rounded-3 ${
+                              digit ? "border-success" : ""
+                            }`}
+                            style={{ width: 48, height: 56 }}
+                            aria-label={`Digit ${i + 1}`}
+                          />
+                        ))}
+                      </div>
+
+                      <button
+                        id="verify-code-btn"
+                        type="submit"
+                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-2"
+                        disabled={loading || resetCode.length !== 6}
+                      >
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                            Verifying…
+                          </>
+                        ) : (
+                          "Verify Code"
+                        )}
+                      </button>
+
+                      <div className="text-center small text-muted mb-1">
+                        Didn&apos;t get the code?{" "}
+                        <button
+                          id="resend-code-btn"
+                          type="button"
+                          className="btn btn-link text-decoration-none text-success small p-0 align-baseline"
+                          onClick={handleResendCode}
+                          disabled={resendCooldown > 0 || loading}
+                        >
+                          {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+                        </button>
+                      </div>
+
+                      <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-muted small p-0"
+                          onClick={() => {
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          <i className="bi bi-arrow-left me-1" />
+                          Change Email
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-success small p-0"
+                          onClick={() => {
+                            setTab("login");
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          Back to Log In
+                        </button>
+                      </div>
+                    </form>
+                  </>
                 ) : (
+                  /* ── Step 3: Set new password (only after code is verified) ── */
                   <>
                     <div className="text-center mb-3">
                       <div
@@ -326,9 +543,9 @@ export default function AuthModal({
                       >
                         <i className="bi bi-key-fill fs-4" />
                       </div>
-                      <h6 className="fw-bold text-dark mb-1">Reset Password</h6>
+                      <h6 className="fw-bold text-dark mb-1">Create New Password</h6>
                       <p className="text-muted small mb-0">
-                        Enter the 6-digit code sent to <strong>{email}</strong> and choose a new password.
+                        Choose a new password for <strong>{email}</strong>.
                       </p>
                     </div>
 
@@ -347,21 +564,6 @@ export default function AuthModal({
                     )}
 
                     <form onSubmit={handleResetPassword} autoComplete="off">
-                      <div className="mb-3">
-                        <label className="form-label small fw-semibold text-dark">6-Digit Verification Code</label>
-                        <input
-                          type="text"
-                          className="form-control rounded-3 text-center fw-bold fs-5"
-                          placeholder="123456"
-                          maxLength={6}
-                          value={resetCode}
-                          onChange={(e) => setResetCode(e.target.value)}
-                          autoComplete="off"
-                          required
-                          style={{ letterSpacing: "4px" }}
-                        />
-                      </div>
-
                       <div className="mb-3">
                         <label className="form-label small fw-semibold text-dark">New Password</label>
                         <div className="input-group">
@@ -422,13 +624,13 @@ export default function AuthModal({
                           type="button"
                           className="btn btn-link text-decoration-none text-muted small p-0"
                           onClick={() => {
-                            setForgotStep("request");
+                            setForgotStep("code");
                             setError(null);
                             setSuccessMsg(null);
                           }}
                         >
                           <i className="bi bi-arrow-left me-1" />
-                          Change Email / Resend
+                          Back
                         </button>
                         <button
                           type="button"
