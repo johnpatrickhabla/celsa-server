@@ -5,11 +5,9 @@ import Link from "next/link";
 import api from "@/lib/api";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { useCartStore } from "@/stores/cartStore";
-import { useAuthStore } from "@/stores/authStore";
 import type { Product } from "@/lib/types";
 import { Carousel } from "react-bootstrap";
 import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
-import AuthModal from "@/components/auth/AuthModal";
 
 const whyChooseUsTop = [
   { icon: "bi-hand-thumbs-up", title: "100% Handmade", subtitle: "By skilled artisans" },
@@ -30,11 +28,6 @@ export default function HomePage() {
   const addItem = useCartStore((s) => s.addItem);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const { isAuthenticated } = useAuthStore();
-  const [authModal, setAuthModal] = useState<{ isOpen: boolean; tab: "login" | "signup" }>({
-    isOpen: false,
-    tab: "login",
-  });
 
   useEffect(() => {
     async function fetchFeatured() {
@@ -93,25 +86,6 @@ export default function HomePage() {
                 <Link href="/products" className="btn btn-success btn-lg px-4 py-2 shadow-sm">
                   Shop Now
                 </Link>
-                {!isAuthenticated && (
-                  <>
-                    <button
-                      type="button"
-                      className="btn btn-outline-dark btn-lg px-4 py-2 shadow-sm"
-                      onClick={() => setAuthModal({ isOpen: true, tab: "login" })}
-                    >
-                      <i className="bi bi-person me-2" />
-                      Log In
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-dark btn-lg px-4 py-2 shadow-sm"
-                      onClick={() => setAuthModal({ isOpen: true, tab: "signup" })}
-                    >
-                      Sign Up Free
-                    </button>
-                  </>
-                )}
               </div>
             </div>
             <div className="col-lg-6">
@@ -279,14 +253,6 @@ export default function HomePage() {
         product={selectedProduct}
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-      />
-
-      {/* Auth Modal — opens in-place on the home page, no redirect needed */}
-      <AuthModal
-        isOpen={authModal.isOpen}
-        initialTab={authModal.tab}
-        onClose={() => setAuthModal({ isOpen: false, tab: "login" })}
-        onSuccess={() => setAuthModal({ isOpen: false, tab: "login" })}
       />
     </>
   );
