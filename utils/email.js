@@ -60,6 +60,69 @@ function getTransporter() {
 }
 
 /**
+ * Returns true when Gmail API (OAuth2) credentials are configured.
+ */
+function hasGmailApiConfig() {
+  const id = process.env.GMAIL_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const secret = process.env.GMAIL_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  const refresh = process.env.GMAIL_REFRESH_TOKEN;
+  return !!(id && secret && refresh && !isPlaceholder(refresh));
+}
+
+/**
+ * Sends an email via the Gmail REST API over HTTPS (port 443) using an OAuth2 refresh token.
+ * Free, uses the existing Gmail account, and is NOT blocked by Render's free tier
+ * (which blocks outbound SMTP ports 25/465/587).
+ */
+async function sendViaGmailApi({ from, to, subject, html, text }) {
+  const clientId = process.env.GMAIL_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN.trim();
+
+  // 1) Exchange refresh token for a short-lived access token
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+  });
+  const tokenBody = await tokenRes.json().catch(() => ({}));
+  if (!tokenRes.ok || !tokenBody.access_token) {
+    throw new Error(
+      `Gmail OAuth token error ${tokenRes.status}: ${tokenBody.error || ""} ${tokenBody.error_description || ""}`.trim()
+    );
+  }
+
+  // 2) Build the raw MIME message with nodemailer (stream transport = no network)
+  const composer = nodemailer.createTransport({ streamTransport: true, buffer: true, newline: "unix" });
+  const { message } = await composer.sendMail({ from, to, subject, html, text });
+  const raw = Buffer.from(message)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  // 3) Send via Gmail API
+  const sendRes = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${tokenBody.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ raw }),
+  });
+  const sendBody = await sendRes.json().catch(() => ({}));
+  if (!sendRes.ok) {
+    throw new Error(`Gmail API ${sendRes.status}: ${sendBody.error?.message || "unknown error"}`);
+  }
+  return sendBody.id;
+}
+
+/**
  * Sends a password reset verification code email.
  *
  * @param {string} toEmail - Recipient email
@@ -193,6 +256,22 @@ If you didn't request a password reset, you can safely ignore this email.
 
 
 
+    const subject = `Your CELSA Handicrafts Password Reset Code: ${resetCode}`;
+
+    // 1) Preferred in production: Gmail API over HTTPS (works on Render free tier)
+    if (hasGmailApiConfig()) {
+      const messageId = await sendViaGmailApi({
+        from: fromAddress,
+        to: toEmail,
+        subject,
+        html: htmlContent,
+        text: textContent,
+      });
+      console.log(`[EMAIL SERVICE] Password reset email sent via Gmail API to ${toEmail}. Message ID: ${messageId}`);
+      return { success: true, messageId };
+    }
+
+    // 2) Fallback: SMTP (local development — blocked on Render free tier)
     if (!transporter) {
       console.log("\n========================================================");
       console.log("🔑 [CELSA PASSWORD RESET CODE - SIMULATION/DEV MODE]");
@@ -206,7 +285,7 @@ If you didn't request a password reset, you can safely ignore this email.
     const info = await transporter.sendMail({
       from: fromAddress,
       to: toEmail,
-      subject: `Your CELSA Handicrafts Password Reset Code: ${resetCode}`,
+      subject,
       text: textContent,
       html: htmlContent,
     });

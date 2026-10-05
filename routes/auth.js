@@ -69,6 +69,20 @@ router.post(
   authController.forgotPassword
 );
 
+// POST /api/auth/verify-reset-code — check code before showing new password form
+router.post(
+  "/verify-reset-code",
+  [
+    body("email").isEmail().withMessage("Valid email is required"),
+    body("code")
+      .trim()
+      .matches(/^\d{6}$/)
+      .withMessage("Verification code must be 6 digits"),
+  ],
+  validate,
+  authController.verifyResetCode
+);
+
 // POST /api/auth/reset-password — verify code and update password
 router.post(
   "/reset-password",
@@ -84,4 +98,5 @@ router.post(
 );
 
 module.exports = router;
+
 

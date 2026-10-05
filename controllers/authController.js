@@ -236,6 +236,43 @@ exports.forgotPassword = async (req, res) => {
 };
 
 /**
+ * POST /api/auth/verify-reset-code
+ * Checks that the 6-digit code is valid and not expired (does NOT consume it).
+ * Lets the client move on to the "set new password" step only when the code is correct.
+ */
+exports.verifyResetCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ error: "Email and 6-digit code are required." });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user || !user.isActive) {
+      return res.status(404).json({ error: "No account found with this email address." });
+    }
+
+    if (!user.resetCode || !user.resetCodeExpires || user.resetCodeExpires < new Date()) {
+      return res.status(400).json({
+        error: "Your verification code has expired. Please request a new code.",
+      });
+    }
+
+    if (user.resetCode !== String(code).trim()) {
+      return res.status(400).json({ error: "Incorrect verification code. Please try again." });
+    }
+
+    res.json({ valid: true, message: "Code verified! You can now set a new password." });
+  } catch (err) {
+    console.error("Verify reset code error:", err);
+    res.status(500).json({ error: "Failed to verify code. Please try again." });
+  }
+};
+
+/**
  * POST /api/auth/reset-password
  * Verifies the 6-digit code and updates the user's password.
  */
