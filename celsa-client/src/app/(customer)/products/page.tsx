@@ -202,18 +202,6 @@ export default function ProductsPage() {
                       <span className="price text-success fw-bold fs-6">
                         ₱{product.basePrice.toFixed(2)}
                       </span>
-                      {product.isCustomizable && (
-                        <span
-                          className="badge rounded-pill"
-                          style={{
-                            backgroundColor: "var(--celsa-cream)",
-                            color: "var(--celsa-gold-dark)",
-                            fontSize: "0.65rem",
-                          }}
-                        >
-                          Customizable
-                        </span>
-                      )}
                     </div>
                   </div>
                 </Link>
