@@ -579,43 +579,12 @@ function MyOrdersContent() {
         }}
       >
         {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-          <div>
-            <h4 className="fw-bold mb-1 text-dark">Orders &amp; Tracking</h4>
+        <div className="mb-4">
+          <h4 className="fw-bold mb-1 text-dark">Orders &amp; Tracking</h4>
           <p className="text-muted small mb-0">
             Track real-time fulfillment, production progress, and order details.
           </p>
         </div>
-
-        {!isAuthenticated && (
-          <div className="d-flex gap-2">
-            <Link
-              href="/login?next=/my-orders"
-              className="btn btn-outline-success btn-sm px-3 rounded-3 fw-semibold"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/signup?next=/my-orders"
-              className="btn btn-success btn-sm px-3 rounded-3 fw-semibold"
-            >
-              Sign Up
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* Guest notice banner (only when logged out) */}
-      {!isAuthenticated && (
-        <div className="alert alert-light border rounded-3 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-sm">
-          <div className="d-flex align-items-center gap-2">
-            <i className="bi bi-info-circle-fill text-success fs-5" />
-            <span className="small text-muted">
-              You can track any order below without logging in. Logging in or signing up is only required when placing an order at <strong>Checkout</strong>.
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Quick Order Lookup Form */}
       <div className="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
@@ -785,12 +754,18 @@ function MyOrdersContent() {
           <p className="small text-muted mb-4" style={{ maxWidth: 450, margin: "0 auto" }}>
             Enter your order number from your confirmation message or email above to view live progress, courier details, and item specifications.
           </p>
-          <div className="d-flex gap-2 justify-content-center">
-            <Link href="/products" className="btn btn-outline-secondary btn-sm px-3 rounded-3">
-              Explore Products
+          <div className="d-flex gap-2 justify-content-center flex-wrap">
+            <Link
+              href="/login?next=/my-orders"
+              className="btn btn-outline-success btn-sm px-3 rounded-3 fw-semibold"
+            >
+              Log In
             </Link>
-            <Link href="/login?next=/my-orders" className="btn btn-success btn-sm px-3 rounded-3 fw-semibold">
-              Log In to View Account Orders
+            <Link
+              href="/signup?next=/my-orders"
+              className="btn btn-success btn-sm px-3 rounded-3 fw-semibold"
+            >
+              Sign Up
             </Link>
           </div>
         </div>
