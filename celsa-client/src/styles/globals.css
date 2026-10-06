@@ -366,9 +366,10 @@ input::-ms-clear {
     height: clamp(46px, 13vw, 56px) !important;
   }
 
-  /* 10. Navbar notification popover constraint on mobile */
-  .notif-popover {
-    width: min(340px, calc(100vw - 2rem)) !important;
+  /* 10. Navbar notification and cart popovers constraint on mobile */
+  .notif-popover,
+  .cart-popover {
+    width: min(360px, calc(100vw - 1.5rem)) !important;
   }
 
   /* 11. Admin & Staff Sidebar: Drawer overlay on mobile screens */
@@ -406,7 +407,8 @@ input::-ms-clear {
 }
 
 .categories-popover,
-.profile-dropdown-menu {
+.profile-dropdown-menu,
+.cart-popover {
   animation: popMenuDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 

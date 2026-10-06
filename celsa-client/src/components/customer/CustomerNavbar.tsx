@@ -14,7 +14,10 @@ export default function CustomerNavbar() {
   const pathname = usePathname();
   const router = useRouter();
   const items = useCartStore((s) => s.items);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const updateQty = useCartStore((s) => s.updateQty);
   const rawCartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
 
   const { isAuthenticated, user, logout, hydrate } = useAuthStore();
   const [mounted, setMounted] = useState(false);
@@ -24,6 +27,7 @@ export default function CustomerNavbar() {
     tab: "login",
   });
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const [navSearch, setNavSearch] = useState("");
 
   // Product Categories Popover State
@@ -58,6 +62,7 @@ export default function CustomerNavbar() {
   const handleProfileMouseEnter = () => {
     if (profileDropdownTimer.current) clearTimeout(profileDropdownTimer.current);
     setDropdownOpen(true);
+    setCartOpen(false);
   };
 
   const handleProfileMouseLeave = () => {
@@ -107,6 +112,7 @@ export default function CustomerNavbar() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const cartRef = useRef<HTMLDivElement>(null);
 
   // Hydrate auth and cart mounted state
   useEffect(() => {
@@ -140,6 +146,29 @@ export default function CustomerNavbar() {
 
   const cartCount = mounted ? rawCartCount : 0;
 
+  // Close dropdowns on route change
+  useEffect(() => {
+    setCartOpen(false);
+    setDropdownOpen(false);
+    setNotifOpen(false);
+    setProductsDropdownOpen(false);
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Close dropdowns on Escape key
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setCartOpen(false);
+        setDropdownOpen(false);
+        setNotifOpen(false);
+        setProductsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Close dropdowns on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -148,6 +177,9 @@ export default function CustomerNavbar() {
       }
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setNotifOpen(false);
+      }
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+        setCartOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -326,18 +358,218 @@ export default function CustomerNavbar() {
               </div>
             </form>
 
-            {/* Shopping Cart Button */}
-            <Link href="/cart" className="btn btn-link text-dark position-relative p-0" aria-label="Cart">
-              <i className="bi bi-cart3 fs-5" />
-              {cartCount > 0 && (
-                <span
-                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
-                  style={{ fontSize: "0.65rem", padding: "0.25em 0.5em" }}
+            {/* Shopping Cart Button & Dropdown Preview */}
+            <div className="position-relative" ref={cartRef}>
+              <button
+                type="button"
+                className="btn btn-link text-dark position-relative p-0 d-flex align-items-center text-decoration-none"
+                onClick={() => {
+                  setCartOpen((prev) => !prev);
+                  setNotifOpen(false);
+                  setDropdownOpen(false);
+                }}
+                aria-label="Shopping Cart"
+                aria-expanded={cartOpen}
+                title="Shopping Cart"
+              >
+                <i className="bi bi-cart3 fs-5" />
+                {cartCount > 0 && (
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
+                    style={{ fontSize: "0.65rem", padding: "0.25em 0.5em" }}
+                  >
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Cart Popover Dropdown */}
+              {cartOpen && (
+                <div
+                  className="cart-popover card shadow-lg border-0 rounded-4 position-absolute end-0 mt-2 overflow-hidden bg-white"
+                  style={{
+                    width: 360,
+                    maxWidth: "min(360px, calc(100vw - 1.5rem))",
+                    zIndex: 1050,
+                    boxShadow: "0 16px 40px rgba(0, 0, 0, 0.12)",
+                  }}
                 >
-                  {cartCount}
-                </span>
+                  {/* Header */}
+                  <div className="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center gap-2">
+                      <i className="bi bi-bag-check-fill text-success" />
+                      <span className="fw-bold small text-dark mb-0">My Cart</span>
+                      {cartCount > 0 && (
+                        <span className="badge bg-success bg-opacity-10 text-success rounded-pill" style={{ fontSize: "0.7rem" }}>
+                          {cartCount} {cartCount === 1 ? "item" : "items"}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-link text-muted p-0 text-decoration-none"
+                      onClick={() => setCartOpen(false)}
+                      aria-label="Close cart preview"
+                      title="Close"
+                    >
+                      <i className="bi bi-x-lg" style={{ fontSize: "0.8rem" }} />
+                    </button>
+                  </div>
+
+                  {/* Body */}
+                  {items.length === 0 ? (
+                    <div className="p-4 text-center">
+                      <div
+                        className="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3 text-secondary"
+                        style={{ width: 56, height: 56 }}
+                      >
+                        <i className="bi bi-cart-x fs-3 opacity-50" />
+                      </div>
+                      <h6 className="fw-semibold text-dark mb-1">Your cart is empty</h6>
+                      <p className="text-muted small mb-3">Add items from our catalog to see them here.</p>
+                      <Link
+                        href="/products"
+                        className="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-medium"
+                        style={{ fontSize: "0.8rem" }}
+                        onClick={() => setCartOpen(false)}
+                      >
+                        Browse Products
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        className="overflow-auto list-group list-group-flush"
+                        style={{ maxHeight: 310, overscrollBehavior: "contain" }}
+                      >
+                        {items.map((item, index) => (
+                          <div
+                            key={`${item.productId}-${index}`}
+                            className="list-group-item p-3 border-0 border-bottom d-flex gap-2.5 align-items-center"
+                          >
+                            {/* Product Thumbnail */}
+                            <div
+                              className="bg-light rounded-3 d-flex align-items-center justify-content-center overflow-hidden flex-shrink-0 border"
+                              style={{ width: 50, height: 50 }}
+                            >
+                              {item.productImage ? (
+                                <img
+                                  src={item.productImage}
+                                  alt={item.productName}
+                                  style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                                />
+                              ) : (
+                                <i className="bi bi-image text-muted fs-5" />
+                              )}
+                            </div>
+
+                            {/* Details */}
+                            <div className="flex-grow-1 overflow-hidden pe-1">
+                              <div className="d-flex justify-content-between align-items-start gap-1">
+                                <Link
+                                  href={`/products/${item.productSlug}`}
+                                  className="text-dark text-decoration-none fw-semibold small text-truncate d-block"
+                                  title={item.productName}
+                                  onClick={() => setCartOpen(false)}
+                                >
+                                  {item.productName}
+                                </Link>
+                                <button
+                                  type="button"
+                                  className="btn btn-link text-muted p-0 border-0 flex-shrink-0"
+                                  onClick={() => removeItem(index)}
+                                  title="Remove item"
+                                  aria-label="Remove item"
+                                  style={{ fontSize: "0.8rem" }}
+                                >
+                                  <i className="bi bi-trash3 text-danger opacity-75" />
+                                </button>
+                              </div>
+
+                              {/* Customizations / Badges */}
+                              {item.customizations && item.customizations.length > 0 && (
+                                <div className="text-muted small text-truncate mt-0.5" style={{ fontSize: "0.7rem" }}>
+                                  {item.customizations.map((c, ci) => (
+                                    <span key={c.type || ci} className="me-1.5">
+                                      {c.label}: <span className="text-dark fw-medium">{c.selectedValue}</span>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              {item.isCustomOrder && (
+                                <span className="badge bg-primary bg-opacity-10 text-primary py-0.5 px-1.5 mt-0.5" style={{ fontSize: "0.62rem" }}>
+                                  Custom Order
+                                </span>
+                              )}
+
+                              {/* Quantity Stepper and Item Price */}
+                              <div className="d-flex justify-content-between align-items-center mt-1.5">
+                                <div className="d-flex align-items-center border rounded-pill bg-light px-1 py-0.5">
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-link text-dark p-0 border-0 d-flex align-items-center justify-content-center"
+                                    style={{ width: 18, height: 18, textDecoration: "none" }}
+                                    onClick={() => updateQty(index, item.quantity - 1)}
+                                    disabled={item.quantity <= 1}
+                                    title="Decrease quantity"
+                                  >
+                                    <i className="bi bi-dash" style={{ fontSize: "0.75rem" }} />
+                                  </button>
+                                  <span className="small fw-semibold px-2" style={{ fontSize: "0.75rem" }}>
+                                    {item.quantity}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-link text-dark p-0 border-0 d-flex align-items-center justify-content-center"
+                                    style={{ width: 18, height: 18, textDecoration: "none" }}
+                                    onClick={() => updateQty(index, item.quantity + 1)}
+                                    title="Increase quantity"
+                                  >
+                                    <i className="bi bi-plus" style={{ fontSize: "0.75rem" }} />
+                                  </button>
+                                </div>
+
+                                <div className="text-end">
+                                  <span className="fw-bold text-success small" style={{ fontSize: "0.82rem" }}>
+                                    ₱{(item.unitPrice * item.quantity).toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="card-footer bg-white border-top p-3">
+                        <div className="d-flex justify-content-between align-items-center mb-2.5">
+                          <span className="text-muted small fw-medium">Subtotal</span>
+                          <span className="fw-bold text-dark fs-6">₱{cartTotal.toFixed(2)}</span>
+                        </div>
+                        <div className="d-grid gap-2">
+                          <Link
+                            href="/checkout"
+                            className="btn btn-success btn-sm rounded-3 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2"
+                            onClick={() => setCartOpen(false)}
+                          >
+                            <span>Proceed to Checkout</span>
+                            <i className="bi bi-arrow-right" />
+                          </Link>
+                          <Link
+                            href="/cart"
+                            className="btn btn-light btn-sm rounded-3 py-1.5 fw-medium text-secondary text-decoration-none border"
+                            style={{ fontSize: "0.8rem" }}
+                            onClick={() => setCartOpen(false)}
+                          >
+                            View Full Cart
+                          </Link>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
-            </Link>
+            </div>
 
             {/* Notification Bell (Visible for logged in customers) */}
             {isAuthenticated && user && (
@@ -345,7 +577,11 @@ export default function CustomerNavbar() {
                 <button
                   type="button"
                   className="btn btn-link text-dark position-relative p-0 d-flex align-items-center text-decoration-none"
-                  onClick={() => setNotifOpen(!notifOpen)}
+                  onClick={() => {
+                    setNotifOpen(!notifOpen);
+                    setCartOpen(false);
+                    setDropdownOpen(false);
+                  }}
                   aria-label="Notifications"
                   title="Order Progress Notifications"
                 >
@@ -474,7 +710,11 @@ export default function CustomerNavbar() {
                 <button
                   type="button"
                   className="btn btn-link text-dark dropdown-toggle d-flex align-items-center gap-1 text-decoration-none p-0"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  onClick={() => {
+                    setDropdownOpen(!dropdownOpen);
+                    setCartOpen(false);
+                    setNotifOpen(false);
+                  }}
                   aria-expanded={dropdownOpen}
                   aria-label="Account"
                 >
@@ -492,7 +732,11 @@ export default function CustomerNavbar() {
                 <button
                   type="button"
                   className="btn btn-link text-dark p-0 d-flex align-items-center justify-content-center text-decoration-none"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  onClick={() => {
+                    setDropdownOpen(!dropdownOpen);
+                    setCartOpen(false);
+                    setNotifOpen(false);
+                  }}
                   aria-expanded={dropdownOpen}
                   aria-label="Account"
                   title="Account"
