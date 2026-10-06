@@ -177,78 +177,41 @@ export default function CustomerNavbar() {
                   >
                     <Link
                       href={item.href}
-                      className={`text-decoration-none d-inline-flex align-items-center gap-1 ${
+                      className={`text-decoration-none ${
                         active
                           ? "fw-semibold text-dark border-bottom border-2 border-dark"
                           : "text-secondary"
                       }`}
                     >
                       <span>{item.label}</span>
-                      <i
-                        className="bi bi-chevron-down"
-                        style={{
-                          fontSize: "0.65rem",
-                          transition: "transform 0.2s ease",
-                          transform: productsDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
-                        }}
-                      />
                     </Link>
 
-                    {/* Popping categories popover menu */}
-                    {productsDropdownOpen && (
+                    {/* Popping categories inline menu on hover */}
+                    {productsDropdownOpen && categories.length > 0 && (
                       <div
-                        className="position-absolute start-0 top-100 mt-2 bg-white rounded-3 shadow-lg border p-2 categories-popover"
+                        className="position-absolute start-0 top-100 mt-2 bg-white rounded-pill shadow-lg border py-1.5 px-3 d-flex align-items-center gap-1.5 categories-popover"
                         style={{
-                          minWidth: "240px",
                           zIndex: 1060,
                           borderColor: "#ebdcc5",
                           boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)",
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        <div className="px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
-                          <span
-                            className="text-uppercase fw-bold text-muted"
-                            style={{ fontSize: "0.68rem", letterSpacing: "1px" }}
-                          >
-                            Browse by Category
-                          </span>
+                        {categories.map((cat) => (
                           <Link
-                            href="/products"
+                            key={cat._id}
+                            href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}`}
                             onClick={() => setProductsDropdownOpen(false)}
-                            className="text-success text-decoration-none fw-semibold"
-                            style={{ fontSize: "0.75rem" }}
+                            className="text-decoration-none px-2.5 py-1 rounded-pill small fw-medium text-dark hover-category-pill"
+                            style={{
+                              fontSize: "0.82rem",
+                              backgroundColor: "#fbf9f5",
+                              border: "1px solid #eee5d8",
+                            }}
                           >
-                            View All
+                            {cat.name}
                           </Link>
-                        </div>
-
-                        <div className="py-1">
-                          <Link
-                            href="/products"
-                            onClick={() => setProductsDropdownOpen(false)}
-                            className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-decoration-none text-dark hover-category-item"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            <i className="bi bi-grid text-success" />
-                            <span className="fw-medium">All Products</span>
-                          </Link>
-
-                          {categories.map((cat) => (
-                            <Link
-                              key={cat._id}
-                              href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}`}
-                              onClick={() => setProductsDropdownOpen(false)}
-                              className="dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 text-decoration-none text-dark hover-category-item"
-                              style={{ fontSize: "0.85rem" }}
-                            >
-                              <div className="d-flex align-items-center gap-2 text-truncate">
-                                <i className="bi bi-tag text-muted" style={{ fontSize: "0.8rem" }} />
-                                <span className="text-truncate">{cat.name}</span>
-                              </div>
-                              <i className="bi bi-chevron-right text-muted opacity-50" style={{ fontSize: "0.7rem" }} />
-                            </Link>
-                          ))}
-                        </div>
+                        ))}
                       </div>
                     )}
                   </div>

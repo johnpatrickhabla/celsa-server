@@ -113,81 +113,41 @@ function ProductsContent() {
           <div>
             {/* Popping categories interactive header */}
             <div
-              className="position-relative d-inline-block"
+              className="d-flex flex-wrap align-items-center gap-2 mb-1"
               onMouseEnter={handlePageCatEnter}
               onMouseLeave={handlePageCatLeave}
             >
               <h4
-                className="fw-bold mb-1 d-inline-flex align-items-center gap-1.5 cursor-pointer"
+                className="fw-bold mb-0 cursor-pointer d-inline-block"
                 role="button"
                 tabIndex={0}
                 style={{ cursor: "pointer" }}
               >
                 <span style={{ color: "#198754" }}>Products</span>
-                <i
-                  className="bi bi-chevron-down text-muted"
-                  style={{
-                    fontSize: "0.85rem",
-                    transition: "transform 0.2s ease",
-                    transform: pageCatOpen ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                />
               </h4>
 
-              {/* Popping Categories Dropdown on cursor hover */}
-              {pageCatOpen && (
-                <div
-                  className="position-absolute start-0 top-100 mt-1 bg-white rounded-3 shadow-lg border p-2 categories-popover"
-                  style={{
-                    minWidth: "240px",
-                    zIndex: 1050,
-                    borderColor: "#ebdcc5",
-                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)",
-                  }}
-                >
-                  <div className="px-3 py-1.5 border-bottom d-flex align-items-center justify-content-between">
-                    <span
-                      className="text-uppercase fw-bold text-muted"
-                      style={{ fontSize: "0.68rem", letterSpacing: "1px" }}
-                    >
-                      Browse Categories
-                    </span>
-                  </div>
-                  <div className="py-1">
-                    <Link
-                      href={search ? `/products?search=${encodeURIComponent(search)}` : "/products"}
-                      onClick={() => setPageCatOpen(false)}
-                      className={`dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-decoration-none hover-category-item ${
-                        !categoryParam ? "fw-bold text-success bg-light" : "text-dark"
-                      }`}
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <i className="bi bi-grid text-success" />
-                      <span>All Products</span>
-                    </Link>
-                    {categories.map((cat) => {
-                      const isSelected = categoryParam === cat._id || categoryParam === cat.slug;
-                      return (
-                        <Link
-                          key={cat._id}
-                          href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}${
-                            search ? `&search=${encodeURIComponent(search)}` : ""
-                          }`}
-                          onClick={() => setPageCatOpen(false)}
-                          className={`dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 text-decoration-none hover-category-item ${
-                            isSelected ? "fw-bold text-success bg-light" : "text-dark"
-                          }`}
-                          style={{ fontSize: "0.85rem" }}
-                        >
-                          <div className="d-flex align-items-center gap-2 text-truncate">
-                            <i className="bi bi-tag text-secondary opacity-75" style={{ fontSize: "0.8rem" }} />
-                            <span className="text-truncate">{cat.name}</span>
-                          </div>
-                          {isSelected && <i className="bi bi-check-lg text-success fw-bold" />}
-                        </Link>
-                      );
-                    })}
-                  </div>
+              {/* Popping Categories Inline on cursor hover */}
+              {pageCatOpen && categories.length > 0 && (
+                <div className="d-inline-flex flex-wrap align-items-center gap-1.5 ms-2 categories-popover">
+                  {categories.map((cat) => {
+                    const isSelected = categoryParam === cat._id || categoryParam === cat.slug;
+                    return (
+                      <Link
+                        key={cat._id}
+                        href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}${
+                          search ? `&search=${encodeURIComponent(search)}` : ""
+                        }`}
+                        className={`badge rounded-pill text-decoration-none py-1.5 px-3 hover-category-pill ${
+                          isSelected
+                            ? "bg-success text-white shadow-sm"
+                            : "bg-white text-dark border shadow-sm"
+                        }`}
+                        style={{ fontSize: "0.8rem", transition: "all 0.15s ease" }}
+                      >
+                        {cat.name}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
