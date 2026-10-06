@@ -24,6 +24,17 @@ export default function CustomerNavbar() {
     tab: "login",
   });
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [navSearch, setNavSearch] = useState("");
+
+  function handleNavSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = navSearch.trim();
+    if (q) {
+      router.push(`/products?search=${encodeURIComponent(q)}`);
+    } else {
+      router.push("/products");
+    }
+  }
 
   // Notification State
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -140,7 +151,40 @@ export default function CustomerNavbar() {
             })}
           </nav>
 
-          <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-2 gap-md-3">
+            {/* Search bar on the left side of Add to Cart icon */}
+            <form onSubmit={handleNavSearch} className="d-flex align-items-center" role="search">
+              <div
+                className="input-group input-group-sm rounded-pill overflow-hidden border"
+                style={{
+                  backgroundColor: "#f9f8f6",
+                  width: "clamp(120px, 18vw, 210px)",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <input
+                  type="search"
+                  className="form-control form-control-sm border-0 bg-transparent ps-3 py-1"
+                  placeholder="Search products..."
+                  value={navSearch}
+                  onChange={(e) => setNavSearch(e.target.value)}
+                  style={{
+                    fontSize: "0.8rem",
+                    outline: "none",
+                    boxShadow: "none",
+                  }}
+                  aria-label="Search products"
+                />
+                <button
+                  type="submit"
+                  className="btn btn-sm btn-link text-muted pe-2 ps-1 border-0 d-flex align-items-center"
+                  aria-label="Submit Search"
+                >
+                  <i className="bi bi-search" style={{ fontSize: "0.8rem" }} />
+                </button>
+              </div>
+            </form>
+
             {/* Shopping Cart Button */}
             <Link href="/cart" className="btn btn-link text-dark position-relative p-0" aria-label="Cart">
               <i className="bi bi-cart3 fs-5" />
@@ -375,7 +419,34 @@ export default function CustomerNavbar() {
 
         {/* Mobile nav */}
         {mobileOpen && (
-          <div className="d-lg-none border-top px-4 py-2 bg-white">
+          <div className="d-lg-none border-top px-4 py-3 bg-white">
+            <form
+              onSubmit={(e) => {
+                handleNavSearch(e);
+                setMobileOpen(false);
+              }}
+              className="mb-3"
+              role="search"
+            >
+              <div className="input-group input-group-sm rounded-pill overflow-hidden border bg-light">
+                <input
+                  type="search"
+                  className="form-control form-control-sm border-0 bg-transparent ps-3 py-1"
+                  placeholder="Search products..."
+                  value={navSearch}
+                  onChange={(e) => setNavSearch(e.target.value)}
+                  style={{ fontSize: "0.85rem", outline: "none", boxShadow: "none" }}
+                  aria-label="Search products"
+                />
+                <button
+                  type="submit"
+                  className="btn btn-sm btn-link text-muted pe-3 border-0 d-flex align-items-center"
+                  aria-label="Search"
+                >
+                  <i className="bi bi-search" />
+                </button>
+              </div>
+            </form>
             {CUSTOMER_NAV.map((item) => {
               const active = pathname === item.href;
               return (
