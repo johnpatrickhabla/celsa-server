@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
@@ -20,7 +20,6 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [page, setPage] = useState(1);
 
   const addItem = useCartStore((s) => s.addItem);
 
@@ -47,41 +46,152 @@ function ProductsContent() {
       .catch(() => {});
   }, []);
 
-  // Reset page whenever search or category query changes
-  useEffect(() => {
-    setPage(1);
-  }, [search, categoryParam]);
-
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const params: Record<string, string> = { page: page.toString(), limit: "12" };
+      const params: Record<string, string> = { page: "1", limit: "100" };
       if (search) params.search = search;
       if (categoryParam) params.category = categoryParam;
 
       const res = await api.get("/products", { params });
-      setProducts(res.data.products);
-      setPagination(res.data.pagination);
+      setProducts(res.data.products || []);
+      setPagination(res.data.pagination || null);
     } catch (err) {
       console.error("Failed to fetch products:", err);
     } finally {
       setLoading(false);
     }
-  }, [page, search, categoryParam]);
+  }, [search, categoryParam]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  const getCategoryName = (product: Product): string => {
-    if (typeof product.category === "object" && product.category !== null) {
-      return product.category.name;
-    }
-    return "";
-  };
-
   const activeCategory = categories.find(
     (c) => c._id === categoryParam || c.slug === categoryParam
+  );
+
+  // Group products by category to display each category in its own separated section
+  const groupedCategories = useMemo(() => {
+    if (!products.length) return [];
+
+    const groups: {
+      id: string;
+      name: string;
+      description?: string;
+      products: Product[];
+    }[] = [];
+
+    // Map through categories in defined order
+    categories.forEach((cat) => {
+      const catProducts = products.filter((p) => {
+        if (typeof p.category === "object" && p.category !== null) {
+          return p.category._id === cat._id || p.category.slug === cat.slug;
+        }
+        return p.category === cat._id || p.category === cat.name;
+      });
+
+      if (catProducts.length > 0) {
+        groups.push({
+          id: cat._id,
+          name: cat.name,
+          description: cat.description,
+          products: catProducts,
+        });
+      }
+    });
+
+    // Check for products with an unlisted or fallback category
+    const handledProductIds = new Set(
+      groups.flatMap((g) => g.products.map((p) => p._id))
+    );
+    const unhandledProducts = products.filter(
+      (p) => !handledProductIds.has(p._id)
+    );
+
+    if (unhandledProducts.length > 0) {
+      groups.push({
+        id: "other",
+        name: "Other Handcrafted Items",
+        description: "Unique local creations",
+        products: unhandledProducts,
+      });
+    }
+
+    return groups;
+  }, [products, categories]);
+
+  const renderProductCard = (product: Product) => (
+    <div className="col-6 col-md-4 col-lg-3" key={product._id}>
+      <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm">
+        <Link
+          href={`/products/${product.slug}`}
+          className="text-decoration-none text-dark"
+        >
+          <div
+            className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2"
+            style={{ height: 180 }}
+          >
+            {product.images.length > 0 ? (
+              <img
+                src={product.images[0].url}
+                alt={product.name}
+                className="d-block w-100 h-100"
+                style={{ objectFit: "contain" }}
+              />
+            ) : (
+              <i className="bi bi-image text-muted fs-1" />
+            )}
+          </div>
+          <div className="product-content">
+            {/* Category tag removed from flashcard as requested */}
+            <h3
+              className="product-title fw-bold text-dark fs-6 mb-2 text-truncate"
+              title={product.name}
+            >
+              {product.name}
+            </h3>
+            <div className="product-price mb-2 d-flex align-items-center justify-content-between">
+              <span className="price text-success fw-bold fs-6">
+                ₱{product.basePrice.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </Link>
+
+        <div>
+          {product.stock <= product.lowStockThreshold && product.stock > 0 && (
+            <div className="text-warning small mb-2" style={{ fontSize: "0.7rem" }}>
+              Only {product.stock} left
+            </div>
+          )}
+          {product.stock === 0 && (
+            <div className="text-danger small mb-2" style={{ fontSize: "0.7rem" }}>
+              Out of stock
+            </div>
+          )}
+          <div className="product-actions d-flex gap-2">
+            <button
+              className="btn btn-success btn-sm flex-grow-1 small"
+              onClick={() => handleQuickAdd(product)}
+              disabled={product.stock === 0}
+            >
+              Add to Cart
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm flex-grow-1 small text-center d-flex align-items-center justify-content-center"
+              onClick={() => {
+                setSelectedProduct(product);
+                setModalOpen(true);
+              }}
+            >
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   return (
@@ -153,7 +263,27 @@ function ProductsContent() {
           </div>
         </div>
 
-        {/* Product Grid */}
+        {/* Quick Category Jump Anchors (when multiple categories exist) */}
+        {!categoryParam && groupedCategories.length > 1 && (
+          <div className="d-flex flex-wrap align-items-center gap-2 mb-4 pb-3 border-bottom">
+            <span className="text-muted small fw-semibold me-1" style={{ fontSize: "0.8rem" }}>
+              Jump to:
+            </span>
+            {groupedCategories.map((group) => (
+              <a
+                key={group.id}
+                href={`#cat-${group.id}`}
+                className="btn btn-sm btn-outline-secondary rounded-pill py-1 px-3 text-decoration-none shadow-sm"
+                style={{ fontSize: "0.78rem", backgroundColor: "#ffffff" }}
+              >
+                {group.name}
+                <span className="ms-1.5 opacity-75 text-muted">({group.products.length})</span>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* Product Sections Separated by Category */}
         {loading ? (
           <div className="row g-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -177,108 +307,36 @@ function ProductsContent() {
             )}
           </div>
         ) : (
-          <div className="row g-3">
-            {products.map((product) => (
-              <div className="col-6 col-md-4 col-lg-3" key={product._id}>
-                <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm">
-                  <Link
-                    href={`/products/${product.slug}`}
-                    className="text-decoration-none text-dark"
-                  >
-                    <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
-                      {product.images.length > 0 ? (
-                        <img
-                          src={product.images[0].url}
-                          alt={product.name}
-                          className="d-block w-100 h-100"
-                          style={{ objectFit: "contain" }}
-                        />
-                      ) : (
-                        <i className="bi bi-image text-muted fs-1" />
-                      )}
-                    </div>
-                    <div className="product-content">
-                      <div className="text-muted mb-1" style={{ fontSize: "0.7rem" }}>
-                        {getCategoryName(product)}
-                      </div>
-                      <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={product.name}>{product.name}</h3>
-                      <div className="product-price mb-2 d-flex align-items-center justify-content-between">
-                        <span className="price text-success fw-bold fs-6">
-                          ₱{product.basePrice.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                  
-                  <div>
-                    {product.stock <= product.lowStockThreshold && product.stock > 0 && (
-                      <div className="text-warning small mb-2" style={{ fontSize: "0.7rem" }}>
-                        Only {product.stock} left
-                      </div>
-                    )}
-                    {product.stock === 0 && (
-                      <div className="text-danger small mb-2" style={{ fontSize: "0.7rem" }}>
-                        Out of stock
-                      </div>
-                    )}
-                    <div className="product-actions d-flex gap-2">
-                      <button
-                        className="btn btn-success btn-sm flex-grow-1 small"
-                        onClick={() => handleQuickAdd(product)}
-                        disabled={product.stock === 0}
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm flex-grow-1 small text-center d-flex align-items-center justify-content-center"
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setModalOpen(true);
-                        }}
-                      >
-                        View Details
-                      </button>
-                    </div>
+          <div className="d-flex flex-column gap-5">
+            {groupedCategories.map((group) => (
+              <section key={group.id} id={`cat-${group.id}`} className="category-section">
+                {/* Category Header */}
+                <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-2 mb-3 border-bottom">
+                  <div className="d-flex align-items-center gap-2">
+                    <h5 className="fw-bold mb-0 text-dark" style={{ letterSpacing: "0.3px" }}>
+                      {group.name}
+                    </h5>
+                    <span
+                      className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1"
+                      style={{ fontSize: "0.75rem" }}
+                    >
+                      {group.products.length} {group.products.length === 1 ? "item" : "items"}
+                    </span>
                   </div>
+                  {group.description && (
+                    <span className="text-muted small mt-1 mt-sm-0" style={{ fontSize: "0.82rem" }}>
+                      {group.description}
+                    </span>
+                  )}
                 </div>
-              </div>
+
+                {/* Category Product Grid */}
+                <div className="row g-3">
+                  {group.products.map(renderProductCard)}
+                </div>
+              </section>
             ))}
           </div>
-        )}
-
-        {/* Pagination */}
-        {pagination && pagination.pages > 1 && (
-          <nav className="mt-4 d-flex justify-content-center">
-            <ul className="pagination pagination-sm">
-              <li className={`page-item ${page <= 1 ? "disabled" : ""}`}>
-                <button className="page-link" onClick={() => setPage(page - 1)}>
-                  ‹
-                </button>
-              </li>
-              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(
-                (p) => (
-                  <li
-                    key={p}
-                    className={`page-item ${p === page ? "active" : ""}`}
-                  >
-                    <button className="page-link" onClick={() => setPage(p)}>
-                      {p}
-                    </button>
-                  </li>
-                )
-              )}
-              <li
-                className={`page-item ${
-                  page >= (pagination?.pages || 1) ? "disabled" : ""
-                }`}
-              >
-                <button className="page-link" onClick={() => setPage(page + 1)}>
-                  ›
-                </button>
-              </li>
-            </ul>
-          </nav>
         )}
       </div>
 
