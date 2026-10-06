@@ -398,11 +398,10 @@ export default function HeroSlidesEditor({ role }: Props) {
                     <td>
                       <button
                         type="button"
-                        className={`btn btn-sm rounded-pill fw-semibold ${
-                          slide.isActive
+                        className={`btn btn-sm rounded-pill fw-semibold ${slide.isActive
                             ? "btn-success bg-opacity-10 text-success border-success"
                             : "btn-secondary bg-opacity-10 text-secondary border-secondary"
-                        }`}
+                          }`}
                         onClick={() => handleToggleActive(slide)}
                         title="Click to toggle active status"
                       >
@@ -508,11 +507,10 @@ export default function HeroSlidesEditor({ role }: Props) {
                     </label>
                     <div className="d-flex gap-3">
                       <div
-                        className={`card flex-grow-1 p-3 text-center border cursor-pointer rounded-3 ${
-                          formData.type === "image"
+                        className={`card flex-grow-1 p-3 text-center border cursor-pointer rounded-3 ${formData.type === "image"
                             ? "border-success bg-success bg-opacity-10 text-success fw-bold"
                             : "bg-white text-muted"
-                        }`}
+                          }`}
                         style={{ cursor: "pointer" }}
                         onClick={() => setFormData((p) => ({ ...p, type: "image" }))}
                       >
@@ -520,11 +518,10 @@ export default function HeroSlidesEditor({ role }: Props) {
                         <span>Picture (Image)</span>
                       </div>
                       <div
-                        className={`card flex-grow-1 p-3 text-center border cursor-pointer rounded-3 ${
-                          formData.type === "video"
+                        className={`card flex-grow-1 p-3 text-center border cursor-pointer rounded-3 ${formData.type === "video"
                             ? "border-primary bg-primary bg-opacity-10 text-primary fw-bold"
                             : "bg-white text-muted"
-                        }`}
+                          }`}
                         style={{ cursor: "pointer" }}
                         onClick={() => setFormData((p) => ({ ...p, type: "video" }))}
                       >

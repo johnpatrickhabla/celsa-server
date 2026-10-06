@@ -3,7 +3,8 @@ const Category = require("../models/Category");
 /** GET /api/categories — public: list all active categories */
 exports.list = async (_req, res) => {
   try {
-    const categories = await Category.find({ isActive: true }).sort({ name: 1 });
+    const categories = await Category.find({ isActive: true }).sort({ name: 1 }).lean();
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
     res.json({ categories });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch categories" });

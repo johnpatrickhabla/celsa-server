@@ -36,7 +36,9 @@ const DEFAULT_SLIDES = [
   },
 ];
 
+let defaultSlidesChecked = false;
 async function ensureDefaultSlides() {
+  if (defaultSlidesChecked) return;
   const count = await HeroSlide.countDocuments();
   if (count === 0) {
     try {
@@ -45,13 +47,15 @@ async function ensureDefaultSlides() {
       console.warn("Failed to seed default hero slides:", e.message);
     }
   }
+  defaultSlidesChecked = true;
 }
 
 // ── GET /api/hero-slides (Public: Active slides only) ────────────────
 router.get("/", async (req, res) => {
   try {
     await ensureDefaultSlides();
-    const slides = await HeroSlide.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
+    const slides = await HeroSlide.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean();
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
     res.json({ slides });
   } catch (err) {
     console.error("Fetch hero slides error:", err);

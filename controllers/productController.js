@@ -39,9 +39,13 @@ exports.list = async (req, res) => {
         .populate("category", "name slug")
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(parseInt(limit)),
+        .limit(parseInt(limit))
+        .lean(),
       Product.countDocuments(filter),
     ]);
+
+    // Cache products response for fast subsequent page loads
+    res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=120");
 
     res.json({
       products,

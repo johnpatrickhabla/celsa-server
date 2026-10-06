@@ -47,9 +47,6 @@ export default function ProductsPage() {
       if (minPrice) params.minPrice = minPrice;
       if (maxPrice) params.maxPrice = maxPrice;
 
-      // TODO: Remove this delay — only for testing loading skeleton
-      await new Promise((r) => setTimeout(r, 2000));
-
       const res = await api.get("/products", { params });
       setProducts(res.data.products);
       setPagination(res.data.pagination);

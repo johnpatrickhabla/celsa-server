@@ -92,9 +92,12 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Text index for search functionality
+// Query indexes for high-speed catalog lookups
 productSchema.index({ name: "text", description: "text" });
 productSchema.index({ category: 1 });
+productSchema.index({ isActive: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, isFeatured: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, category: 1, createdAt: -1 });
 
 // Auto-generate slug from name before validation if not provided
 productSchema.pre("validate", function (next) {
