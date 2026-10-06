@@ -85,8 +85,8 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/hero-slides", heroSlideRoutes);
 
-// Health check
-app.get("/api/health", (_req, res) => {
+// Health check & keep-alive ping endpoints
+app.get(["/", "/health", "/api/health"], (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
