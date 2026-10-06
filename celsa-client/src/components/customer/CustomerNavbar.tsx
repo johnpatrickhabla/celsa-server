@@ -252,7 +252,7 @@ export default function CustomerNavbar() {
                 <input
                   type="search"
                   className="form-control form-control-sm border-0 bg-transparent ps-3 py-1"
-                  placeholder="Search products..."
+                  placeholder="Search product or category..."
                   value={navSearch}
                   onChange={(e) => setNavSearch(e.target.value)}
                   style={{
@@ -260,7 +260,7 @@ export default function CustomerNavbar() {
                     outline: "none",
                     boxShadow: "none",
                   }}
-                  aria-label="Search products"
+                  aria-label="Search product or category"
                 />
                 <button
                   type="submit"
@@ -519,11 +519,11 @@ export default function CustomerNavbar() {
                 <input
                   type="search"
                   className="form-control form-control-sm border-0 bg-transparent ps-3 py-1"
-                  placeholder="Search products..."
+                  placeholder="Search product or category..."
                   value={navSearch}
                   onChange={(e) => setNavSearch(e.target.value)}
                   style={{ fontSize: "0.85rem", outline: "none", boxShadow: "none" }}
-                  aria-label="Search products"
+                  aria-label="Search product or category"
                 />
                 <button
                   type="submit"

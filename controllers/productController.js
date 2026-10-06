@@ -39,11 +39,29 @@ exports.list = async (req, res) => {
       if (minPrice) filter.basePrice.$gte = parseFloat(minPrice);
       if (maxPrice) filter.basePrice.$lte = parseFloat(maxPrice);
     }
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+    if (search && search.trim()) {
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const matchedCategories = await Category.find({
+        $or: [
+          { name: { $regex: escaped, $options: "i" } },
+          { slug: { $regex: escaped, $options: "i" } },
+        ],
+      })
+        .select("_id")
+        .lean();
+
+      const matchedCategoryIds = matchedCategories.map((c) => c._id);
+
+      const searchConditions = [
+        { name: { $regex: escaped, $options: "i" } },
+        { description: { $regex: escaped, $options: "i" } },
       ];
+
+      if (matchedCategoryIds.length > 0) {
+        searchConditions.push({ category: { $in: matchedCategoryIds } });
+      }
+
+      filter.$or = searchConditions;
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -223,11 +241,29 @@ exports.listAll = async (req, res) => {
     const { page = 1, limit = 20, search } = req.query;
     const filter = {};
 
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+    if (search && search.trim()) {
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const matchedCategories = await Category.find({
+        $or: [
+          { name: { $regex: escaped, $options: "i" } },
+          { slug: { $regex: escaped, $options: "i" } },
+        ],
+      })
+        .select("_id")
+        .lean();
+
+      const matchedCategoryIds = matchedCategories.map((c) => c._id);
+
+      const searchConditions = [
+        { name: { $regex: escaped, $options: "i" } },
+        { description: { $regex: escaped, $options: "i" } },
       ];
+
+      if (matchedCategoryIds.length > 0) {
+        searchConditions.push({ category: { $in: matchedCategoryIds } });
+      }
+
+      filter.$or = searchConditions;
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
