@@ -35,6 +35,9 @@ function getCourierTrackingUrl(courier: string = "", trackingNumber: string = ""
   if (c.includes("prieto")) {
     return `https://www.prieto-cargo.com/track`;
   }
+  if (c.includes("daily") || c.includes("overland")) {
+    return `https://track.dailyoverland.com`;
+  }
   return null;
 }
 

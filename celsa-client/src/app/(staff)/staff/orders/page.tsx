@@ -215,7 +215,7 @@ export default function StaffOrdersPage() {
                           <input
                             className="form-control form-control-sm"
                             list="staffCourierOptions"
-                            placeholder="e.g. Flash Express, Prieto Cargo Forwarders"
+                            placeholder="e.g. Flash Express, Prieto, Daily Overland"
                             value={courierName}
                             onChange={(e) => setCourierName(e.target.value)}
                             required
@@ -223,6 +223,7 @@ export default function StaffOrdersPage() {
                           <datalist id="staffCourierOptions">
                             <option value="Flash Express" />
                             <option value="Prieto Cargo Forwarders" />
+                            <option value="Daily Overland" />
                           </datalist>
                         </div>
                         <div className="col-md-5">
