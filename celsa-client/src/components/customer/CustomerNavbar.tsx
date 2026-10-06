@@ -274,7 +274,8 @@ export default function CustomerNavbar() {
                 }}
               >
                 <input
-                  type="search"
+                  type="text"
+                  inputMode="search"
                   className="form-control form-control-sm border-0 bg-transparent ps-3 py-1 flex-grow-1"
                   placeholder="Search product or category..."
                   value={navSearch}
@@ -560,7 +561,8 @@ export default function CustomerNavbar() {
             >
               <div className="input-group input-group-sm rounded-pill overflow-hidden border bg-light d-flex align-items-center">
                 <input
-                  type="search"
+                  type="text"
+                  inputMode="search"
                   className="form-control form-control-sm border-0 bg-transparent ps-3 py-1 flex-grow-1"
                   placeholder="Search product or category..."
                   value={navSearch}
