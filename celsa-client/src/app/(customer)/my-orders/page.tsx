@@ -504,10 +504,17 @@ function MyOrdersContent() {
 
   return (
     <div className="container-fluid px-4 py-5" style={{ maxWidth: 1000, margin: "0 auto" }}>
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Orders &amp; Tracking</h4>
+      <div
+        className="rounded-4 p-4 p-md-5"
+        style={{
+          backgroundColor: "#fcfaf6",
+          border: "1px solid #ebdcc5",
+        }}
+      >
+        {/* Header */}
+        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h4 className="fw-bold mb-1 text-dark">Orders &amp; Tracking</h4>
           <p className="text-muted small mb-0">
             Track real-time fulfillment, production progress, and order details.
           </p>
@@ -721,6 +728,7 @@ function MyOrdersContent() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
