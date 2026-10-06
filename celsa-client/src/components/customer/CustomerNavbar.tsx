@@ -52,6 +52,20 @@ export default function CustomerNavbar() {
     }, 220);
   };
 
+  // Profile Dropdown Hover Handlers
+  const profileDropdownTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleProfileMouseEnter = () => {
+    if (profileDropdownTimer.current) clearTimeout(profileDropdownTimer.current);
+    setDropdownOpen(true);
+  };
+
+  const handleProfileMouseLeave = () => {
+    profileDropdownTimer.current = setTimeout(() => {
+      setDropdownOpen(false);
+    }, 220);
+  };
+
   // Sync navSearch from URL query parameter
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -450,7 +464,12 @@ export default function CustomerNavbar() {
             )}
 
             {/* User Account Menu (Profile button with dropdown for Login/Signup or Account actions) */}
-            <div className="dropdown position-relative" ref={dropdownRef}>
+            <div
+              className="dropdown position-relative"
+              ref={dropdownRef}
+              onMouseEnter={handleProfileMouseEnter}
+              onMouseLeave={handleProfileMouseLeave}
+            >
               {isAuthenticated && user ? (
                 <button
                   type="button"
@@ -484,7 +503,7 @@ export default function CustomerNavbar() {
               )}
 
               <ul
-                className={`dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 ${
+                className={`dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 profile-dropdown-menu ${
                   dropdownOpen ? "show" : ""
                 }`}
                 style={{
