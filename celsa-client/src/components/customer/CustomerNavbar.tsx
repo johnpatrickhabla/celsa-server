@@ -201,10 +201,8 @@ export default function CustomerNavbar() {
                   >
                     <Link
                       href={item.href}
-                      className={`text-decoration-none ${
-                        active
-                          ? "fw-semibold text-dark border-bottom border-2 border-dark"
-                          : "text-secondary"
+                      className={`celsa-nav-link text-decoration-none ${
+                        active ? "active" : ""
                       }`}
                     >
                       <span>{item.label}</span>
@@ -254,7 +252,9 @@ export default function CustomerNavbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-decoration-none ${active ? "fw-semibold text-dark border-bottom border-2 border-dark" : "text-secondary"}`}
+                  className={`celsa-nav-link text-decoration-none ${
+                    active ? "active" : ""
+                  }`}
                 >
                   {item.label}
                 </Link>
@@ -606,7 +606,9 @@ export default function CustomerNavbar() {
                   <div key={item.href} className="border-bottom pb-2 mb-1">
                     <Link
                       href={item.href}
-                      className={`d-block py-2 text-decoration-none ${active ? "fw-semibold text-dark" : "text-secondary"}`}
+                      className={`celsa-mobile-nav-link d-block py-2 text-decoration-none ${
+                        active ? "active" : ""
+                      }`}
                       onClick={() => setMobileOpen(false)}
                     >
                       {item.label}
@@ -648,7 +650,9 @@ export default function CustomerNavbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`d-block py-2 text-decoration-none ${active ? "fw-semibold text-dark" : "text-secondary"}`}
+                  className={`celsa-mobile-nav-link d-block py-2 text-decoration-none ${
+                    active ? "active" : ""
+                  }`}
                   onClick={() => setMobileOpen(false)}
                 >
                   {item.label}

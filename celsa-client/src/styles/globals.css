@@ -439,3 +439,62 @@ input[type="search"]::-webkit-search-results-decoration {
   appearance: none;
   display: none;
 }
+
+/* Customer Navbar Link Highlight Effects */
+.celsa-nav-link {
+  color: #595346 !important;
+  font-weight: 500;
+  font-size: 0.92rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.celsa-nav-link:hover {
+  color: #198754 !important;
+  background-color: rgba(25, 135, 84, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.celsa-nav-link:active {
+  transform: translateY(0);
+}
+
+.celsa-nav-link.active {
+  color: #146c43 !important;
+  font-weight: 600;
+  background-color: rgba(25, 135, 84, 0.13) !important;
+  box-shadow: inset 0 -2px 0 0 #198754;
+}
+
+.celsa-nav-link.active:hover {
+  background-color: rgba(25, 135, 84, 0.18) !important;
+}
+
+/* Mobile Navbar Link Highlight */
+.celsa-mobile-nav-link {
+  color: #495057 !important;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 0.18s ease;
+  text-decoration: none !important;
+  display: block;
+}
+
+.celsa-mobile-nav-link:hover,
+.celsa-mobile-nav-link:active {
+  color: #198754 !important;
+  background-color: rgba(25, 135, 84, 0.08) !important;
+  padding-left: 1rem !important;
+}
+
+.celsa-mobile-nav-link.active {
+  color: #146c43 !important;
+  font-weight: 600;
+  background-color: rgba(25, 135, 84, 0.12) !important;
+}
