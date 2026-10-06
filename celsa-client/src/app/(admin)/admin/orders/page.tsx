@@ -367,19 +367,14 @@ export default function AdminOrdersPage() {
                           <input
                             className="form-control form-control-sm"
                             list="adminCourierOptions"
-                            placeholder="e.g. Flash Express, J&amp;T Express, LBC"
+                            placeholder="e.g. Flash Express, Prieto Cargo Forwarders"
                             value={courierName}
                             onChange={(e) => setCourierName(e.target.value)}
                             required
                           />
                           <datalist id="adminCourierOptions">
                             <option value="Flash Express" />
-                            <option value="J&T Express" />
-                            <option value="LBC Express" />
-                            <option value="Ninja Van" />
-                            <option value="2GO Express" />
-                            <option value="Lalamove" />
-                            <option value="Grab Express" />
+                            <option value="Prieto Cargo Forwarders" />
                           </datalist>
                         </div>
                         <div className="col-md-5">

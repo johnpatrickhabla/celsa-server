@@ -32,19 +32,10 @@ function getCourierTrackingUrl(courier: string = "", trackingNumber: string = ""
   if (c.includes("flash")) {
     return `https://www.flashexpress.ph/fle/tracking?se=${encodeURIComponent(trimmed)}`;
   }
-  if (c.includes("j&t") || c.includes("jt")) {
-    return `https://www.jtexpress.ph/trajectoryQuery?bills=${encodeURIComponent(trimmed)}`;
+  if (c.includes("prieto")) {
+    return `https://www.prieto-cargo.com/track`;
   }
-  if (c.includes("lbc")) {
-    return `https://www.lbcexpress.com/track/?tracking_no=${encodeURIComponent(trimmed)}`;
-  }
-  if (c.includes("ninja")) {
-    return `https://www.ninjavan.co/en-ph/tracking?id=${encodeURIComponent(trimmed)}`;
-  }
-  if (c.includes("2go")) {
-    return `https://supplychain.2go.com.ph/track/`;
-  }
-  return `https://www.google.com/search?q=${encodeURIComponent(`${courier || "courier"} tracking ${trimmed}`)}`;
+  return null;
 }
 
 interface OrderCardProps {
