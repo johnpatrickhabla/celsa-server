@@ -439,3 +439,43 @@ input[type="search"]::-webkit-search-results-decoration {
   appearance: none;
   display: none;
 }
+
+/* Navbar Link: Letter highlight & underline below words */
+.celsa-nav-link {
+  color: #6c757d !important;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  padding-bottom: 3px;
+  text-decoration: none !important;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+.celsa-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #212529;
+  transition: width 0.2s ease-in-out;
+}
+
+.celsa-nav-link:hover {
+  color: #212529 !important;
+}
+
+.celsa-nav-link:hover::after {
+  width: 100%;
+}
+
+.celsa-nav-link.active {
+  color: #212529 !important;
+  font-weight: 600;
+}
+
+.celsa-nav-link.active::after {
+  width: 100%;
+}

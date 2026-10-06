@@ -201,11 +201,7 @@ export default function CustomerNavbar() {
                   >
                     <Link
                       href={item.href}
-                      className={`text-decoration-none ${
-                        active
-                          ? "fw-semibold text-dark border-bottom border-2 border-dark"
-                          : "text-secondary"
-                      }`}
+                      className={`celsa-nav-link ${active ? "active" : ""}`}
                     >
                       <span>{item.label}</span>
                     </Link>
@@ -254,9 +250,9 @@ export default function CustomerNavbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-decoration-none ${active ? "fw-semibold text-dark border-bottom border-2 border-dark" : "text-secondary"}`}
+                  className={`celsa-nav-link ${active ? "active" : ""}`}
                 >
-                  {item.label}
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
@@ -604,13 +600,15 @@ export default function CustomerNavbar() {
               if (isProducts) {
                 return (
                   <div key={item.href} className="border-bottom pb-2 mb-1">
-                    <Link
-                      href={item.href}
-                      className={`d-block py-2 text-decoration-none ${active ? "fw-semibold text-dark" : "text-secondary"}`}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
+                    <div className="py-2">
+                      <Link
+                        href={item.href}
+                        className={`celsa-nav-link ${active ? "active" : ""}`}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span>{item.label}</span>
+                      </Link>
+                    </div>
                     {categories.length > 0 && (
                       <div className="ps-2 pe-1 pb-1">
                         <span
@@ -645,14 +643,15 @@ export default function CustomerNavbar() {
               }
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`d-block py-2 text-decoration-none ${active ? "fw-semibold text-dark" : "text-secondary"}`}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                <div key={item.href} className="py-2">
+                  <Link
+                    href={item.href}
+                    className={`celsa-nav-link ${active ? "active" : ""}`}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span>{item.label}</span>
+                  </Link>
+                </div>
               );
             })}
           </div>
