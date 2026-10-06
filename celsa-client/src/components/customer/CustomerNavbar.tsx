@@ -449,9 +449,9 @@ export default function CustomerNavbar() {
               </div>
             )}
 
-            {/* User Account Menu */}
-            {isAuthenticated && user ? (
-              <div className="dropdown position-relative" ref={dropdownRef}>
+            {/* User Account Menu (Profile button with dropdown for Login/Signup or Account actions) */}
+            <div className="dropdown position-relative" ref={dropdownRef}>
+              {isAuthenticated && user ? (
                 <button
                   type="button"
                   className="btn btn-link text-dark dropdown-toggle d-flex align-items-center gap-1 text-decoration-none p-0"
@@ -469,79 +469,107 @@ export default function CustomerNavbar() {
                     {user.name.split(" ")[0]}
                   </span>
                 </button>
-                <ul
-                  className={`dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 ${
-                    dropdownOpen ? "show" : ""
-                  }`}
-                  style={{
-                    position: "absolute",
-                    right: 0,
-                    top: "100%",
-                    marginTop: "0.5rem",
-                  }}
-                >
-                  <li className="dropdown-header small text-muted">{user.email}</li>
-                  <li><hr className="dropdown-divider" /></li>
-                  <li>
-                    <Link
-                      className="dropdown-item small"
-                      href="/my-orders"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <i className="bi bi-receipt me-2" />Track Order
-                    </Link>
-                  </li>
-                  {(user.role === "admin" || user.role === "staff") && (
-                    <>
-                      <li><hr className="dropdown-divider" /></li>
-                      <li>
-                        <Link
-                          className="dropdown-item small"
-                          href={user.role === "admin" ? "/admin/dashboard" : "/staff/dashboard"}
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          <i className="bi bi-speedometer2 me-2" />Dashboard
-                        </Link>
-                      </li>
-                    </>
-                  )}
-                  <li><hr className="dropdown-divider" /></li>
-                  <li>
-                    <button
-                      type="button"
-                      className="dropdown-item small text-danger"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        logout();
-                      }}
-                    >
-                      <i className="bi bi-box-arrow-right me-2" />Log Out
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            ) : (
-              <div className="d-flex align-items-center gap-2 gap-md-3">
+              ) : (
                 <button
                   type="button"
-                  className="btn btn-link text-dark p-0 d-flex align-items-center gap-1 text-decoration-none"
-                  onClick={() => setAuthModal({ isOpen: true, tab: "login" })}
+                  className="btn btn-link text-dark p-0 d-flex align-items-center justify-content-center text-decoration-none"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  aria-expanded={dropdownOpen}
                   aria-label="Account"
+                  title="Account"
+                  style={{ width: 32, height: 32 }}
                 >
                   <i className="bi bi-person fs-5" />
-                  <span className="d-none d-md-inline small">Log In</span>
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-success btn-sm rounded-pill px-3 fw-semibold text-nowrap d-none d-sm-inline-flex align-items-center shadow-sm"
-                  style={{ fontSize: "0.8rem", padding: "0.3rem 0.85rem" }}
-                  onClick={() => setAuthModal({ isOpen: true, tab: "signup" })}
-                  aria-label="Sign Up"
-                >
-                  Sign Up
-                </button>
-              </div>
-            )}
+              )}
+
+              <ul
+                className={`dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 ${
+                  dropdownOpen ? "show" : ""
+                }`}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "100%",
+                  marginTop: "0.5rem",
+                  minWidth: "190px",
+                }}
+              >
+                {isAuthenticated && user ? (
+                  <>
+                    <li className="dropdown-header small text-muted">{user.email}</li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <Link
+                        className="dropdown-item small"
+                        href="/my-orders"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <i className="bi bi-receipt me-2" />Track Order
+                      </Link>
+                    </li>
+                    {(user.role === "admin" || user.role === "staff") && (
+                      <>
+                        <li><hr className="dropdown-divider" /></li>
+                        <li>
+                          <Link
+                            className="dropdown-item small"
+                            href={user.role === "admin" ? "/admin/dashboard" : "/staff/dashboard"}
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            <i className="bi bi-speedometer2 me-2" />Dashboard
+                          </Link>
+                        </li>
+                      </>
+                    )}
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button
+                        type="button"
+                        className="dropdown-item small text-danger"
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          logout();
+                        }}
+                      >
+                        <i className="bi bi-box-arrow-right me-2" />Log Out
+                      </button>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li className="dropdown-header small text-muted">Account</li>
+                    <li><hr className="dropdown-divider my-1" /></li>
+                    <li>
+                      <button
+                        type="button"
+                        className="dropdown-item small d-flex align-items-center gap-2 py-2"
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          setAuthModal({ isOpen: true, tab: "login" });
+                        }}
+                      >
+                        <i className="bi bi-box-arrow-in-right text-success fs-6" />
+                        <span className="fw-medium">Log In</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        className="dropdown-item small d-flex align-items-center gap-2 py-2"
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          setAuthModal({ isOpen: true, tab: "signup" });
+                        }}
+                      >
+                        <i className="bi bi-person-plus text-success fs-6" />
+                        <span className="fw-medium">Sign Up</span>
+                      </button>
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
 
             {/* Mobile menu toggle */}
             <button
@@ -666,30 +694,7 @@ export default function CustomerNavbar() {
               );
             })}
 
-            {!isAuthenticated && (
-              <div className="pt-3 border-top mt-3 d-flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-outline-success btn-sm w-50 rounded-pill fw-semibold py-2"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    setAuthModal({ isOpen: true, tab: "login" });
-                  }}
-                >
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-success btn-sm w-50 rounded-pill fw-semibold py-2"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    setAuthModal({ isOpen: true, tab: "signup" });
-                  }}
-                >
-                  Sign Up
-                </button>
-              </div>
-            )}
+
           </div>
         )}
       </header>
