@@ -28,6 +28,8 @@ export default function CustomerNavbar() {
   });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const [navSearch, setNavSearch] = useState("");
 
   // Product Categories Popover State
@@ -186,6 +188,43 @@ export default function CustomerNavbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Hide navbar on scroll down, show on scroll up
+  useEffect(() => {
+    let ticking = false;
+
+    function handleScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+
+          // Always visible near top of page
+          if (currentScrollY <= 20) {
+            setNavVisible(true);
+          } else if (currentScrollY > lastScrollY.current && currentScrollY > 70) {
+            // Scrolling down -> hide navbar (unless mobile menu is open)
+            if (!mobileOpen) {
+              setNavVisible(false);
+              setCartOpen(false);
+              setDropdownOpen(false);
+              setNotifOpen(false);
+              setProductsDropdownOpen(false);
+            }
+          } else if (currentScrollY < lastScrollY.current) {
+            // Scrolling up -> show navbar
+            setNavVisible(true);
+          }
+
+          lastScrollY.current = Math.max(0, currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [mobileOpen]);
+
   async function handleMarkAllAsRead() {
     try {
       await api.patch("/notifications/read-all");
@@ -214,7 +253,9 @@ export default function CustomerNavbar() {
 
   return (
     <>
-      <header className="celsa-navbar sticky-top shadow-sm">
+      <header
+        className={`celsa-navbar sticky-top shadow-sm ${!navVisible ? "celsa-navbar-hidden" : ""}`}
+      >
         <div className="container-fluid px-4 py-3 d-flex align-items-center justify-content-between">
           <Link href="/" className="text-decoration-none d-flex flex-column">
             <span className="fw-bold text-dark fs-4 lh-1" style={{ letterSpacing: "1px" }}>
@@ -399,21 +440,12 @@ export default function CustomerNavbar() {
                     <div className="d-flex align-items-center gap-2">
                       <i className="bi bi-bag-check-fill text-success" />
                       <span className="fw-bold small text-dark mb-0">My Cart</span>
-                      {cartCount > 0 && (
-                        <span className="badge bg-success bg-opacity-10 text-success rounded-pill" style={{ fontSize: "0.7rem" }}>
-                          {cartCount} {cartCount === 1 ? "item" : "items"}
-                        </span>
-                      )}
                     </div>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-link text-muted p-0 text-decoration-none"
-                      onClick={() => setCartOpen(false)}
-                      aria-label="Close cart preview"
-                      title="Close"
-                    >
-                      <i className="bi bi-x-lg" style={{ fontSize: "0.8rem" }} />
-                    </button>
+                    {cartCount > 0 && (
+                      <span className="badge bg-success bg-opacity-10 text-success rounded-pill" style={{ fontSize: "0.7rem" }}>
+                        {cartCount} {cartCount === 1 ? "item" : "items"}
+                      </span>
+                    )}
                   </div>
 
                   {/* Body */}

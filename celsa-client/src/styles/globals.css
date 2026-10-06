@@ -33,6 +33,12 @@ body {
   z-index: 1020;
   background-color: var(--celsa-cream);
   border-bottom: 1px solid var(--celsa-border);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.celsa-navbar-hidden {
+  transform: translateY(-100%);
 }
 
 .celsa-logo-mark {
