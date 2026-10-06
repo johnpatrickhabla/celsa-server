@@ -282,7 +282,8 @@ exports.getById = async (req, res) => {
 
 /**
  * GET /api/orders/track/:orderNumber
- * Public endpoint to allow anyone to track an order by order number without login.
+ * Authenticated endpoint to track an order by order number.
+ * Customers are only authorized to view their own orders.
  */
 exports.trackOrder = async (req, res) => {
   try {
@@ -295,12 +296,23 @@ exports.trackOrder = async (req, res) => {
     const order = await Order.findOne({
       orderNumber: { $regex: new RegExp(`^${cleanOrderNumber}$`, "i") },
     })
-      .populate("user", "name email")
+      .populate("user", "name email phone")
       .populate("assignedTo", "name");
 
     if (!order) {
       return res.status(404).json({
         error: `No order found with order number "${cleanOrderNumber}". Please verify and try again.`,
+      });
+    }
+
+    // Customers can only view their own orders
+    if (
+      req.user.role === "customer" &&
+      order.user &&
+      order.user._id.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        error: "Access denied. You can only view and track orders placed under your account.",
       });
     }
 

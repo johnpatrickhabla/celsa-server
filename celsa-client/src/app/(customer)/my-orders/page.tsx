@@ -485,8 +485,11 @@ function MyOrdersContent() {
   const [trackingError, setTrackingError] = useState<string | null>(null);
   const [recentOrderNumbers, setRecentOrderNumbers] = useState<string[]>([]);
 
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     hydrate();
+    setMounted(true);
   }, [hydrate]);
 
   // Load recent tracked orders from localStorage
@@ -506,6 +509,11 @@ function MyOrdersContent() {
     async (numberToTrack: string) => {
       const num = numberToTrack.trim();
       if (!num) return;
+
+      if (!isAuthenticated) {
+        setTrackingError("Please log in to your account to track orders.");
+        return;
+      }
 
       setTrackingLoading(true);
       setTrackingError(null);
@@ -541,13 +549,13 @@ function MyOrdersContent() {
     []
   );
 
-  // Auto-track on initial mount if orderNumber query param is present
+  // Auto-track on initial mount if orderNumber query param is present and user is logged in
   useEffect(() => {
-    if (initialOrderNumber) {
+    if (mounted && isAuthenticated && initialOrderNumber) {
       setSearchOrderNumber(initialOrderNumber);
       handleTrackOrder(initialOrderNumber);
     }
-  }, [initialOrderNumber, handleTrackOrder]);
+  }, [mounted, isAuthenticated, initialOrderNumber, handleTrackOrder]);
 
   // Fetch user account orders if authenticated
   useEffect(() => {
@@ -569,6 +577,14 @@ function MyOrdersContent() {
     fetchOrders();
   }, [isAuthenticated, page]);
 
+  if (!mounted) {
+    return (
+      <div className="container-fluid px-4 py-5" style={{ maxWidth: 1000, margin: "0 auto" }}>
+        <LoadingSkeleton variant="orderList" />
+      </div>
+    );
+  }
+
   return (
     <div className="container-fluid px-4 py-5" style={{ maxWidth: 1000, margin: "0 auto" }}>
       <div
@@ -586,8 +602,37 @@ function MyOrdersContent() {
           </p>
         </div>
 
-      {/* Quick Order Lookup Form */}
-      <div className="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
+        {!isAuthenticated ? (
+          <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 text-center bg-white">
+            <div
+              className="mx-auto mb-3 rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center text-success"
+              style={{ width: 68, height: 68 }}
+            >
+              <i className="bi bi-shield-lock-fill fs-2" />
+            </div>
+            <h4 className="fw-bold text-dark mb-2">Log In Required to Track Orders</h4>
+            <p className="text-muted small mb-4" style={{ maxWidth: 460, margin: "0 auto" }}>
+              To protect your privacy and order security, you must be logged into your account to search, track, and view order details.
+            </p>
+            <div className="d-flex gap-2 justify-content-center flex-wrap">
+              <Link
+                href="/login?next=/my-orders"
+                className="btn btn-success px-4 py-2 rounded-3 fw-semibold"
+              >
+                Log In to Your Account
+              </Link>
+              <Link
+                href="/signup?next=/my-orders"
+                className="btn btn-outline-success px-4 py-2 rounded-3 fw-semibold"
+              >
+                Create an Account
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Quick Order Lookup Form */}
+            <div className="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
         <h6 className="fw-bold mb-2 text-dark">
           <i className="bi bi-search me-2 text-success" />
           Track Any Order
@@ -690,85 +735,60 @@ function MyOrdersContent() {
         </div>
       )}
 
-      {/* Account Orders List (when authenticated) */}
-      {isAuthenticated && (
-        <div className="mt-4">
-          <h5 className="fw-bold text-dark mb-3">Your Order History</h5>
-          {loading ? (
-            <LoadingSkeleton variant="orderList" />
-          ) : orders.length === 0 ? (
-            <div className="text-center py-5 text-muted border rounded-4 bg-white shadow-sm p-4">
-              <i className="bi bi-receipt fs-1 d-block mb-2" />
-              <p className="mb-3">You haven&apos;t placed any orders yet under this account.</p>
-              <Link href="/products" className="btn btn-success">
-                Browse Products
-              </Link>
-            </div>
-          ) : (
-            <>
-              {orders.map((order) => (
-                <OrderCard
-                  key={order._id}
-                  order={order}
-                  isExpanded={expandedOrder === order._id}
-                  onToggle={() =>
-                    setExpandedOrder(expandedOrder === order._id ? null : order._id)
-                  }
-                />
-              ))}
+          {/* Account Orders List */}
+          <div className="mt-4">
+            <h5 className="fw-bold text-dark mb-3">Your Order History</h5>
+            {loading ? (
+              <LoadingSkeleton variant="orderList" />
+            ) : orders.length === 0 ? (
+              <div className="text-center py-5 text-muted border rounded-4 bg-white shadow-sm p-4">
+                <i className="bi bi-receipt fs-1 d-block mb-2" />
+                <p className="mb-3">You haven&apos;t placed any orders yet under this account.</p>
+                <Link href="/products" className="btn btn-success">
+                  Browse Products
+                </Link>
+              </div>
+            ) : (
+              <>
+                {orders.map((order) => (
+                  <OrderCard
+                    key={order._id}
+                    order={order}
+                    isExpanded={expandedOrder === order._id}
+                    onToggle={() =>
+                      setExpandedOrder(expandedOrder === order._id ? null : order._id)
+                    }
+                  />
+                ))}
 
-              {/* Pagination */}
-              {pagination && pagination.pages > 1 && (
-                <nav className="d-flex justify-content-center mt-3">
-                  <ul className="pagination pagination-sm">
-                    <li className={`page-item ${page <= 1 ? "disabled" : ""}`}>
-                      <button className="page-link" onClick={() => setPage(page - 1)}>
-                        ‹
-                      </button>
-                    </li>
-                    {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
-                      <li key={p} className={`page-item ${p === page ? "active" : ""}`}>
-                        <button className="page-link" onClick={() => setPage(p)}>
-                          {p}
+                {/* Pagination */}
+                {pagination && pagination.pages > 1 && (
+                  <nav className="d-flex justify-content-center mt-3">
+                    <ul className="pagination pagination-sm">
+                      <li className={`page-item ${page <= 1 ? "disabled" : ""}`}>
+                        <button className="page-link" onClick={() => setPage(page - 1)}>
+                          ‹
                         </button>
                       </li>
-                    ))}
-                    <li className={`page-item ${page >= (pagination?.pages || 1) ? "disabled" : ""}`}>
-                      <button className="page-link" onClick={() => setPage(page + 1)}>
-                        ›
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* When not authenticated and no search performed yet */}
-      {!isAuthenticated && !trackingResult && recentOrderNumbers.length === 0 && !trackingLoading && (
-        <div className="text-center py-5 border rounded-4 bg-white shadow-sm p-4 text-muted">
-          <i className="bi bi-box-seam fs-1 text-success d-block mb-3" />
-          <h5 className="fw-bold text-dark">No Order Number Entered Yet</h5>
-          <p className="small text-muted mb-4" style={{ maxWidth: 450, margin: "0 auto" }}>
-            Enter your order number from your confirmation message or email above to view live progress, courier details, and item specifications.
-          </p>
-          <div className="d-flex gap-2 justify-content-center flex-wrap">
-            <Link
-              href="/login?next=/my-orders"
-              className="btn btn-outline-success btn-sm px-3 rounded-3 fw-semibold"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/signup?next=/my-orders"
-              className="btn btn-success btn-sm px-3 rounded-3 fw-semibold"
-            >
-              Sign Up
-            </Link>
+                      {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
+                        <li key={p} className={`page-item ${p === page ? "active" : ""}`}>
+                          <button className="page-link" onClick={() => setPage(p)}>
+                            {p}
+                          </button>
+                        </li>
+                      ))}
+                      <li className={`page-item ${page >= (pagination?.pages || 1) ? "disabled" : ""}`}>
+                        <button className="page-link" onClick={() => setPage(page + 1)}>
+                          ›
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                )}
+              </>
+            )}
           </div>
-        </div>
+        </>
       )}
       </div>
     </div>
