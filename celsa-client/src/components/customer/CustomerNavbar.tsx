@@ -521,15 +521,26 @@ export default function CustomerNavbar() {
                 </ul>
               </div>
             ) : (
-              <button
-                type="button"
-                className="btn btn-link text-dark p-0 d-flex align-items-center gap-1 text-decoration-none"
-                onClick={() => setAuthModal({ isOpen: true, tab: "login" })}
-                aria-label="Account"
-              >
-                <i className="bi bi-person fs-5" />
-                <span className="d-none d-md-inline small">Log In</span>
-              </button>
+              <div className="d-flex align-items-center gap-2 gap-md-3">
+                <button
+                  type="button"
+                  className="btn btn-link text-dark p-0 d-flex align-items-center gap-1 text-decoration-none"
+                  onClick={() => setAuthModal({ isOpen: true, tab: "login" })}
+                  aria-label="Account"
+                >
+                  <i className="bi bi-person fs-5" />
+                  <span className="d-none d-md-inline small">Log In</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success btn-sm rounded-pill px-3 fw-semibold text-nowrap d-none d-sm-inline-flex align-items-center shadow-sm"
+                  style={{ fontSize: "0.8rem", padding: "0.3rem 0.85rem" }}
+                  onClick={() => setAuthModal({ isOpen: true, tab: "signup" })}
+                  aria-label="Sign Up"
+                >
+                  Sign Up
+                </button>
+              </div>
             )}
 
             {/* Mobile menu toggle */}
@@ -654,6 +665,31 @@ export default function CustomerNavbar() {
                 </div>
               );
             })}
+
+            {!isAuthenticated && (
+              <div className="pt-3 border-top mt-3 d-flex gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline-success btn-sm w-50 rounded-pill fw-semibold py-2"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setAuthModal({ isOpen: true, tab: "login" });
+                  }}
+                >
+                  Log In
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success btn-sm w-50 rounded-pill fw-semibold py-2"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setAuthModal({ isOpen: true, tab: "signup" });
+                  }}
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
           </div>
         )}
       </header>
