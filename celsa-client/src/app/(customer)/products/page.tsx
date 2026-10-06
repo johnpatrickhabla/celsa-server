@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, Suspense } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
@@ -21,21 +21,6 @@ function ProductsContent() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [page, setPage] = useState(1);
-
-  // Popping categories menu on "Products" title hover
-  const [pageCatOpen, setPageCatOpen] = useState(false);
-  const pageCatTimer = useRef<NodeJS.Timeout | null>(null);
-
-  const handlePageCatEnter = () => {
-    if (pageCatTimer.current) clearTimeout(pageCatTimer.current);
-    setPageCatOpen(true);
-  };
-
-  const handlePageCatLeave = () => {
-    pageCatTimer.current = setTimeout(() => {
-      setPageCatOpen(false);
-    }, 220);
-  };
 
   const addItem = useCartStore((s) => s.addItem);
 
@@ -111,47 +96,9 @@ function ProductsContent() {
         {/* Header Container */}
         <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
           <div>
-            {/* Popping categories interactive header */}
-            <div
-              className="d-flex flex-wrap align-items-center gap-2 mb-1"
-              onMouseEnter={handlePageCatEnter}
-              onMouseLeave={handlePageCatLeave}
-            >
-              <h4
-                className="fw-bold mb-0 cursor-pointer d-inline-block"
-                role="button"
-                tabIndex={0}
-                style={{ cursor: "pointer" }}
-              >
-                <span style={{ color: "#198754" }}>Products</span>
-              </h4>
-
-              {/* Popping Categories Inline on cursor hover */}
-              {pageCatOpen && categories.length > 0 && (
-                <div className="d-inline-flex flex-wrap align-items-center gap-1.5 ms-2 categories-popover">
-                  {categories.map((cat) => {
-                    const isSelected = categoryParam === cat._id || categoryParam === cat.slug;
-                    return (
-                      <Link
-                        key={cat._id}
-                        href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}${
-                          search ? `&search=${encodeURIComponent(search)}` : ""
-                        }`}
-                        className={`badge rounded-pill text-decoration-none py-1.5 px-3 hover-category-pill ${
-                          isSelected
-                            ? "bg-success text-white shadow-sm"
-                            : "bg-white text-dark border shadow-sm"
-                        }`}
-                        style={{ fontSize: "0.8rem", transition: "all 0.15s ease" }}
-                      >
-                        {cat.name}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
+            <h4 className="fw-bold mb-1">
+              <span style={{ color: "#198754" }}>Products</span>
+            </h4>
             <p className="text-muted small mb-0">
               Browse our handcrafted collection
               {pagination && ` — ${pagination.total} product${pagination.total === 1 ? "" : "s"}`}

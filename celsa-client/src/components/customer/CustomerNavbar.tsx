@@ -186,32 +186,40 @@ export default function CustomerNavbar() {
                       <span>{item.label}</span>
                     </Link>
 
-                    {/* Popping categories inline menu on hover */}
+                    {/* Popping categories dropdown menu on hover */}
                     {productsDropdownOpen && categories.length > 0 && (
                       <div
-                        className="position-absolute start-0 top-100 mt-2 bg-white rounded-pill shadow-lg border py-1.5 px-3 d-flex align-items-center gap-1.5 categories-popover"
+                        className="position-absolute start-0 top-100 mt-2 bg-white rounded-3 shadow-lg border p-2 categories-popover"
                         style={{
+                          minWidth: "200px",
                           zIndex: 1060,
                           borderColor: "#ebdcc5",
                           boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)",
-                          whiteSpace: "nowrap",
                         }}
                       >
-                        {categories.map((cat) => (
+                        <div className="py-1">
                           <Link
-                            key={cat._id}
-                            href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}`}
+                            href="/products"
                             onClick={() => setProductsDropdownOpen(false)}
-                            className="text-decoration-none px-2.5 py-1 rounded-pill small fw-medium text-dark hover-category-pill"
-                            style={{
-                              fontSize: "0.82rem",
-                              backgroundColor: "#fbf9f5",
-                              border: "1px solid #eee5d8",
-                            }}
+                            className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-decoration-none text-dark hover-category-item"
+                            style={{ fontSize: "0.85rem" }}
                           >
-                            {cat.name}
+                            <i className="bi bi-grid text-success" />
+                            <span className="fw-medium">All Products</span>
                           </Link>
-                        ))}
+
+                          {categories.map((cat) => (
+                            <Link
+                              key={cat._id}
+                              href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}`}
+                              onClick={() => setProductsDropdownOpen(false)}
+                              className="dropdown-item d-flex align-items-center px-3 py-2 rounded-2 text-decoration-none text-dark hover-category-item"
+                              style={{ fontSize: "0.85rem" }}
+                            >
+                              <span className="text-truncate">{cat.name}</span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
