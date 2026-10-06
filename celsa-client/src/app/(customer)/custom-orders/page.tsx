@@ -169,12 +169,6 @@ export default function CustomOrdersPage() {
           margin: "0 auto",
         }}
       >
-        <span
-          className="badge rounded-pill px-3 py-2 text-uppercase mb-3 bg-white border"
-          style={{ color: "var(--celsa-gold-dark)", letterSpacing: 1 }}
-        >
-          Product Customization Studio
-        </span>
         <h2 className="fw-bold display-6 text-dark mb-3">
           Design Your Custom Handicraft
         </h2>
