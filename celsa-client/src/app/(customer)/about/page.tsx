@@ -16,15 +16,17 @@ export default function AboutPage() {
       <div className="row g-5 align-items-center mb-5">
         <div className="col-lg-6">
           <h3 className="fw-bold mb-3">Our Story &amp; Craftsmanship</h3>
-          <p className="text-muted">
-            Founded in the heart of Pangasinan, Celsa Handicrafts began with a vision to share authentic Filipino 
-            artistry with every home. Each item in our collection is handwoven by local artisans using locally 
-            sourced natural materials including dried buri palm, abaca fibers, rattan, and native bamboo.
+          <p className="text-muted mb-3">
+            Founded in 2024 by Celsa L. Gabrentina, Celsa Handicrafts is a local handicraft business located in Sitio Comon, Barangay Bangate, Barcelona, Sorsogon. We create and sell handcrafted products made from natural and locally available materials such as buri, bariw, karagumoy, bandala, and other similar materials.
           </p>
-          <p className="text-muted">
-            Beyond offering ready-to-use home items, we specialize in <strong>customized product orders</strong>, allowing 
-            our customers to tailor dimensions, materials, color palettes, and personal engravings to fit their unique 
-            lifestyle and aesthetic preferences.
+          <p className="text-muted mb-3">
+            Each handcrafted product is carefully made according to its intended design and purpose. We also welcome customized orders, allowing customers to share their preferred designs, specifications, quantities, and other requirements to create products that suit their individual needs and preferences.
+          </p>
+          <p className="text-muted mb-3">
+            Our products are created through a hands-on production process, with selected workers contributing to the crafting of orders from their homes when additional assistance is needed. Once completed, the finished products are collected and stored at our residence before being prepared for delivery or shipment.
+          </p>
+          <p className="text-muted mb-4">
+            At Celsa Handicrafts, we value the use of locally available materials and the hands-on craftsmanship that goes into every product. Through our handcrafted and customized creations, we aim to provide products that are made with care and shaped according to the needs and preferences of our customers.
           </p>
           <div className="d-flex gap-3 mt-4">
             <Link href="/products" className="btn btn-success px-4 py-2">
