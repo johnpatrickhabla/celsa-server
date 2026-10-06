@@ -366,11 +366,21 @@ export default function AdminOrdersPage() {
                           <label className="form-label small mb-1">Courier / Carrier Name</label>
                           <input
                             className="form-control form-control-sm"
-                            placeholder="e.g. J&amp;T Express, Lalamove, LBC, Ninjavan"
+                            list="adminCourierOptions"
+                            placeholder="e.g. Flash Express, J&amp;T Express, LBC"
                             value={courierName}
                             onChange={(e) => setCourierName(e.target.value)}
                             required
                           />
+                          <datalist id="adminCourierOptions">
+                            <option value="Flash Express" />
+                            <option value="J&T Express" />
+                            <option value="LBC Express" />
+                            <option value="Ninja Van" />
+                            <option value="2GO Express" />
+                            <option value="Lalamove" />
+                            <option value="Grab Express" />
+                          </datalist>
                         </div>
                         <div className="col-md-5">
                           <label className="form-label small mb-1">Waybill / Tracking Number</label>

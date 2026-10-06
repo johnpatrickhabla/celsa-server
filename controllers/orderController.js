@@ -1,6 +1,38 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Notification = require("../models/Notification");
+const User = require("../models/User");
+const { sendShippingEmail } = require("../utils/email");
+
+async function dispatchShippingEmailIfNeeded(order) {
+  try {
+    if (!order || !order.trackingNumber) return;
+    let recipientEmail = null;
+    let recipientName = order.shippingAddress?.fullName || "Valued Customer";
+
+    if (order.user) {
+      const userId = typeof order.user === "object" ? order.user._id || order.user : order.user;
+      const userDoc = await User.findById(userId).select("name email").lean();
+      if (userDoc) {
+        recipientEmail = userDoc.email;
+        recipientName = userDoc.name || recipientName;
+      }
+    }
+
+    if (recipientEmail) {
+      sendShippingEmail({
+        toEmail: recipientEmail,
+        recipientName,
+        orderNumber: order.orderNumber,
+        courierName: order.courierName || "Courier",
+        trackingNumber: order.trackingNumber,
+        shippingAddress: order.shippingAddress,
+      }).catch((e) => console.error("[EMAIL ERROR] Failed to dispatch shipping email:", e.message));
+    }
+  } catch (err) {
+    console.error("[EMAIL ERROR] Error triggering shipping email:", err.message);
+  }
+}
 
 async function createOrderNotification(order, title, message, type = "order_status") {
   try {
@@ -309,6 +341,7 @@ exports.updateStatus = async (req, res) => {
           : "Your order has been dispatched for delivery.",
         "shipped"
       );
+      await dispatchShippingEmailIfNeeded(order);
     } else if (orderStatus === "confirmed") {
       await createOrderNotification(
         order,
@@ -423,6 +456,7 @@ exports.updateShipment = async (req, res) => {
         `Your package is on its way via ${order.courierName || "Courier"} (Tracking: ${order.trackingNumber || "N/A"}).`,
         "shipped"
       );
+      await dispatchShippingEmailIfNeeded(order);
     }
 
     res.json({ order });

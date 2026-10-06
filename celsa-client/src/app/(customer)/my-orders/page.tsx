@@ -25,6 +25,28 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   paid: "Paid",
 };
 
+function getCourierTrackingUrl(courier: string = "", trackingNumber: string = ""): string | null {
+  if (!trackingNumber) return null;
+  const c = (courier || "").toLowerCase().trim();
+  const trimmed = trackingNumber.trim();
+  if (c.includes("flash")) {
+    return `https://www.flashexpress.ph/fle/tracking?se=${encodeURIComponent(trimmed)}`;
+  }
+  if (c.includes("j&t") || c.includes("jt")) {
+    return `https://www.jtexpress.ph/trajectoryQuery?bills=${encodeURIComponent(trimmed)}`;
+  }
+  if (c.includes("lbc")) {
+    return `https://www.lbcexpress.com/track/?tracking_no=${encodeURIComponent(trimmed)}`;
+  }
+  if (c.includes("ninja")) {
+    return `https://www.ninjavan.co/en-ph/tracking?id=${encodeURIComponent(trimmed)}`;
+  }
+  if (c.includes("2go")) {
+    return `https://supplychain.2go.com.ph/track/`;
+  }
+  return `https://www.google.com/search?q=${encodeURIComponent(`${courier || "courier"} tracking ${trimmed}`)}`;
+}
+
 interface OrderCardProps {
   order: Order;
   isExpanded: boolean;
@@ -33,6 +55,15 @@ interface OrderCardProps {
 
 function OrderCard({ order, isExpanded, onToggle }: OrderCardProps) {
   const statusColor = STATUS_COLORS[order.orderStatus] || STATUS_COLORS.pending;
+  const [copied, setCopied] = useState(false);
+
+  function handleCopyTracking(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!order.trackingNumber) return;
+    navigator.clipboard.writeText(order.trackingNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div className="border rounded-4 mb-3 overflow-hidden shadow-sm bg-white">
@@ -271,7 +302,7 @@ function OrderCard({ order, isExpanded, onToggle }: OrderCardProps) {
 
           {/* Shipment Tracking Info */}
           {(order.trackingNumber || order.orderStatus === "shipped") && (
-            <div className="p-3 rounded-3 bg-white border mb-3">
+            <div className="p-3 rounded-3 bg-white border mb-3 shadow-sm">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <i className="bi bi-truck text-primary fs-5" />
                 <span className="fw-bold small text-dark">
@@ -279,18 +310,60 @@ function OrderCard({ order, isExpanded, onToggle }: OrderCardProps) {
                 </span>
                 <span className="badge bg-primary ms-auto">Shipped</span>
               </div>
-              <div className="row g-2 small">
+              <div className="row g-2 small align-items-center">
                 <div className="col-sm-6">
-                  <span className="text-muted">Courier / Carrier:</span>{" "}
-                  <strong>{order.courierName || "Local Courier (Standard Delivery)"}</strong>
+                  <span className="text-muted d-block">Courier / Carrier:</span>
+                  <strong className="fs-6 text-dark">{order.courierName || "Local Courier (Standard Delivery)"}</strong>
                 </div>
                 <div className="col-sm-6">
-                  <span className="text-muted">Tracking Number:</span>{" "}
-                  <strong className="font-monospace text-primary">
-                    {order.trackingNumber || "Assigned upon dispatch"}
-                  </strong>
+                  <span className="text-muted d-block">Waybill / Tracking Number:</span>
+                  <div className="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                    <strong className="font-monospace text-primary bg-light px-2 py-1 rounded border">
+                      {order.trackingNumber || "Assigned upon dispatch"}
+                    </strong>
+                    {order.trackingNumber && (
+                      <button
+                        type="button"
+                        onClick={handleCopyTracking}
+                        className="btn btn-sm btn-outline-secondary py-0 px-2 rounded-2 d-inline-flex align-items-center"
+                        style={{ fontSize: "0.75rem", height: 26 }}
+                        title="Copy tracking code"
+                      >
+                        {copied ? (
+                          <>
+                            <i className="bi bi-check2 text-success me-1" />
+                            <span className="text-success fw-semibold">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-clipboard me-1" />
+                            Copy
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {order.trackingNumber && (
+                <div className="pt-2 border-top mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                  <span className="text-muted small" style={{ fontSize: "0.8rem" }}>
+                    <i className="bi bi-info-circle me-1 text-primary" />
+                    Copy reference above or track directly on the courier website:
+                  </span>
+                  <a
+                    href={getCourierTrackingUrl(order.courierName, order.trackingNumber) || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm btn-primary px-3 rounded-3 fw-semibold text-decoration-none shadow-sm d-inline-flex align-items-center gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <i className="bi bi-box-arrow-up-right" />
+                    Track on {order.courierName || "Courier"}
+                  </a>
+                </div>
+              )}
             </div>
           )}
 
