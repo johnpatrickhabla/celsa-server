@@ -255,6 +255,8 @@ export default function CustomerNavbar() {
                   placeholder="Search product or category..."
                   value={navSearch}
                   onChange={(e) => setNavSearch(e.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
                   style={{
                     fontSize: "0.8rem",
                     outline: "none",
@@ -522,6 +524,8 @@ export default function CustomerNavbar() {
                   placeholder="Search product or category..."
                   value={navSearch}
                   onChange={(e) => setNavSearch(e.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
                   style={{ fontSize: "0.85rem", outline: "none", boxShadow: "none" }}
                   aria-label="Search product or category"
                 />

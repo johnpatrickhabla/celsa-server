@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
-import type { Product, Category, PaginationInfo } from "@/lib/types";
+import type { Product, PaginationInfo } from "@/lib/types";
 import { useCartStore } from "@/stores/cartStore";
 import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
@@ -15,7 +15,6 @@ function ProductsContent() {
   const categoryParam = searchParams?.get("category") || "";
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -35,17 +34,6 @@ function ProductsContent() {
       quantity: 1,
     });
   }, [addItem]);
-
-  // Fetch categories on mount
-  useEffect(() => {
-    api.get("/categories")
-      .then((res) => {
-        if (res.data?.categories) {
-          setCategories(res.data.categories);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   // Reset page whenever search or category query changes
   useEffect(() => {
@@ -73,10 +61,6 @@ function ProductsContent() {
     fetchProducts();
   }, [fetchProducts]);
 
-  const activeCategory = categories.find(
-    (c) => c._id === categoryParam || c.slug === categoryParam
-  );
-
   return (
     <div className="container-fluid px-4 py-5">
       <div
@@ -86,67 +70,7 @@ function ProductsContent() {
           border: "1px solid #ebdcc5",
         }}
       >
-        {/* Header Container */}
-        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
-          <div>
-            <h4 className="fw-bold mb-1">
-              <span style={{ color: "#198754" }}>Products</span>
-            </h4>
-            <p className="text-muted small mb-0">
-              Browse our handcrafted collection
-              {pagination && ` — ${pagination.total} product${pagination.total === 1 ? "" : "s"}`}
-            </p>
-          </div>
-
-          {/* Active Filters Indicators */}
-          <div className="d-flex flex-wrap align-items-center gap-2">
-            {activeCategory && (
-              <div className="d-flex align-items-center gap-1 bg-white border border-success border-opacity-50 rounded-pill px-2.5 py-1 shadow-sm">
-                <i className="bi bi-tag text-success" style={{ fontSize: "0.8rem" }} />
-                <span className="small fw-semibold text-success" style={{ fontSize: "0.78rem" }}>
-                  {activeCategory.name}
-                </span>
-                <Link
-                  href={search ? `/products?search=${encodeURIComponent(search)}` : "/products"}
-                  className="text-muted text-decoration-none ms-1 d-flex align-items-center"
-                  title="Remove category filter"
-                  style={{ fontSize: "0.75rem" }}
-                >
-                  <i className="bi bi-x-circle-fill text-secondary opacity-75" />
-                </Link>
-              </div>
-            )}
-
-            {search && (
-              <div className="d-flex align-items-center gap-1 bg-white border rounded-pill px-2.5 py-1 shadow-sm">
-                <i className="bi bi-search text-muted" style={{ fontSize: "0.75rem" }} />
-                <span className="small text-dark" style={{ fontSize: "0.78rem" }}>
-                  &ldquo;{search}&rdquo;
-                </span>
-                <Link
-                  href={categoryParam ? `/products?category=${encodeURIComponent(categoryParam)}` : "/products"}
-                  className="text-muted text-decoration-none ms-1 d-flex align-items-center"
-                  title="Clear search"
-                  style={{ fontSize: "0.75rem" }}
-                >
-                  <i className="bi bi-x-circle-fill text-secondary opacity-75" />
-                </Link>
-              </div>
-            )}
-
-            {(activeCategory || search) && (
-              <Link
-                href="/products"
-                className="btn btn-sm btn-link text-muted py-0 px-1 text-decoration-none"
-                style={{ fontSize: "0.75rem" }}
-              >
-                Clear all
-              </Link>
-            )}
-          </div>
-        </div>
-
-        {/* Product Grid (Default unified grid layout) */}
+        {/* Product Grid */}
         {loading ? (
           <div className="row g-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -162,12 +86,7 @@ function ProductsContent() {
         ) : products.length === 0 ? (
           <div className="text-center py-5 text-muted">
             <i className="bi bi-box-seam fs-1 d-block mb-2" />
-            <p className="mb-2">No products found.</p>
-            {(activeCategory || search) && (
-              <Link href="/products" className="btn btn-sm btn-success">
-                View all products
-              </Link>
-            )}
+            <p className="mb-0">No products found.</p>
           </div>
         ) : (
           <div className="row g-3">
@@ -194,7 +113,6 @@ function ProductsContent() {
                       )}
                     </div>
                     <div className="product-content">
-                      {/* Category tag removed from flashcards */}
                       <h3
                         className="product-title fw-bold text-dark fs-6 mb-2 text-truncate"
                         title={product.name}
