@@ -160,28 +160,34 @@ export default function CustomOrdersPage() {
 
   return (
     <div className="container-fluid px-4 py-5">
-      {/* Header Container */}
       <div
-        className="rounded-4 p-4 p-md-5 mb-5 shadow-sm text-center"
+        className="rounded-4 p-4 p-md-5"
         style={{
-          backgroundColor: "var(--celsa-cream)",
-          maxWidth: 900,
-          margin: "0 auto",
+          backgroundColor: "#fcfaf6",
+          border: "1px solid #ebdcc5",
         }}
       >
-        <h2 className="fw-bold display-6 text-dark mb-3">
-          Design Your Custom Handicraft
-        </h2>
-        <p className="text-muted mb-3 mx-auto" style={{ maxWidth: 660 }}>
-          Upload reference photos and provide detailed design descriptions.
-          Our skilled artisans will review your custom specifications before
-          handcrafting your personalized item.
-        </p>
-        <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-white border small text-muted shadow-sm">
-          <i className="bi bi-shield-check text-success fs-6" />
-          <span>Reviewed &amp; Approved by Administrator before production</span>
+        {/* Header Container */}
+        <div
+          className="mb-5 text-center"
+          style={{
+            maxWidth: 900,
+            margin: "0 auto",
+          }}
+        >
+          <h2 className="fw-bold display-6 text-dark mb-3">
+            Design Your <span style={{ color: "#198754" }}>Custom Handicraft</span>
+          </h2>
+          <p className="text-muted mb-3 mx-auto" style={{ maxWidth: 660 }}>
+            Upload reference photos and provide detailed design descriptions.
+            Our skilled artisans will review your custom specifications before
+            handcrafting your personalized item.
+          </p>
+          <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-white border small text-muted shadow-sm">
+            <i className="bi bi-shield-check text-success fs-6" />
+            <span>Reviewed &amp; Approved by Administrator before production</span>
+          </div>
         </div>
-      </div>
 
       {loading ? (
         <LoadingSkeleton variant="customOrders" />
@@ -553,6 +559,7 @@ export default function CustomOrdersPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
