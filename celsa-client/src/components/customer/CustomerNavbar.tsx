@@ -52,6 +52,30 @@ export default function CustomerNavbar() {
     }, 220);
   };
 
+  // Sync navSearch from URL query parameter
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("search") || "";
+      setNavSearch(q);
+    }
+  }, [pathname]);
+
+  const handleSearchChange = (val: string) => {
+    setNavSearch(val);
+    // When clearing search bar, immediately return to all products
+    if (val === "" && pathname === "/products") {
+      router.push("/products");
+    }
+  };
+
+  const handleClearSearch = () => {
+    setNavSearch("");
+    if (pathname === "/products") {
+      router.push("/products");
+    }
+  };
+
   function handleNavSearch(e: React.FormEvent) {
     e.preventDefault();
     const q = navSearch.trim();
@@ -242,19 +266,24 @@ export default function CustomerNavbar() {
             {/* Search bar on the left side of Add to Cart icon */}
             <form onSubmit={handleNavSearch} className="d-flex align-items-center" role="search">
               <div
-                className="input-group input-group-sm rounded-pill overflow-hidden border"
+                className="input-group input-group-sm rounded-pill overflow-hidden border d-flex align-items-center"
                 style={{
                   backgroundColor: "#f9f8f6",
-                  width: "clamp(120px, 18vw, 210px)",
+                  width: "clamp(120px, 18vw, 220px)",
                   transition: "all 0.2s ease",
                 }}
               >
                 <input
                   type="search"
-                  className="form-control form-control-sm border-0 bg-transparent ps-3 py-1"
+                  className="form-control form-control-sm border-0 bg-transparent ps-3 py-1 flex-grow-1"
                   placeholder="Search product or category..."
                   value={navSearch}
-                  onChange={(e) => setNavSearch(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape" && navSearch) {
+                      handleClearSearch();
+                    }
+                  }}
                   autoComplete="off"
                   spellCheck={false}
                   style={{
@@ -264,6 +293,18 @@ export default function CustomerNavbar() {
                   }}
                   aria-label="Search product or category"
                 />
+                {navSearch && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="btn btn-sm btn-link text-muted p-0 border-0 me-1 d-flex align-items-center"
+                    style={{ fontSize: "0.85rem", textDecoration: "none" }}
+                    aria-label="Clear search"
+                    title="Clear search"
+                  >
+                    <i className="bi bi-x-circle-fill text-secondary opacity-75" />
+                  </button>
+                )}
                 <button
                   type="submit"
                   className="btn btn-sm btn-link text-muted pe-2 ps-1 border-0 d-flex align-items-center"
@@ -517,18 +558,34 @@ export default function CustomerNavbar() {
               className="mb-3"
               role="search"
             >
-              <div className="input-group input-group-sm rounded-pill overflow-hidden border bg-light">
+              <div className="input-group input-group-sm rounded-pill overflow-hidden border bg-light d-flex align-items-center">
                 <input
                   type="search"
-                  className="form-control form-control-sm border-0 bg-transparent ps-3 py-1"
+                  className="form-control form-control-sm border-0 bg-transparent ps-3 py-1 flex-grow-1"
                   placeholder="Search product or category..."
                   value={navSearch}
-                  onChange={(e) => setNavSearch(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape" && navSearch) {
+                      handleClearSearch();
+                    }
+                  }}
                   autoComplete="off"
                   spellCheck={false}
                   style={{ fontSize: "0.85rem", outline: "none", boxShadow: "none" }}
                   aria-label="Search product or category"
                 />
+                {navSearch && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="btn btn-sm btn-link text-muted p-0 border-0 me-2 d-flex align-items-center"
+                    style={{ fontSize: "0.9rem", textDecoration: "none" }}
+                    aria-label="Clear search"
+                  >
+                    <i className="bi bi-x-circle-fill text-secondary opacity-75" />
+                  </button>
+                )}
                 <button
                   type="submit"
                   className="btn btn-sm btn-link text-muted pe-3 border-0 d-flex align-items-center"
