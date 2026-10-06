@@ -1,9 +1,11 @@
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
+const Category = require("../models/Category");
 
 /**
  * GET /api/products
  * Public: list products with optional filters.
- * Query: ?category=id&search=text&minPrice=0&maxPrice=1000&featured=true&page=1&limit=12
+ * Query: ?category=id_or_slug&search=text&minPrice=0&maxPrice=1000&featured=true&page=1&limit=12
  */
 exports.list = async (req, res) => {
   try {
@@ -19,18 +21,47 @@ exports.list = async (req, res) => {
 
     const filter = { isActive: true };
 
-    if (category) filter.category = category;
+    if (category) {
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        filter.category = category;
+      } else {
+        const foundCat = await Category.findOne({ slug: category });
+        if (foundCat) {
+          filter.category = foundCat._id;
+        } else {
+          filter.category = category;
+        }
+      }
+    }
     if (featured === "true") filter.isFeatured = true;
     if (minPrice || maxPrice) {
       filter.basePrice = {};
       if (minPrice) filter.basePrice.$gte = parseFloat(minPrice);
       if (maxPrice) filter.basePrice.$lte = parseFloat(maxPrice);
     }
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+    if (search && search.trim()) {
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const matchedCategories = await Category.find({
+        $or: [
+          { name: { $regex: escaped, $options: "i" } },
+          { slug: { $regex: escaped, $options: "i" } },
+        ],
+      })
+        .select("_id")
+        .lean();
+
+      const matchedCategoryIds = matchedCategories.map((c) => c._id);
+
+      const searchConditions = [
+        { name: { $regex: escaped, $options: "i" } },
+        { description: { $regex: escaped, $options: "i" } },
       ];
+
+      if (matchedCategoryIds.length > 0) {
+        searchConditions.push({ category: { $in: matchedCategoryIds } });
+      }
+
+      filter.$or = searchConditions;
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -210,11 +241,29 @@ exports.listAll = async (req, res) => {
     const { page = 1, limit = 20, search } = req.query;
     const filter = {};
 
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+    if (search && search.trim()) {
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const matchedCategories = await Category.find({
+        $or: [
+          { name: { $regex: escaped, $options: "i" } },
+          { slug: { $regex: escaped, $options: "i" } },
+        ],
+      })
+        .select("_id")
+        .lean();
+
+      const matchedCategoryIds = matchedCategories.map((c) => c._id);
+
+      const searchConditions = [
+        { name: { $regex: escaped, $options: "i" } },
+        { description: { $regex: escaped, $options: "i" } },
       ];
+
+      if (matchedCategoryIds.length > 0) {
+        searchConditions.push({ category: { $in: matchedCategoryIds } });
+      }
+
+      filter.$or = searchConditions;
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
