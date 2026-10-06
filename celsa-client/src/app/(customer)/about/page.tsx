@@ -50,31 +50,47 @@ export default function AboutPage() {
           <div className="col-lg-6">
             <div className="row g-3 h-100">
               <div className="col-6">
-                <div className="p-4 border rounded-4 bg-white text-center h-100 shadow-sm d-flex flex-column align-items-center justify-content-center">
-                  <i className="bi bi-house-heart fs-1 text-success mb-2 d-block" />
-                  <h5 className="fw-bold mb-1 text-dark">Locally Sourced</h5>
-                  <small className="text-muted">100% natural Philippines fibers &amp; palm leaves</small>
+                <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center shadow-sm">
+                  <div className="icon-wrapper mb-3">
+                    <i className="bi bi-house-heart fs-3" />
+                  </div>
+                  <div className="fw-bold small why-choose-title">Locally Sourced</div>
+                  <div className="text-muted mt-1" style={{ fontSize: "0.78rem" }}>
+                    100% natural Philippines fibers &amp; palm leaves
+                  </div>
                 </div>
               </div>
               <div className="col-6">
-                <div className="p-4 border rounded-4 bg-white text-center h-100 shadow-sm d-flex flex-column align-items-center justify-content-center">
-                  <i className="bi bi-people fs-1 text-success mb-2 d-block" />
-                  <h5 className="fw-bold mb-1 text-dark">Artisan-Made</h5>
-                  <small className="text-muted">Supporting local weavers &amp; community livelihood</small>
+                <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center shadow-sm">
+                  <div className="icon-wrapper mb-3">
+                    <i className="bi bi-people fs-3" />
+                  </div>
+                  <div className="fw-bold small why-choose-title">Artisan-Made</div>
+                  <div className="text-muted mt-1" style={{ fontSize: "0.78rem" }}>
+                    Supporting local weavers &amp; community livelihood
+                  </div>
                 </div>
               </div>
               <div className="col-6">
-                <div className="p-4 border rounded-4 bg-white text-center h-100 shadow-sm d-flex flex-column align-items-center justify-content-center">
-                  <i className="bi bi-tree fs-1 text-success mb-2 d-block" />
-                  <h5 className="fw-bold mb-1 text-dark">Eco-Friendly</h5>
-                  <small className="text-muted">Sustainable and zero-waste crafting process</small>
+                <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center shadow-sm">
+                  <div className="icon-wrapper mb-3">
+                    <i className="bi bi-tree fs-3" />
+                  </div>
+                  <div className="fw-bold small why-choose-title">Eco-Friendly</div>
+                  <div className="text-muted mt-1" style={{ fontSize: "0.78rem" }}>
+                    Sustainable and zero-waste crafting process
+                  </div>
                 </div>
               </div>
               <div className="col-6">
-                <div className="p-4 border rounded-4 bg-white text-center h-100 shadow-sm d-flex flex-column align-items-center justify-content-center">
-                  <i className="bi bi-palette fs-1 text-success mb-2 d-block" />
-                  <h5 className="fw-bold mb-1 text-dark">Tailored for You</h5>
-                  <small className="text-muted">Personalized customization options available</small>
+                <div className="why-choose-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center shadow-sm">
+                  <div className="icon-wrapper mb-3">
+                    <i className="bi bi-palette fs-3" />
+                  </div>
+                  <div className="fw-bold small why-choose-title">Tailored for You</div>
+                  <div className="text-muted mt-1" style={{ fontSize: "0.78rem" }}>
+                    Personalized customization options available
+                  </div>
                 </div>
               </div>
             </div>
