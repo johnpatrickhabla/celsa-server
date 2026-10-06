@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useEffect, useState, useRef } from "react";
 import AuthModal from "@/components/auth/AuthModal";
 import api from "@/lib/api";
-import type { Notification } from "@/lib/types";
+import type { Notification, Category } from "@/lib/types";
 
 export default function CustomerNavbar() {
   const pathname = usePathname();
@@ -25,6 +25,32 @@ export default function CustomerNavbar() {
   });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [navSearch, setNavSearch] = useState("");
+
+  // Product Categories Popover State
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [productsDropdownOpen, setProductsDropdownOpen] = useState(false);
+  const productsDropdownTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    api.get("/categories")
+      .then((res) => {
+        if (res.data?.categories) {
+          setCategories(res.data.categories);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleProductsMouseEnter = () => {
+    if (productsDropdownTimer.current) clearTimeout(productsDropdownTimer.current);
+    setProductsDropdownOpen(true);
+  };
+
+  const handleProductsMouseLeave = () => {
+    productsDropdownTimer.current = setTimeout(() => {
+      setProductsDropdownOpen(false);
+    }, 220);
+  };
 
   function handleNavSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -136,9 +162,99 @@ export default function CustomerNavbar() {
             </span>
           </Link>
 
-          <nav className="d-none d-lg-flex gap-4">
+          <nav className="d-none d-lg-flex align-items-center gap-4">
             {CUSTOMER_NAV.map((item) => {
               const active = pathname === item.href;
+              const isProducts = item.href === "/products";
+
+              if (isProducts) {
+                return (
+                  <div
+                    key={item.href}
+                    className="position-relative d-inline-block py-1"
+                    onMouseEnter={handleProductsMouseEnter}
+                    onMouseLeave={handleProductsMouseLeave}
+                  >
+                    <Link
+                      href={item.href}
+                      className={`text-decoration-none d-inline-flex align-items-center gap-1 ${
+                        active
+                          ? "fw-semibold text-dark border-bottom border-2 border-dark"
+                          : "text-secondary"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <i
+                        className="bi bi-chevron-down"
+                        style={{
+                          fontSize: "0.65rem",
+                          transition: "transform 0.2s ease",
+                          transform: productsDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        }}
+                      />
+                    </Link>
+
+                    {/* Popping categories popover menu */}
+                    {productsDropdownOpen && (
+                      <div
+                        className="position-absolute start-0 top-100 mt-2 bg-white rounded-3 shadow-lg border p-2 categories-popover"
+                        style={{
+                          minWidth: "240px",
+                          zIndex: 1060,
+                          borderColor: "#ebdcc5",
+                          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)",
+                        }}
+                      >
+                        <div className="px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
+                          <span
+                            className="text-uppercase fw-bold text-muted"
+                            style={{ fontSize: "0.68rem", letterSpacing: "1px" }}
+                          >
+                            Browse by Category
+                          </span>
+                          <Link
+                            href="/products"
+                            onClick={() => setProductsDropdownOpen(false)}
+                            className="text-success text-decoration-none fw-semibold"
+                            style={{ fontSize: "0.75rem" }}
+                          >
+                            View All
+                          </Link>
+                        </div>
+
+                        <div className="py-1">
+                          <Link
+                            href="/products"
+                            onClick={() => setProductsDropdownOpen(false)}
+                            className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-decoration-none text-dark hover-category-item"
+                            style={{ fontSize: "0.85rem" }}
+                          >
+                            <i className="bi bi-grid text-success" />
+                            <span className="fw-medium">All Products</span>
+                          </Link>
+
+                          {categories.map((cat) => (
+                            <Link
+                              key={cat._id}
+                              href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}`}
+                              onClick={() => setProductsDropdownOpen(false)}
+                              className="dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 text-decoration-none text-dark hover-category-item"
+                              style={{ fontSize: "0.85rem" }}
+                            >
+                              <div className="d-flex align-items-center gap-2 text-truncate">
+                                <i className="bi bi-tag text-muted" style={{ fontSize: "0.8rem" }} />
+                                <span className="text-truncate">{cat.name}</span>
+                              </div>
+                              <i className="bi bi-chevron-right text-muted opacity-50" style={{ fontSize: "0.7rem" }} />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
@@ -449,6 +565,51 @@ export default function CustomerNavbar() {
             </form>
             {CUSTOMER_NAV.map((item) => {
               const active = pathname === item.href;
+              const isProducts = item.href === "/products";
+
+              if (isProducts) {
+                return (
+                  <div key={item.href} className="border-bottom pb-2 mb-1">
+                    <Link
+                      href={item.href}
+                      className={`d-block py-2 text-decoration-none ${active ? "fw-semibold text-dark" : "text-secondary"}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                    {categories.length > 0 && (
+                      <div className="ps-2 pe-1 pb-1">
+                        <span
+                          className="text-muted text-uppercase fw-bold d-block mb-1.5"
+                          style={{ fontSize: "0.62rem", letterSpacing: "0.5px" }}
+                        >
+                          Categories
+                        </span>
+                        <div className="d-flex flex-wrap gap-1">
+                          <Link
+                            href="/products"
+                            className="badge bg-light text-dark border text-decoration-none py-1 px-2"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            All
+                          </Link>
+                          {categories.map((cat) => (
+                            <Link
+                              key={cat._id}
+                              href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}`}
+                              className="badge bg-light text-dark border text-decoration-none py-1 px-2"
+                              onClick={() => setMobileOpen(false)}
+                            >
+                              {cat.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}

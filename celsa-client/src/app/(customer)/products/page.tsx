@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
-import type { Product, PaginationInfo } from "@/lib/types";
+import type { Product, Category, PaginationInfo } from "@/lib/types";
 import { useCartStore } from "@/stores/cartStore";
 import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
@@ -12,13 +12,30 @@ import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 function ProductsContent() {
   const searchParams = useSearchParams();
   const search = searchParams?.get("search") || "";
+  const categoryParam = searchParams?.get("category") || "";
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [page, setPage] = useState(1);
+
+  // Popping categories menu on "Products" title hover
+  const [pageCatOpen, setPageCatOpen] = useState(false);
+  const pageCatTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handlePageCatEnter = () => {
+    if (pageCatTimer.current) clearTimeout(pageCatTimer.current);
+    setPageCatOpen(true);
+  };
+
+  const handlePageCatLeave = () => {
+    pageCatTimer.current = setTimeout(() => {
+      setPageCatOpen(false);
+    }, 220);
+  };
 
   const addItem = useCartStore((s) => s.addItem);
 
@@ -34,16 +51,28 @@ function ProductsContent() {
     });
   }, [addItem]);
 
-  // Reset page whenever search query changes
+  // Fetch categories on mount
+  useEffect(() => {
+    api.get("/categories")
+      .then((res) => {
+        if (res.data?.categories) {
+          setCategories(res.data.categories);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Reset page whenever search or category query changes
   useEffect(() => {
     setPage(1);
-  }, [search]);
+  }, [search, categoryParam]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params: Record<string, string> = { page: page.toString(), limit: "12" };
       if (search) params.search = search;
+      if (categoryParam) params.category = categoryParam;
 
       const res = await api.get("/products", { params });
       setProducts(res.data.products);
@@ -53,7 +82,7 @@ function ProductsContent() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, categoryParam]);
 
   useEffect(() => {
     fetchProducts();
@@ -66,6 +95,10 @@ function ProductsContent() {
     return "";
   };
 
+  const activeCategory = categories.find(
+    (c) => c._id === categoryParam || c.slug === categoryParam
+  );
+
   return (
     <div className="container-fluid px-4 py-5">
       <div
@@ -76,31 +109,141 @@ function ProductsContent() {
         }}
       >
         {/* Header Container */}
-        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
           <div>
-            <h4 className="fw-bold mb-1">
-              <span style={{ color: "#198754" }}>Products</span>
-            </h4>
+            {/* Popping categories interactive header */}
+            <div
+              className="position-relative d-inline-block"
+              onMouseEnter={handlePageCatEnter}
+              onMouseLeave={handlePageCatLeave}
+            >
+              <h4
+                className="fw-bold mb-1 d-inline-flex align-items-center gap-1.5 cursor-pointer"
+                role="button"
+                tabIndex={0}
+                style={{ cursor: "pointer" }}
+              >
+                <span style={{ color: "#198754" }}>Products</span>
+                <i
+                  className="bi bi-chevron-down text-muted"
+                  style={{
+                    fontSize: "0.85rem",
+                    transition: "transform 0.2s ease",
+                    transform: pageCatOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </h4>
+
+              {/* Popping Categories Dropdown on cursor hover */}
+              {pageCatOpen && (
+                <div
+                  className="position-absolute start-0 top-100 mt-1 bg-white rounded-3 shadow-lg border p-2 categories-popover"
+                  style={{
+                    minWidth: "240px",
+                    zIndex: 1050,
+                    borderColor: "#ebdcc5",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)",
+                  }}
+                >
+                  <div className="px-3 py-1.5 border-bottom d-flex align-items-center justify-content-between">
+                    <span
+                      className="text-uppercase fw-bold text-muted"
+                      style={{ fontSize: "0.68rem", letterSpacing: "1px" }}
+                    >
+                      Browse Categories
+                    </span>
+                  </div>
+                  <div className="py-1">
+                    <Link
+                      href={search ? `/products?search=${encodeURIComponent(search)}` : "/products"}
+                      onClick={() => setPageCatOpen(false)}
+                      className={`dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-decoration-none hover-category-item ${
+                        !categoryParam ? "fw-bold text-success bg-light" : "text-dark"
+                      }`}
+                      style={{ fontSize: "0.85rem" }}
+                    >
+                      <i className="bi bi-grid text-success" />
+                      <span>All Products</span>
+                    </Link>
+                    {categories.map((cat) => {
+                      const isSelected = categoryParam === cat._id || categoryParam === cat.slug;
+                      return (
+                        <Link
+                          key={cat._id}
+                          href={`/products?category=${encodeURIComponent(cat.slug || cat._id)}${
+                            search ? `&search=${encodeURIComponent(search)}` : ""
+                          }`}
+                          onClick={() => setPageCatOpen(false)}
+                          className={`dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 text-decoration-none hover-category-item ${
+                            isSelected ? "fw-bold text-success bg-light" : "text-dark"
+                          }`}
+                          style={{ fontSize: "0.85rem" }}
+                        >
+                          <div className="d-flex align-items-center gap-2 text-truncate">
+                            <i className="bi bi-tag text-secondary opacity-75" style={{ fontSize: "0.8rem" }} />
+                            <span className="text-truncate">{cat.name}</span>
+                          </div>
+                          {isSelected && <i className="bi bi-check-lg text-success fw-bold" />}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <p className="text-muted small mb-0">
               Browse our handcrafted collection
               {pagination && ` — ${pagination.total} product${pagination.total === 1 ? "" : "s"}`}
             </p>
           </div>
 
-          {search && (
-            <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-light text-dark border px-2 py-1">
-                Search: &ldquo;{search}&rdquo;
-              </span>
+          {/* Active Filters Indicators */}
+          <div className="d-flex flex-wrap align-items-center gap-2">
+            {activeCategory && (
+              <div className="d-flex align-items-center gap-1 bg-white border border-success border-opacity-50 rounded-pill px-2.5 py-1 shadow-sm">
+                <i className="bi bi-tag text-success" style={{ fontSize: "0.8rem" }} />
+                <span className="small fw-semibold text-success" style={{ fontSize: "0.78rem" }}>
+                  {activeCategory.name}
+                </span>
+                <Link
+                  href={search ? `/products?search=${encodeURIComponent(search)}` : "/products"}
+                  className="text-muted text-decoration-none ms-1 d-flex align-items-center"
+                  title="Remove category filter"
+                  style={{ fontSize: "0.75rem" }}
+                >
+                  <i className="bi bi-x-circle-fill text-secondary opacity-75" />
+                </Link>
+              </div>
+            )}
+
+            {search && (
+              <div className="d-flex align-items-center gap-1 bg-white border rounded-pill px-2.5 py-1 shadow-sm">
+                <i className="bi bi-search text-muted" style={{ fontSize: "0.75rem" }} />
+                <span className="small text-dark" style={{ fontSize: "0.78rem" }}>
+                  &ldquo;{search}&rdquo;
+                </span>
+                <Link
+                  href={categoryParam ? `/products?category=${encodeURIComponent(categoryParam)}` : "/products"}
+                  className="text-muted text-decoration-none ms-1 d-flex align-items-center"
+                  title="Clear search"
+                  style={{ fontSize: "0.75rem" }}
+                >
+                  <i className="bi bi-x-circle-fill text-secondary opacity-75" />
+                </Link>
+              </div>
+            )}
+
+            {(activeCategory || search) && (
               <Link
                 href="/products"
-                className="btn btn-sm btn-outline-secondary py-0 px-2 text-decoration-none"
+                className="btn btn-sm btn-link text-muted py-0 px-1 text-decoration-none"
                 style={{ fontSize: "0.75rem" }}
               >
-                Clear
+                Clear all
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Product Grid */}
@@ -120,7 +263,7 @@ function ProductsContent() {
           <div className="text-center py-5 text-muted">
             <i className="bi bi-box-seam fs-1 d-block mb-2" />
             <p className="mb-2">No products found.</p>
-            {search && (
+            {(activeCategory || search) && (
               <Link href="/products" className="btn btn-sm btn-success">
                 View all products
               </Link>

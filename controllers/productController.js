@@ -1,9 +1,11 @@
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
+const Category = require("../models/Category");
 
 /**
  * GET /api/products
  * Public: list products with optional filters.
- * Query: ?category=id&search=text&minPrice=0&maxPrice=1000&featured=true&page=1&limit=12
+ * Query: ?category=id_or_slug&search=text&minPrice=0&maxPrice=1000&featured=true&page=1&limit=12
  */
 exports.list = async (req, res) => {
   try {
@@ -19,7 +21,18 @@ exports.list = async (req, res) => {
 
     const filter = { isActive: true };
 
-    if (category) filter.category = category;
+    if (category) {
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        filter.category = category;
+      } else {
+        const foundCat = await Category.findOne({ slug: category });
+        if (foundCat) {
+          filter.category = foundCat._id;
+        } else {
+          filter.category = category;
+        }
+      }
+    }
     if (featured === "true") filter.isFeatured = true;
     if (minPrice || maxPrice) {
       filter.basePrice = {};
