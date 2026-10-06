@@ -58,9 +58,25 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
       className="modal fade show d-block bg-black bg-opacity-50"
       tabIndex={-1}
       style={{ zIndex: 1060 }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
-      <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 400 }}>
-        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div
+        className="modal-dialog modal-dialog-centered"
+        style={{ maxWidth: 400 }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+      >
+        <div
+          className="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-start">
             <div>
@@ -83,12 +99,6 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 Welcome back! Log in to your account
               </small>
             </div>
-            <button
-              type="button"
-              className="btn-close mt-1"
-              onClick={onClose}
-              aria-label="Close"
-            />
           </div>
 
           {/* Body */}

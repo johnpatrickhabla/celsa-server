@@ -74,6 +74,18 @@ export default function AuthModal({
     }
   }, [forgotStep]);
 
+  // Close modal when Escape key is pressed
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -284,12 +296,28 @@ export default function AuthModal({
       className="modal fade show d-block bg-black bg-opacity-50"
       tabIndex={-1}
       style={{ zIndex: 1060, overflowY: "auto" }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
-      <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 430 }}>
-        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+      <div
+        className="modal-dialog modal-dialog-centered"
+        style={{ maxWidth: 430 }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+      >
+        <div
+          className="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-white"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex flex-column align-items-stretch">
-            <div className="d-flex justify-content-between align-items-start mb-3">
+            <div className="mb-3">
               <div>
                 <div className="d-flex flex-column mb-1">
                   <span className="fw-bold text-dark fs-4 lh-1" style={{ letterSpacing: "1px" }}>
@@ -318,13 +346,6 @@ export default function AuthModal({
                     : "Recover your account access"}
                 </small>
               </div>
-              <button
-                type="button"
-                className="btn-close mt-1"
-                onClick={onClose}
-                aria-label="Close"
-                title="Close"
-              />
             </div>
           </div>
 
