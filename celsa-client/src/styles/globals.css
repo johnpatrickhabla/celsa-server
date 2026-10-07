@@ -703,3 +703,43 @@ input[type="search"]::-webkit-search-results-decoration {
 .celsa-nav-link.active::after {
   width: 100%;
 }
+
+/* Sweet Cart Notification Toast Styling & Animations */
+@keyframes sweetToastIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-22px) scale(0.92);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sweetProgressShrink {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.sweet-cart-toast {
+  animation: sweetToastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto;
+}
+
+@media (max-width: 576px) {
+  .sweet-cart-toast {
+    top: 14px !important;
+    right: 14px !important;
+    left: 14px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}

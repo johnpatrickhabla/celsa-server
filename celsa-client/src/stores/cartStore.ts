@@ -27,8 +27,19 @@ export interface CartItem {
   isCustomOrder?: boolean;
 }
 
+export interface CartToastInfo {
+  id: string;
+  productName: string;
+  productImage?: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 interface CartState {
   items: CartItem[];
+  toastItem: CartToastInfo | null;
+  toastVisible: boolean;
+  hideCartToast: () => void;
 
   /** Add an item or increment quantity if the same product+customizations combo exists */
   addItem: (item: Omit<CartItem, "unitPrice">) => void;
@@ -69,9 +80,21 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      toastItem: null,
+      toastVisible: false,
+
+      hideCartToast: () => set({ toastVisible: false }),
 
       addItem: (item) => {
         const unitPrice = calcUnitPrice(item.basePrice, item.customizations);
+
+        const toastInfo: CartToastInfo = {
+          id: Date.now().toString(),
+          productName: item.productName,
+          productImage: item.productImage,
+          quantity: item.quantity,
+          unitPrice,
+        };
 
         set((state) => {
           // Check for existing item with same product + same customizations
@@ -88,12 +111,18 @@ export const useCartStore = create<CartState>()(
               ...updated[existingIdx],
               quantity: updated[existingIdx].quantity + item.quantity,
             };
-            return { items: updated };
+            return {
+              items: updated,
+              toastItem: toastInfo,
+              toastVisible: true,
+            };
           }
 
           // New line item
           return {
             items: [...state.items, { ...item, unitPrice }],
+            toastItem: toastInfo,
+            toastVisible: true,
           };
         });
       },
@@ -125,6 +154,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "celsa-cart", // localStorage key
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );
