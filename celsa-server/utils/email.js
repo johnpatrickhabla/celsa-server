@@ -516,8 +516,176 @@ Thank you for choosing CELSA Handicrafts!
   }
 }
 
+/**
+ * Sends a notification email confirming that the account password has been successfully changed.
+ *
+ * @param {string} toEmail - Recipient email
+ * @param {string} [recipientName] - Optional recipient name
+ * @returns {Promise<{success: boolean, simulated?: boolean, error?: any}>}
+ */
+async function sendPasswordChangedEmail(toEmail, recipientName = "Valued Customer") {
+  try {
+    const transporter = getTransporter();
+    const fromAddress =
+      process.env.EMAIL_FROM ||
+      process.env.SMTP_FROM ||
+      `"CELSA Handicrafts" <${process.env.SMTP_USER || process.env.EMAIL_USER || "noreply@celsahandicrafts.com"}>`;
+
+    const year = new Date().getFullYear();
+    const clientUrl = (process.env.CLIENT_URL || "https://celsa-client-gznj.vercel.app").split(",")[0].trim().replace(/\/+$/, "");
+    const loginUrl = `${clientUrl}/login`;
+    const nowFormatted = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Manila",
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Changed – CELSA Handicrafts</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;">
+
+          <!-- HEADER / BRAND -->
+          <tr>
+            <td style="background-color:#1a1a1a;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+              <div style="display:inline-block;">
+                <span style="font-size:28px;font-weight:900;color:#ffffff;letter-spacing:4px;text-transform:uppercase;">CELSA</span>
+                <span style="display:block;font-size:10px;font-weight:600;color:#8b6914;letter-spacing:5px;text-transform:uppercase;margin-top:3px;">HANDICRAFTS</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- MAIN CARD -->
+          <tr>
+            <td style="background-color:#ffffff;padding:40px 40px 32px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">
+
+              <!-- Icon -->
+              <div style="text-align:center;margin-bottom:24px;">
+                <div style="display:inline-block;background-color:#ecfdf5;border-radius:50%;width:64px;height:64px;line-height:64px;text-align:center;">
+                  <span style="font-size:32px;">🛡️</span>
+                </div>
+              </div>
+
+              <!-- Heading -->
+              <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#111827;text-align:center;">Password Successfully Updated</h1>
+              <p style="margin:0 0 24px;font-size:15px;color:#6b7280;text-align:center;line-height:1.6;">
+                Hi <strong style="color:#111827;">${recipientName || "there"}</strong>, this is an automated confirmation that the password for your CELSA Handicrafts account (<strong>${toEmail}</strong>) was changed on <strong>${nowFormatted} (PHT)</strong>.
+              </p>
+
+              <!-- Success Card -->
+              <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px;text-align:center;margin-bottom:24px;">
+                <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#15803d;">
+                  ✓ Your new password is now active
+                </p>
+                <p style="margin:0;font-size:13px;color:#166534;line-height:1.5;">
+                  You can now log in using your updated password.
+                </p>
+              </div>
+
+              <!-- Action Button -->
+              <div style="text-align:center;margin-bottom:28px;">
+                <a href="${loginUrl}" target="_blank" style="display:inline-block;background-color:#15803d;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;letter-spacing:0.5px;">
+                  Log In to Your Account →
+                </a>
+              </div>
+
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid #f3f4f6;margin:0 0 24px;" />
+
+              <!-- Security Warning -->
+              <div style="background-color:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px 20px;">
+                <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#991b1b;">
+                  ⚠️ Didn't change your password?
+                </p>
+                <p style="margin:0;font-size:13px;color:#b91c1c;line-height:1.6;">
+                  If you did not make this change, your account may have been compromised. Please immediately reset your password on our website or contact our support team.
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:12px;color:#9ca3af;">This email was sent by CELSA Handicrafts. Do not reply to this email.</p>
+              <p style="margin:0;font-size:12px;color:#d1d5db;">&copy; ${year} CELSA Handicrafts. All rights reserved.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    const textContent = `CELSA Handicrafts – Password Successfully Updated
+
+Hi ${recipientName || "Valued Customer"},
+
+This is an automated confirmation that the password for your CELSA Handicrafts account (${toEmail}) was changed on ${nowFormatted} (PHT).
+
+If you made this change, your new password is now active and no further action is needed. You can log in at:
+${loginUrl}
+
+⚠️ DIDN'T MAKE THIS CHANGE?
+If you did not make this change, please reset your password immediately to secure your account.
+
+© ${year} CELSA Handicrafts. All rights reserved.`;
+
+    const subject = `Your CELSA Handicrafts Password Has Been Changed`;
+
+    // 1) Gmail API over HTTPS (production)
+    if (hasGmailApiConfig()) {
+      const messageId = await sendViaGmailApi({
+        from: fromAddress,
+        to: toEmail,
+        subject,
+        html: htmlContent,
+        text: textContent,
+      });
+      console.log(`[EMAIL SERVICE] Password changed confirmation email sent via Gmail API to ${toEmail}. Message ID: ${messageId}`);
+      return { success: true, messageId };
+    }
+
+    // 2) Fallback: SMTP / Dev Mode
+    if (!transporter) {
+      console.log("\n========================================================");
+      console.log("🛡️ [CELSA PASSWORD CHANGED CONFIRMATION - SIMULATION/DEV MODE]");
+      console.log(`📧 Recipient: ${toEmail} (${recipientName})`);
+      console.log(`📅 Timestamp: ${nowFormatted}`);
+      console.log("========================================================\n");
+      return { success: true, simulated: true };
+    }
+
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to: toEmail,
+      subject,
+      text: textContent,
+      html: htmlContent,
+    });
+
+    console.log(`[EMAIL SERVICE] Password changed email sent to ${toEmail}. Message ID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`[EMAIL SERVICE ERROR] Failed to send password changed email to ${toEmail}:`, error.message);
+    return { success: false, error };
+  }
+}
+
 module.exports = {
   sendPasswordResetEmail,
+  sendPasswordChangedEmail,
   sendShippingEmail,
   getCourierTrackingUrl,
 };

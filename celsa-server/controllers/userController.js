@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { sendPasswordChangedEmail } = require("../utils/email");
 
 /**
  * GET /api/users
@@ -112,9 +113,16 @@ exports.update = async (req, res) => {
     if (role !== undefined) user.role = role;
     if (phone !== undefined) user.phone = phone;
     if (isActive !== undefined) user.isActive = isActive;
+    const passwordChanged = Boolean(password);
     if (password) user.passwordHash = password; // pre-save hook re-hashes
 
     await user.save();
+
+    if (passwordChanged) {
+      sendPasswordChangedEmail(user.email, user.name)
+        .catch((err) => console.error("[ERROR] Failed to send password changed email:", err.message));
+    }
+
     res.json({ user: user.toJSON() });
   } catch (err) {
     if (err.code === 11000) {

@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { sendPasswordResetEmail } = require("../utils/email");
+const { sendPasswordResetEmail, sendPasswordChangedEmail } = require("../utils/email");
 
 /**
  * Generate an access token (short-lived) and a refresh token (long-lived).
@@ -311,6 +311,19 @@ exports.resetPassword = async (req, res) => {
     user.resetCode = null;
     user.resetCodeExpires = null;
     await user.save();
+
+    // Send confirmation email that password has been changed (fire-and-forget)
+    sendPasswordChangedEmail(user.email, user.name)
+      .then((result) => {
+        if (!result.success) {
+          console.error("[ERROR] Background password-changed email delivery failed:", result.error?.message);
+        } else {
+          console.log(`[EMAIL SERVICE] Password changed confirmation sent to ${user.email} (simulated: ${!!result.simulated})`);
+        }
+      })
+      .catch((err) => {
+        console.error("[ERROR] Unexpected email error:", err.message);
+      });
 
     res.json({
       message: "Your password has been updated successfully! You can now log in with your new password.",
