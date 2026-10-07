@@ -77,7 +77,7 @@ export default function ProductCard({
         </div>
 
         {/* ── IN-LINE ACTIONS AT BOTTOM OF IMAGE: QUICK VIEW & ADD CART ICON ── */}
-        <div className="shein-image-actions position-absolute bottom-0 start-0 w-100 p-2 d-flex align-items-center gap-2">
+        <div className="shein-image-actions position-absolute bottom-0 start-0 w-100 p-2 d-flex align-items-center gap-1 gap-sm-2">
           <button
             type="button"
             className="shein-quick-view-btn flex-grow-1"
@@ -105,7 +105,7 @@ export default function ProductCard({
       </div>
 
       {/* ── PRODUCT DETAILS (CLEAN BOTTOM SECTION - NO BUTTONS, NO RATINGS) ── */}
-      <div className="shein-info-wrap p-2 p-sm-3 d-flex flex-column flex-grow-1 justify-content-between">
+      <div className="shein-info-wrap p-2 d-flex flex-column flex-grow-1 justify-content-between">
         <div>
           {/* Category / Material Tag */}
           <div className="mb-1">

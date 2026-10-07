@@ -59,7 +59,7 @@ export default function HomePage() {
     async function fetchFeatured() {
       try {
         const res = await api.get("/products", {
-          params: { featured: "true", limit: "4" },
+          params: { featured: "true", limit: "5" },
         });
         setFeatured(res.data.products);
       } catch (err) {
@@ -224,10 +224,10 @@ export default function HomePage() {
               View All
             </Link>
           </div>
-          <div className="row g-3 g-md-4">
+          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 g-md-3">
             {loading
-              ? Array.from({ length: 4 }).map((_, i) => (
-                <div className="col-6 col-md-3" key={i}>
+              ? Array.from({ length: 5 }).map((_, i) => (
+                <div className="col" key={i}>
                   <div className="border rounded p-3 h-100 bg-white shadow-sm">
                     <div className="celsa-skeleton" style={{ height: 180, borderRadius: "0.5rem", marginBottom: "0.75rem" }} />
                     <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
@@ -236,7 +236,7 @@ export default function HomePage() {
                 </div>
               ))
               : featured.map((p) => (
-                <div className="col-6 col-md-3" key={p._id}>
+                <div className="col" key={p._id}>
                   <ProductCard
                     product={p}
                     onQuickAdd={handleQuickAdd}

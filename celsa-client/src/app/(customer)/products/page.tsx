@@ -44,7 +44,7 @@ function ProductsContent() {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const params: Record<string, string> = { page: page.toString(), limit: "12" };
+      const params: Record<string, string> = { page: page.toString(), limit: "15" };
       if (search) params.search = search;
       if (categoryParam) params.category = categoryParam;
 
@@ -73,9 +73,9 @@ function ProductsContent() {
       >
         {/* Product Grid */}
         {loading ? (
-          <div className="row g-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div className="col-6 col-md-4 col-lg-3" key={i}>
+          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 g-md-3">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div className="col" key={i}>
                 <div className="border rounded p-3 h-100 bg-white shadow-sm">
                   <div className="celsa-skeleton" style={{ height: 180, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
                   <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
@@ -90,9 +90,9 @@ function ProductsContent() {
             <p className="mb-0">No products found.</p>
           </div>
         ) : (
-          <div className="row g-3 g-md-4">
+          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 g-md-3">
             {products.map((product) => (
-              <div className="col-6 col-md-4 col-lg-3" key={product._id}>
+              <div className="col" key={product._id}>
                 <ProductCard
                   product={product}
                   onQuickAdd={handleQuickAdd}
