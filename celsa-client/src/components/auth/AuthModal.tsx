@@ -526,32 +526,20 @@ export default function AuthModal({
                         )}
                       </button>
 
-                      <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-                        <button
-                          type="button"
-                          className="btn btn-link text-decoration-none text-muted small p-0"
-                          onClick={() => {
-                            setForgotStep("request");
-                            setError(null);
-                            setSuccessMsg(null);
-                          }}
-                        >
-                          <i className="bi bi-arrow-left me-1" />
-                          Change Email
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-link p-0 text-success fw-semibold text-decoration-none small"
-                          onClick={() => {
-                            setTab("login");
-                            setForgotStep("request");
-                            setError(null);
-                            setSuccessMsg(null);
-                          }}
-                        >
-                          Back to Log In
-                        </button>
-                      </div>
+                      <button
+                        id="cancel-verify-code-btn"
+                        type="button"
+                        className="btn btn-outline-secondary w-100 rounded-3 py-2 fw-semibold"
+                        onClick={() => {
+                          setTab("login");
+                          setForgotStep("request");
+                          setError(null);
+                          setSuccessMsg(null);
+                          setCodeDigits(["", "", "", "", "", ""]);
+                        }}
+                      >
+                        Cancel
+                      </button>
                     </form>
                   </>
                 ) : (
