@@ -3,55 +3,42 @@
 export function getPasswordStrength(pwd: string) {
   if (!pwd) {
     return {
-      score: 0,
+      level: 0,
       label: "",
       color: "#dee2e6",
-      checks: { length: false, upper: false, lower: false, number: false, special: false },
+      percent: 0,
     };
   }
 
-  const checks = {
-    length: pwd.length >= 8,
-    upper: /[A-Z]/.test(pwd),
-    lower: /[a-z]/.test(pwd),
-    number: /[0-9]/.test(pwd),
-    special: /[^A-Za-z0-9]/.test(pwd),
-  };
+  const hasLetters = /[a-zA-Z]/.test(pwd);
+  const hasNumbers = /[0-9]/.test(pwd);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(pwd);
+  const varietyCount = (hasLetters ? 1 : 0) + (hasNumbers ? 1 : 0) + (hasSpecial ? 1 : 0);
 
-  let points = 0;
-  if (checks.length) points++;
-  if (checks.upper && checks.lower) points++;
-  if (checks.number) points++;
-  if (checks.special) points++;
-  if (pwd.length >= 10 && points >= 3) points++;
-
-  let score = 1;
-  let label = "Weak";
-  let color = "#dc3545"; // Red
-
-  if (!checks.length) {
-    score = 1;
-    label = "Too short (min 8 chars)";
-    color = "#dc3545";
-  } else if (points <= 2) {
-    score = 1;
-    label = "Weak";
-    color = "#dc3545";
-  } else if (points === 3) {
-    score = 2;
-    label = "Fair";
-    color = "#fd7e14"; // Orange
-  } else if (points === 4) {
-    score = 3;
-    label = "Good";
-    color = "#0d6efd"; // Blue
-  } else {
-    score = 4;
-    label = "Strong";
-    color = "#198754"; // Green
+  if (pwd.length < 6) {
+    return {
+      level: 1,
+      label: "Weak",
+      color: "#dc3545", // Red
+      percent: 33,
+    };
   }
 
-  return { score, label, color, checks };
+  if (pwd.length >= 8 && (varietyCount >= 2 || pwd.length >= 10)) {
+    return {
+      level: 3,
+      label: "Strong",
+      color: "#198754", // Green
+      percent: 100,
+    };
+  }
+
+  return {
+    level: 2,
+    label: "Medium",
+    color: "#fd7e14", // Orange
+    percent: 66,
+  };
 }
 
 export default function PasswordStrengthIndicator({ password }: { password: string }) {
@@ -59,13 +46,10 @@ export default function PasswordStrengthIndicator({ password }: { password: stri
   const strength = getPasswordStrength(password);
 
   return (
-    <div
-      className="mt-2 mb-2 p-2 rounded-3 border"
-      style={{ backgroundColor: "#fdfbf7", borderColor: "#ebdcc5" }}
-    >
+    <div className="mt-1 mb-2">
       <div className="d-flex justify-content-between align-items-center mb-1">
         <span className="text-muted" style={{ fontSize: "0.72rem" }}>
-          Password Strength:
+          Password strength:
         </span>
         <span
           className="fw-bold"
@@ -75,38 +59,19 @@ export default function PasswordStrengthIndicator({ password }: { password: stri
         </span>
       </div>
 
-      {/* 4-Segment Strength Meter from Weak to Strong */}
-      <div className="d-flex gap-1 mb-2" style={{ height: "5px" }}>
-        {[1, 2, 3, 4].map((seg) => (
-          <div
-            key={seg}
-            className="flex-grow-1 rounded-pill"
-            style={{
-              backgroundColor: seg <= strength.score ? strength.color : "#e2e8f0",
-              transition: "background-color 0.25s ease",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Helper criteria checklist */}
-      <div className="d-flex flex-wrap gap-2 text-muted" style={{ fontSize: "0.68rem" }}>
-        <span className={`d-inline-flex align-items-center ${strength.checks.length ? "text-success fw-semibold" : ""}`}>
-          <i className={`bi ${strength.checks.length ? "bi-check-circle-fill text-success" : "bi-circle"} me-1`} />
-          8+ chars
-        </span>
-        <span className={`d-inline-flex align-items-center ${strength.checks.upper && strength.checks.lower ? "text-success fw-semibold" : ""}`}>
-          <i className={`bi ${strength.checks.upper && strength.checks.lower ? "bi-check-circle-fill text-success" : "bi-circle"} me-1`} />
-          Upper &amp; lowercase
-        </span>
-        <span className={`d-inline-flex align-items-center ${strength.checks.number ? "text-success fw-semibold" : ""}`}>
-          <i className={`bi ${strength.checks.number ? "bi-check-circle-fill text-success" : "bi-circle"} me-1`} />
-          Number
-        </span>
-        <span className={`d-inline-flex align-items-center ${strength.checks.special ? "text-success fw-semibold" : ""}`}>
-          <i className={`bi ${strength.checks.special ? "bi-check-circle-fill text-success" : "bi-circle"} me-1`} />
-          Symbol (!@#$)
-        </span>
+      {/* Clean single continuous line meter from Weak to Strong */}
+      <div
+        className="rounded-pill overflow-hidden"
+        style={{ height: "4px", backgroundColor: "#e9ecef" }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${strength.percent}%`,
+            backgroundColor: strength.color,
+            transition: "width 0.25s ease, background-color 0.25s ease",
+          }}
+        />
       </div>
     </div>
   );
