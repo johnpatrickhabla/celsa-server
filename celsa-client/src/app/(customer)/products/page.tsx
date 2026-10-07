@@ -7,6 +7,7 @@ import api from "@/lib/api";
 import type { Product, PaginationInfo } from "@/lib/types";
 import { useCartStore } from "@/stores/cartStore";
 import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
+import ProductCard from "@/components/customer/ProductCard";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
 function ProductsContent() {
@@ -89,76 +90,17 @@ function ProductsContent() {
             <p className="mb-0">No products found.</p>
           </div>
         ) : (
-          <div className="row g-3">
+          <div className="row g-3 g-md-4">
             {products.map((product) => (
               <div className="col-6 col-md-4 col-lg-3" key={product._id}>
-                <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm">
-                  <Link
-                    href={`/products/${product.slug}`}
-                    className="text-decoration-none text-dark"
-                  >
-                    <div
-                      className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2"
-                      style={{ height: 180 }}
-                    >
-                      {product.images.length > 0 ? (
-                        <img
-                          src={product.images[0].url}
-                          alt={product.name}
-                          className="d-block w-100 h-100"
-                          style={{ objectFit: "contain" }}
-                        />
-                      ) : (
-                        <i className="bi bi-image text-muted fs-1" />
-                      )}
-                    </div>
-                    <div className="product-content">
-                      <h3
-                        className="product-title fw-bold text-dark fs-6 mb-2 text-truncate"
-                        title={product.name}
-                      >
-                        {product.name}
-                      </h3>
-                      <div className="product-price mb-2 d-flex align-items-center justify-content-between">
-                        <span className="price text-success fw-bold fs-6">
-                          ₱{product.basePrice.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-
-                  <div>
-                    {product.stock <= product.lowStockThreshold && product.stock > 0 && (
-                      <div className="text-warning small mb-2" style={{ fontSize: "0.7rem" }}>
-                        Only {product.stock} left
-                      </div>
-                    )}
-                    {product.stock === 0 && (
-                      <div className="text-danger small mb-2" style={{ fontSize: "0.7rem" }}>
-                        Out of stock
-                      </div>
-                    )}
-                    <div className="product-actions d-flex gap-2">
-                      <button
-                        className="btn btn-success btn-sm flex-grow-1 small"
-                        onClick={() => handleQuickAdd(product)}
-                        disabled={product.stock === 0}
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm flex-grow-1 small text-center d-flex align-items-center justify-content-center"
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setModalOpen(true);
-                        }}
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard
+                  product={product}
+                  onQuickAdd={handleQuickAdd}
+                  onViewDetails={(prod) => {
+                    setSelectedProduct(prod);
+                    setModalOpen(true);
+                  }}
+                />
               </div>
             ))}
           </div>

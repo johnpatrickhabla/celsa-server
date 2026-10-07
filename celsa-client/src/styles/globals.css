@@ -128,6 +128,223 @@ body {
   color: var(--celsa-gold-dark) !important;
 }
 
+/* ========================================================
+   SHEIN-STYLE PRODUCT CARD SYSTEM
+   ======================================================== */
+.shein-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #ededed;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  position: relative;
+}
+
+.shein-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+  border-color: #dcdcdc;
+}
+
+/* 3:4 Vertical Fashion Aspect Ratio */
+.shein-media-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background-color: #f6f6f7;
+  position: relative;
+  overflow: hidden;
+}
+
+.shein-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  background-color: #f8f8f9;
+}
+
+.shein-card:hover .shein-product-img {
+  transform: scale(1.06);
+}
+
+/* Shein Badges */
+.shein-badges-container {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.shein-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  line-height: 1.2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.shein-badge-warning {
+  background-color: #ff4747;
+  color: #ffffff;
+}
+
+.shein-badge-danger {
+  background-color: rgba(30, 30, 30, 0.88);
+  color: #ffffff;
+}
+
+.shein-badge-custom {
+  background-color: #198754;
+  color: #ffffff;
+}
+
+/* Floating Shein Quick View Button */
+.shein-quick-view-btn {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 56px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #111111;
+  font-size: 0.73rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 20px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 3;
+  cursor: pointer;
+}
+
+.shein-card:hover .shein-quick-view-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.shein-quick-view-btn:hover {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+/* Floating Shein Bag Button (Circular, Bottom-Right) */
+.shein-bag-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 3;
+  cursor: pointer;
+}
+
+.shein-bag-btn:hover:not(.disabled) {
+  background: #198754;
+  color: #ffffff;
+  border-color: #198754;
+  transform: scale(1.1);
+  box-shadow: 0 5px 14px rgba(25, 135, 84, 0.35);
+}
+
+.shein-bag-btn.added {
+  background: #198754;
+  color: #ffffff;
+  border-color: #198754;
+  transform: scale(1.1);
+}
+
+.shein-bag-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0;
+  color: #999999;
+}
+
+/* Details Section */
+.shein-info-wrap {
+  background: #ffffff;
+}
+
+.shein-category-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #8c8c8c;
+}
+
+.shein-product-title {
+  font-size: 0.85rem;
+  line-height: 1.35;
+  font-weight: 500;
+  color: #222222;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.3rem;
+  transition: color 0.18s ease;
+}
+
+.shein-card:hover .shein-product-title {
+  color: #198754;
+}
+
+.shein-price-main {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: -0.2px;
+}
+
+.shein-sold-tag {
+  font-size: 0.7rem;
+  color: #999999;
+  font-weight: 500;
+}
+
+.shein-add-btn {
+  background: #198754;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+}
+
+.shein-add-btn:hover:not(:disabled) {
+  background: #146c43;
+}
+
+.shein-add-btn:disabled {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
 /* Disable browser native password reveal & clear buttons (e.g. Edge / Chromium) */
 input::-ms-reveal,
 input::-ms-clear {

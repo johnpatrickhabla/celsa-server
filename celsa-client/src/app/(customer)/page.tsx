@@ -8,6 +8,7 @@ import { useCartStore } from "@/stores/cartStore";
 import type { Product, HeroSlide } from "@/lib/types";
 import { Carousel } from "react-bootstrap";
 import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
+import ProductCard from "@/components/customer/ProductCard";
 
 const whyChooseUsTop = [
   { icon: "bi-hand-thumbs-up", title: "100% Handmade", subtitle: "By skilled artisans" },
@@ -223,12 +224,12 @@ export default function HomePage() {
               View All
             </Link>
           </div>
-          <div className="row g-3">
+          <div className="row g-3 g-md-4">
             {loading
               ? Array.from({ length: 4 }).map((_, i) => (
                 <div className="col-6 col-md-3" key={i}>
                   <div className="border rounded p-3 h-100 bg-white shadow-sm">
-                    <div className="celsa-skeleton" style={{ height: 140, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
+                    <div className="celsa-skeleton" style={{ height: 180, borderRadius: "0.5rem", marginBottom: "0.75rem" }} />
                     <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
                     <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
                   </div>
@@ -236,46 +237,14 @@ export default function HomePage() {
               ))
               : featured.map((p) => (
                 <div className="col-6 col-md-3" key={p._id}>
-                  <div className="product-card border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm">
-                    <div>
-                      <div className="product-image bg-light rounded mb-2 d-flex align-items-center justify-content-center overflow-hidden p-2" style={{ height: 180 }}>
-                        {p.images.length > 0 ? (
-                          <img
-                            src={p.images[0].url}
-                            alt={p.name}
-                            className="d-block w-100 h-100"
-                            style={{ objectFit: "contain" }}
-                          />
-                        ) : (
-                          <i className="bi bi-image text-muted fs-1" />
-                        )}
-                      </div>
-                      <div className="product-content">
-                        <h3 className="product-title fw-bold text-dark fs-6 mb-2 text-truncate" title={p.name}>{p.name}</h3>
-                        <div className="product-price mb-3">
-                          <span className="price text-success fw-bold fs-6">₱{p.basePrice.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="product-actions d-flex gap-2">
-                      <button
-                        className="btn btn-success btn-sm flex-grow-1 small"
-                        onClick={() => handleQuickAdd(p)}
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm flex-grow-1 small"
-                        onClick={() => {
-                          setSelectedProduct(p);
-                          setModalOpen(true);
-                        }}
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
+                  <ProductCard
+                    product={p}
+                    onQuickAdd={handleQuickAdd}
+                    onViewDetails={(prod) => {
+                      setSelectedProduct(prod);
+                      setModalOpen(true);
+                    }}
+                  />
                 </div>
               ))}
           </div>
