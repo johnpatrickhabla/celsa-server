@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { Product } from "@/lib/types";
 
 interface ProductCardProps {
@@ -49,7 +48,7 @@ export default function ProductCard({
     >
       {/* ── IMAGE WRAPPER (SHEIN 3:4 ASPECT RATIO) ── */}
       <div className="shein-media-wrap position-relative overflow-hidden">
-        <Link href={`/products/${product.slug}`} className="d-block w-100 h-100">
+        <div className="w-100 h-100">
           {primaryImage ? (
             <img
               src={isHovered && secondaryImage ? secondaryImage : primaryImage}
@@ -64,7 +63,7 @@ export default function ProductCard({
               <i className="bi bi-image fs-1" />
             </div>
           )}
-        </Link>
+        </div>
 
         {/* ── SHEIN BADGES (TOP-LEFT) ── */}
         <div className="shein-badges-container position-absolute top-0 start-0 p-2 d-flex flex-column gap-1">
@@ -118,14 +117,9 @@ export default function ProductCard({
           </div>
 
           {/* Product Title */}
-          <Link
-            href={`/products/${product.slug}`}
-            className="text-decoration-none text-dark d-block"
-          >
-            <h3 className="shein-product-title mb-1" title={product.name}>
-              {product.name}
-            </h3>
-          </Link>
+          <h3 className="shein-product-title mb-1" title={product.name}>
+            {product.name}
+          </h3>
         </div>
 
         {/* Price & Stock Status */}

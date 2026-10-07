@@ -92,7 +92,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-white">
           {/* Header */}
           <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-            <h5 className="fw-bold text-dark mb-0">Product Details</h5>
+            <h5 className="fw-bold text-dark mb-0">Quick View</h5>
             <button
               type="button"
               className="btn-close"
