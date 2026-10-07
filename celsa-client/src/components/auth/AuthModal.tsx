@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/lib/api";
+import PasswordStrengthIndicator from "@/components/auth/PasswordStrengthIndicator";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -580,6 +581,7 @@ export default function AuthModal({
                             <i className={`bi ${showNewPassword ? "bi-eye-slash text-secondary" : "bi-eye text-muted"} fs-6`} />
                           </button>
                         </div>
+                        <PasswordStrengthIndicator password={newPassword} />
                       </div>
 
                       <div className="mb-3">
@@ -784,9 +786,7 @@ export default function AuthModal({
                       </button>
                     </div>
                     {tab === "signup" && (
-                      <div className="form-text" style={{ fontSize: "0.7rem" }}>
-                        Must be at least 8 characters long.
-                      </div>
+                      <PasswordStrengthIndicator password={password} />
                     )}
                   </div>
 

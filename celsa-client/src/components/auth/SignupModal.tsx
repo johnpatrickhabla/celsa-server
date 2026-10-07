@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
+import PasswordStrengthIndicator from "@/components/auth/PasswordStrengthIndicator";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -183,6 +184,7 @@ export default function SignupModal({
                   required
                   minLength={8}
                 />
+                <PasswordStrengthIndicator password={password} />
               </div>
 
               <button
