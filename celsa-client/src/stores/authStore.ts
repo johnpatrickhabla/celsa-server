@@ -26,6 +26,7 @@ interface AuthState {
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: (redirect?: boolean | unknown) => Promise<void>;
   refresh: () => Promise<boolean>;
+  setUser: (user: UserPayload) => void;
 }
 
 function setClientCookie(token: string, role?: string) {
@@ -37,6 +38,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   accessToken: null,
   isAuthenticated: false,
+  setUser: (user) => set({ user }),
 
   hydrate: async () => {
     const token = localStorage.getItem("celsa_access_token");

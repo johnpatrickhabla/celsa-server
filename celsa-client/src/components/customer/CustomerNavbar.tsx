@@ -792,10 +792,10 @@ export default function CustomerNavbar() {
                     <li>
                       <Link
                         className="dropdown-item small"
-                        href="/my-orders"
+                        href="/account"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <i className="bi bi-receipt me-2" />Track Order
+                        <i className="bi bi-gear me-2" />Account Settings
                       </Link>
                     </li>
                     {(user.role === "admin" || user.role === "staff") && (

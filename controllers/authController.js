@@ -182,6 +182,77 @@ exports.me = async (req, res) => {
 };
 
 /**
+ * PUT /api/auth/me
+ * Updates current user's profile (name, phone, address).
+ */
+exports.updateMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { name, phone, address } = req.body;
+    if (name && typeof name === "string") {
+      user.name = name.trim();
+    }
+    if (phone !== undefined && typeof phone === "string") {
+      user.phone = phone.trim();
+    }
+    if (address && typeof address === "object") {
+      user.address = {
+        street: typeof address.street === "string" ? address.street.trim() : (user.address?.street || ""),
+        city: typeof address.city === "string" ? address.city.trim() : (user.address?.city || ""),
+        province: typeof address.province === "string" ? address.province.trim() : (user.address?.province || ""),
+        zip: typeof address.zip === "string" ? address.zip.trim() : (user.address?.zip || ""),
+      };
+    }
+
+    await user.save();
+    res.json({ message: "Profile updated successfully", user: user.toJSON() });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+};
+
+/**
+ * PUT /api/auth/change-password
+ * Changes password for logged-in user with current password validation.
+ */
+exports.changePassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: "New password must be at least 8 characters long." });
+    }
+
+    if (user.passwordHash) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: "Current password is required." });
+      }
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Current password is incorrect." });
+      }
+    }
+
+    user.passwordHash = newPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully!" });
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({ error: "Failed to update password." });
+  }
+};
+
+/**
  * POST /api/auth/forgot-password
  * Generates a 6-digit verification code for password reset.
  */
