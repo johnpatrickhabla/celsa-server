@@ -226,15 +226,15 @@ body {
 }
 
 .shein-quick-view-btn {
-  background: #fcfaf6;
+  background: #ffffff;
   backdrop-filter: blur(8px);
-  border: 1px solid #ebdcc5;
-  color: #3a2e24;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #212529;
   font-size: 0.72rem;
   font-weight: 600;
   padding: 6px 10px;
   border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -244,21 +244,21 @@ body {
 }
 
 .shein-quick-view-btn:hover {
-  background: #198754;
-  color: #ffffff;
-  border-color: #198754;
-  box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
+  background: #fcfaf6;
+  color: #198754;
+  border-color: #ebdcc5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .shein-bag-btn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #fcfaf6;
+  background: #ffffff;
   backdrop-filter: blur(8px);
-  color: #3a2e24;
-  border: 1px solid #ebdcc5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #212529;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -268,11 +268,11 @@ body {
 }
 
 .shein-bag-btn:hover:not(.disabled) {
-  background: #198754;
-  color: #ffffff;
-  border-color: #198754;
+  background: #fcfaf6;
+  color: #198754;
+  border-color: #ebdcc5;
   transform: scale(1.08);
-  box-shadow: 0 5px 14px rgba(25, 135, 84, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .shein-bag-btn.added {
