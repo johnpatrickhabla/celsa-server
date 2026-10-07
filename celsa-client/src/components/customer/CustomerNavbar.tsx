@@ -739,14 +739,9 @@ export default function CustomerNavbar() {
               onMouseLeave={handleProfileMouseLeave}
             >
               {isAuthenticated && user ? (
-                <button
-                  type="button"
-                  className="btn btn-link text-dark dropdown-toggle d-flex align-items-center gap-1 text-decoration-none p-0"
-                  onClick={() => {
-                    setDropdownOpen(!dropdownOpen);
-                    setCartOpen(false);
-                    setNotifOpen(false);
-                  }}
+                <div
+                  className="d-flex align-items-center gap-1 text-decoration-none p-0 user-select-none"
+                  style={{ cursor: "pointer" }}
                   aria-expanded={dropdownOpen}
                   aria-label="Account"
                 >
@@ -756,10 +751,10 @@ export default function CustomerNavbar() {
                   >
                     {user.name.charAt(0).toUpperCase()}
                   </div>
-                  <span className="d-none d-md-inline small fw-semibold ms-1">
+                  <span className="d-none d-md-inline small fw-semibold ms-1 text-dark">
                     {user.name.split(" ")[0]}
                   </span>
-                </button>
+                </div>
               ) : (
                 <button
                   type="button"
