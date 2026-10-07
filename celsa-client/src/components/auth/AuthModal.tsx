@@ -259,9 +259,9 @@ export default function AuthModal({
         newPassword,
       });
       setLoading(false);
-      // Ensure user is completely logged out and not directed into a logged-in state
+      // Ensure user is completely logged out and not directed into a logged-in state without redirecting
       try {
-        await logout();
+        await logout(false);
       } catch {
         // quiet
       }

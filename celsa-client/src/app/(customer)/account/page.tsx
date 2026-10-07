@@ -93,7 +93,7 @@ export default function AccountPage() {
       )}
 
       <div className="d-flex justify-content-between">
-        <button className="btn btn-outline-danger" onClick={logout}>
+        <button className="btn btn-outline-danger" onClick={() => logout()}>
           <i className="bi bi-box-arrow-right me-2" />
           Log Out
         </button>

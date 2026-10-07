@@ -24,7 +24,7 @@ interface AuthState {
   hydrate: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (redirect?: boolean | unknown) => Promise<void>;
   refresh: () => Promise<boolean>;
 }
 
@@ -96,7 +96,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  logout: async () => {
+  logout: async (redirect = true) => {
+    const shouldRedirect = typeof redirect === "boolean" ? redirect : true;
     try {
       await api.post("/auth/logout");
     } catch {
@@ -105,7 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     localStorage.removeItem("celsa_access_token");
     document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
     set({ user: null, accessToken: null, isAuthenticated: false });
-    if (typeof window !== "undefined") {
+    if (shouldRedirect && typeof window !== "undefined") {
       window.location.href = "/";
     }
   },
