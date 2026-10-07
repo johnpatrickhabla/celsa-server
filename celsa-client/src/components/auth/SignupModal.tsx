@@ -76,27 +76,25 @@ export default function SignupModal({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-start">
-            <div>
-              <div className="d-flex flex-column mb-1">
-                <span className="fw-bold text-dark fs-4 lh-1" style={{ letterSpacing: "1px" }}>
-                  CELSA
-                </span>
-                <span
-                  className="text-uppercase fw-semibold mt-1"
-                  style={{
-                    letterSpacing: "3px",
-                    fontSize: "0.72rem",
-                    color: "#73511f",
-                  }}
-                >
-                  Handicrafts
-                </span>
-              </div>
-              <small className="text-muted d-block" style={{ fontSize: "0.75rem" }}>
-                Create your customer account
-              </small>
+          <div className="modal-header border-0 pb-0 pt-4 px-4 d-flex flex-column align-items-center text-center">
+            <div className="d-flex flex-column align-items-center mb-1">
+              <span className="fw-bold text-dark fs-3 lh-1" style={{ letterSpacing: "1.5px" }}>
+                CELSA
+              </span>
+              <span
+                className="text-uppercase fw-semibold mt-1"
+                style={{
+                  letterSpacing: "3px",
+                  fontSize: "0.72rem",
+                  color: "#73511f",
+                }}
+              >
+                Handicrafts
+              </span>
             </div>
+            <small className="text-muted d-block mt-1" style={{ fontSize: "0.8rem" }}>
+              Create your customer account
+            </small>
           </div>
 
           {/* Body */}
