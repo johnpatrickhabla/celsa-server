@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import api from "@/lib/api";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { useAuthStore } from "@/stores/authStore";
@@ -27,12 +26,12 @@ interface UserProfile {
 
 export default function AccountPage() {
   const router = useRouter();
-  const { isAuthenticated, user, hydrate, logout, setUser } = useAuthStore();
+  const { isAuthenticated, user, hydrate, setUser } = useAuthStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Active settings tab
-  const [activeTab, setActiveTab] = useState<"profile" | "address" | "security" | "orders">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "address" | "security" | "notifications">("profile");
 
   // Profile Form state
   const [name, setName] = useState("");
@@ -60,7 +59,7 @@ export default function AccountPage() {
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // Notification Preferences (Client-side preference)
+  // Notification Preferences
   const [orderEmailNotifs, setOrderEmailNotifs] = useState(true);
   const [promoEmailNotifs, setPromoEmailNotifs] = useState(false);
   const [notifSuccess, setNotifSuccess] = useState(false);
@@ -201,67 +200,48 @@ export default function AccountPage() {
         }}
       >
         {/* Header Title */}
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style={{ borderColor: "#ebdcc5" }}>
-          <div>
-            <h4 className="fw-bold text-dark mb-1">
-              Account <span style={{ color: "#198754" }}>Settings</span>
-            </h4>
-            <p className="text-muted small mb-0">
-              Manage your profile, delivery addresses, security, and preferences.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center align-self-start align-self-md-auto"
-            onClick={() => logout()}
-          >
-            <i className="bi bi-box-arrow-right me-2" />
-            Log Out
-          </button>
+        <div className="mb-4 pb-3 border-bottom" style={{ borderColor: "#ebdcc5" }}>
+          <h4 className="fw-bold text-dark mb-1">
+            Account <span style={{ color: "#198754" }}>Settings</span>
+          </h4>
+          <p className="text-muted small mb-0">
+            Manage your personal profile, delivery address, security, and notification preferences.
+          </p>
         </div>
 
-        {/* User Quick Info Banner */}
+        {/* User Quick Info Banner (Clean without external action buttons) */}
         {profile && (
           <div
-            className="rounded-4 p-3 p-md-4 mb-4 bg-white d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 shadow-sm border"
+            className="rounded-4 p-3 p-md-4 mb-4 bg-white d-flex align-items-center gap-3 shadow-sm border"
             style={{ borderColor: "#ebdcc5" }}
           >
-            <div className="d-flex align-items-center gap-3">
-              <div
-                className="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold fs-3 shadow-sm flex-shrink-0"
-                style={{
-                  width: 64,
-                  height: 64,
-                  background: "linear-gradient(135deg, #198754, #146c43)",
-                }}
-              >
-                {profile.name ? profile.name.charAt(0).toUpperCase() : "U"}
-              </div>
-              <div>
-                <h5 className="fw-bold mb-1 text-dark">{profile.name || "Customer"}</h5>
-                <div className="text-muted small d-flex align-items-center gap-2">
-                  <span>{profile.email}</span>
-                  <span className="badge bg-success bg-opacity-10 text-success rounded-pill fw-medium" style={{ fontSize: "0.68rem" }}>
-                    <i className="bi bi-patch-check-fill me-1" />
-                    Verified
-                  </span>
-                </div>
-                <div className="text-muted mt-1" style={{ fontSize: "0.75rem" }}>
-                  Role: <strong className="text-uppercase text-secondary">{profile.role || "Customer"}</strong>
-                  {profile.createdAt && (
-                    <span className="ms-2">
-                      • Member since {new Date(profile.createdAt).toLocaleDateString("en-PH", { month: "short", year: "numeric" })}
-                    </span>
-                  )}
-                </div>
-              </div>
+            <div
+              className="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold fs-3 shadow-sm flex-shrink-0"
+              style={{
+                width: 64,
+                height: 64,
+                background: "linear-gradient(135deg, #198754, #146c43)",
+              }}
+            >
+              {profile.name ? profile.name.charAt(0).toUpperCase() : "U"}
             </div>
-
-            <div className="d-flex gap-2">
-              <Link href="/my-orders" className="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold">
-                <i className="bi bi-receipt me-1" />
-                My Orders
-              </Link>
+            <div>
+              <h5 className="fw-bold mb-1 text-dark">{profile.name || "Customer"}</h5>
+              <div className="text-muted small d-flex align-items-center gap-2">
+                <span>{profile.email}</span>
+                <span className="badge bg-success bg-opacity-10 text-success rounded-pill fw-medium" style={{ fontSize: "0.68rem" }}>
+                  <i className="bi bi-patch-check-fill me-1" />
+                  Verified
+                </span>
+              </div>
+              <div className="text-muted mt-1" style={{ fontSize: "0.75rem" }}>
+                Role: <strong className="text-uppercase text-secondary">{profile.role || "Customer"}</strong>
+                {profile.createdAt && (
+                  <span className="ms-2">
+                    • Member since {new Date(profile.createdAt).toLocaleDateString("en-PH", { month: "short", year: "numeric" })}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -301,12 +281,12 @@ export default function AccountPage() {
           <button
             type="button"
             className={`btn btn-sm rounded-pill px-3 py-1.5 fw-semibold transition-all ${
-              activeTab === "orders" ? "btn-success" : "btn-light text-muted border bg-white"
+              activeTab === "notifications" ? "btn-success" : "btn-light text-muted border bg-white"
             }`}
-            onClick={() => setActiveTab("orders")}
+            onClick={() => setActiveTab("notifications")}
           >
             <i className="bi bi-bell me-1.5" />
-            Orders &amp; Notifications
+            Notifications
           </button>
         </div>
 
@@ -362,7 +342,7 @@ export default function AccountPage() {
                     placeholder="e.g. 0912 345 6789"
                   />
                   <div className="form-text small" style={{ fontSize: "0.72rem" }}>
-                    Used by courier couriers for delivery updates and GCash verification.
+                    Used by couriers for delivery updates and GCash verification.
                   </div>
                 </div>
 
@@ -618,118 +598,71 @@ export default function AccountPage() {
           </div>
         )}
 
-        {/* ── TAB 4: ORDERS & NOTIFICATIONS (RECOMMENDED) ── */}
-        {activeTab === "orders" && (
-          <div className="d-flex flex-column gap-3">
-            {/* Quick Order Hub */}
-            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white" style={{ border: "1px solid #ebdcc5" }}>
-              <h6 className="fw-bold text-dark mb-1">Quick Orders &amp; Craft Activities</h6>
-              <p className="text-muted small mb-3">
-                Review your purchases, delivery milestones, and custom artisan craft inquiries.
-              </p>
+        {/* ── TAB 4: NOTIFICATIONS & PREFERENCES ── */}
+        {activeTab === "notifications" && (
+          <div className="card border-0 shadow-sm rounded-4 p-4 bg-white" style={{ border: "1px solid #ebdcc5" }}>
+            <h6 className="fw-bold text-dark mb-1">Email Notification Preferences</h6>
+            <p className="text-muted small mb-3">
+              Choose the emails you want to receive from Celsa Handicrafts.
+            </p>
 
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <div className="border rounded-3 p-3 bg-light h-100 d-flex flex-column justify-content-between">
-                    <div>
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <i className="bi bi-box-seam fs-4 text-success" />
-                        <h6 className="fw-bold mb-0 text-dark">My Purchase Orders</h6>
-                      </div>
-                      <p className="small text-muted mb-3" style={{ fontSize: "0.8rem" }}>
-                        View live status (Pending, Crafting, Out for Delivery), order summaries, and payment receipts.
-                      </p>
-                    </div>
-                    <Link href="/my-orders" className="btn btn-success btn-sm rounded-pill px-3 fw-semibold">
-                      Track All Orders &rarr;
-                    </Link>
-                  </div>
-                </div>
+            {notifSuccess && (
+              <div className="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                <i className="bi bi-check-circle-fill fs-6 text-success" />
+                <span>Preferences saved successfully!</span>
+              </div>
+            )}
 
-                <div className="col-md-6">
-                  <div className="border rounded-3 p-3 bg-light h-100 d-flex flex-column justify-content-between">
-                    <div>
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <i className="bi bi-palette fs-4 text-success" />
-                        <h6 className="fw-bold mb-0 text-dark">Custom Handicrafts</h6>
-                      </div>
-                      <p className="small text-muted mb-3" style={{ fontSize: "0.8rem" }}>
-                        Submit unique specifications, preferred fiber materials, and custom dimensions.
-                      </p>
-                    </div>
-                    <Link href="/custom-orders" className="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold">
-                      New Custom Request &rarr;
-                    </Link>
-                  </div>
+            <div className="d-flex flex-column gap-3 mb-4">
+              <div className="form-check form-switch d-flex align-items-center justify-content-between ps-0">
+                <div>
+                  <label className="form-check-label fw-semibold text-dark d-block" htmlFor="orderNotifSwitch">
+                    Order Milestones &amp; Tracking Alerts
+                  </label>
+                  <span className="text-muted small" style={{ fontSize: "0.75rem" }}>
+                    Get notified when your order is confirmed, crafted, or out for delivery.
+                  </span>
                 </div>
+                <input
+                  className="form-check-input ms-3 fs-5"
+                  type="checkbox"
+                  role="switch"
+                  id="orderNotifSwitch"
+                  checked={orderEmailNotifs}
+                  onChange={(e) => setOrderEmailNotifs(e.target.checked)}
+                />
+              </div>
+
+              <hr className="my-1 text-muted opacity-25" />
+
+              <div className="form-check form-switch d-flex align-items-center justify-content-between ps-0">
+                <div>
+                  <label className="form-check-label fw-semibold text-dark d-block" htmlFor="promoNotifSwitch">
+                    Artisan News &amp; Seasonal Handicrafts
+                  </label>
+                  <span className="text-muted small" style={{ fontSize: "0.75rem" }}>
+                    Discover newly released baskets, woven bags, and festive holiday promos.
+                  </span>
+                </div>
+                <input
+                  className="form-check-input ms-3 fs-5"
+                  type="checkbox"
+                  role="switch"
+                  id="promoNotifSwitch"
+                  checked={promoEmailNotifs}
+                  onChange={(e) => setPromoEmailNotifs(e.target.checked)}
+                />
               </div>
             </div>
 
-            {/* Notification Preferences */}
-            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white" style={{ border: "1px solid #ebdcc5" }}>
-              <h6 className="fw-bold text-dark mb-1">Email Notification Preferences</h6>
-              <p className="text-muted small mb-3">
-                Choose the emails you want to receive from Celsa Handicrafts.
-              </p>
-
-              {notifSuccess && (
-                <div className="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
-                  <i className="bi bi-check-circle-fill fs-6 text-success" />
-                  <span>Preferences saved successfully!</span>
-                </div>
-              )}
-
-              <div className="d-flex flex-column gap-3 mb-3">
-                <div className="form-check form-switch d-flex align-items-center justify-content-between ps-0">
-                  <div>
-                    <label className="form-check-label fw-semibold text-dark d-block" htmlFor="orderNotifSwitch">
-                      Order Milestones &amp; Tracking Alerts
-                    </label>
-                    <span className="text-muted small" style={{ fontSize: "0.75rem" }}>
-                      Get notified when your order is confirmed, crafted, or out for delivery.
-                    </span>
-                  </div>
-                  <input
-                    className="form-check-input ms-3 fs-5"
-                    type="checkbox"
-                    role="switch"
-                    id="orderNotifSwitch"
-                    checked={orderEmailNotifs}
-                    onChange={(e) => setOrderEmailNotifs(e.target.checked)}
-                  />
-                </div>
-
-                <hr className="my-1 text-muted opacity-25" />
-
-                <div className="form-check form-switch d-flex align-items-center justify-content-between ps-0">
-                  <div>
-                    <label className="form-check-label fw-semibold text-dark d-block" htmlFor="promoNotifSwitch">
-                      Artisan News &amp; Seasonal Handicrafts
-                    </label>
-                    <span className="text-muted small" style={{ fontSize: "0.75rem" }}>
-                      Discover newly released baskets, woven bags, and festive holiday promos.
-                    </span>
-                  </div>
-                  <input
-                    className="form-check-input ms-3 fs-5"
-                    type="checkbox"
-                    role="switch"
-                    id="promoNotifSwitch"
-                    checked={promoEmailNotifs}
-                    onChange={(e) => setPromoEmailNotifs(e.target.checked)}
-                  />
-                </div>
-              </div>
-
-              <div className="d-flex justify-content-end">
-                <button
-                  type="button"
-                  className="btn btn-outline-success btn-sm rounded-pill px-4 fw-semibold"
-                  onClick={handleSaveNotifs}
-                >
-                  Save Notification Settings
-                </button>
-              </div>
+            <div className="d-flex justify-content-end">
+              <button
+                type="button"
+                className="btn btn-outline-success btn-sm rounded-pill px-4 fw-semibold"
+                onClick={handleSaveNotifs}
+              >
+                Save Notification Settings
+              </button>
             </div>
           </div>
         )}
