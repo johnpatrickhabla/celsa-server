@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function AboutPage() {
   return (
     <div className="container-fluid px-4 py-5">
@@ -12,8 +10,10 @@ export default function AboutPage() {
       >
         {/* Story section at top */}
         <div className="border rounded-4 p-4 p-md-5 bg-white shadow-sm mb-4">
+          <div className="text-center mb-4">
+            <h3 className="fw-bold text-dark mb-0">Our Story &amp; Craftsmanship</h3>
+          </div>
           <div className="d-flex flex-column">
-            <h3 className="fw-bold mb-3 text-dark">Our Story &amp; Craftsmanship</h3>
             <p className="text-muted mb-3" style={{ lineHeight: 1.7 }}>
               Founded in 2024 by Celsa L. Gabrentina, Celsa Handicrafts is a local handicraft business located in Sitio Comon, Barangay Bangate, Barcelona, Sorsogon. We create and sell handcrafted products made from natural and locally available materials such as buri, bariw, karagumoy, bandala, and other similar materials.
             </p>
@@ -23,17 +23,9 @@ export default function AboutPage() {
             <p className="text-muted mb-3" style={{ lineHeight: 1.7 }}>
               Our products are created through a hands-on production process, with selected workers contributing to the crafting of orders from their homes when additional assistance is needed. Once completed, the finished products are collected and stored at our residence before being prepared for delivery or shipment.
             </p>
-            <p className="text-muted mb-4" style={{ lineHeight: 1.7 }}>
+            <p className="text-muted mb-0" style={{ lineHeight: 1.7 }}>
               At Celsa Handicrafts, we value the use of locally available materials and the hands-on craftsmanship that goes into every product. Through our handcrafted and customized creations, we aim to provide products that are made with care and shaped according to the needs and preferences of our customers.
             </p>
-            <div className="d-flex gap-3 flex-wrap">
-              <Link href="/products" className="btn btn-success px-4 py-2 rounded-3 shadow-sm">
-                Browse Collection
-              </Link>
-              <Link href="/custom-orders" className="btn btn-outline-success px-4 py-2 rounded-3">
-                Start Customization
-              </Link>
-            </div>
           </div>
         </div>
 
