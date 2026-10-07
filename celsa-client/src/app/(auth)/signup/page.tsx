@@ -36,7 +36,7 @@ function SignupPageContent() {
   }, [isAuthenticated, user, nextPath, router, justLoggedIn]);
 
   function handleClose() {
-    router.push("/my-orders");
+    router.push("/");
   }
 
   return (

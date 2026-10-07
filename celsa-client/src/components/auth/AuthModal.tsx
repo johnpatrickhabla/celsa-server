@@ -17,7 +17,7 @@ export default function AuthModal({
   initialTab = "login",
   onSuccess,
 }: AuthModalProps) {
-  const { login, signup } = useAuthStore();
+  const { login, signup, logout } = useAuthStore();
   const [tab, setTab] = useState<"login" | "signup" | "forgot">(initialTab);
 
   const [name, setName] = useState("");
@@ -259,10 +259,17 @@ export default function AuthModal({
         newPassword,
       });
       setLoading(false);
+      // Ensure user is completely logged out and not directed into a logged-in state
+      try {
+        await logout();
+      } catch {
+        // quiet
+      }
       setSuccessMsg(res.data.message || "Your password has been updated! Please log in with your new password.");
       setTab("login");
       setForgotStep("request");
       setCodeDigits(["", "", "", "", "", ""]);
+      setPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
@@ -412,6 +419,22 @@ export default function AuthModal({
                           "Send Verification Code"
                         )}
                       </button>
+
+                      <div className="text-center mt-3 pt-2 border-top">
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-success fw-semibold text-decoration-none small"
+                          onClick={() => {
+                            setTab("login");
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          <i className="bi bi-arrow-left me-1" />
+                          Back to Log In
+                        </button>
+                      </div>
                     </form>
                   </>
                 ) : forgotStep === "code" ? (
@@ -490,7 +513,7 @@ export default function AuthModal({
                       <button
                         id="verify-code-btn"
                         type="submit"
-                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-0"
+                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-2"
                         disabled={loading || resetCode.length !== 6}
                       >
                         {loading ? (
@@ -502,6 +525,33 @@ export default function AuthModal({
                           "Verify Code"
                         )}
                       </button>
+
+                      <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-muted small p-0"
+                          onClick={() => {
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          <i className="bi bi-arrow-left me-1" />
+                          Change Email
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-success fw-semibold text-decoration-none small"
+                          onClick={() => {
+                            setTab("login");
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          Back to Log In
+                        </button>
+                      </div>
                     </form>
                   </>
                 ) : (
@@ -591,6 +641,33 @@ export default function AuthModal({
                           "Update Password"
                         )}
                       </button>
+
+                      <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <button
+                          type="button"
+                          className="btn btn-link text-decoration-none text-muted small p-0"
+                          onClick={() => {
+                            setForgotStep("code");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          <i className="bi bi-arrow-left me-1" />
+                          Back to Code
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-success fw-semibold text-decoration-none small"
+                          onClick={() => {
+                            setTab("login");
+                            setForgotStep("request");
+                            setError(null);
+                            setSuccessMsg(null);
+                          }}
+                        >
+                          Back to Log In
+                        </button>
+                      </div>
                     </form>
                   </>
                 )}
@@ -642,6 +719,13 @@ export default function AuthModal({
                   <div className="alert alert-warning py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
                     <i className="bi bi-clock-history fs-6 flex-shrink-0" />
                     <span>{notice}</span>
+                  </div>
+                )}
+
+                {successMsg && (
+                  <div className="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                    <i className="bi bi-check-circle-fill fs-6 flex-shrink-0 text-success" />
+                    <span>{successMsg}</span>
                   </div>
                 )}
 
