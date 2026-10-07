@@ -10,38 +10,61 @@ interface ProductCardProps {
   onViewDetails?: (product: Product) => void;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  onQuickAdd,
+  onViewDetails,
+}: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [addedAnim, setAddedAnim] = useState(false);
 
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 5);
+
+  function handleBagClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isOutOfStock || !onQuickAdd) return;
+    onQuickAdd(product);
+    setAddedAnim(true);
+    setTimeout(() => setAddedAnim(false), 900);
+  }
+
+  function handleQuickViewClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onViewDetails) {
+      onViewDetails(product);
+    }
+  }
 
   const primaryImage = product.images?.[0]?.url;
   const secondaryImage = product.images?.[1]?.url || primaryImage;
 
   return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="shein-card h-100 d-flex flex-column text-decoration-none"
+    <div
+      className="shein-card h-100 d-flex flex-column position-relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* ── IMAGE WRAPPER (SHEIN 3:4 ASPECT RATIO) ── */}
       <div className="shein-media-wrap position-relative overflow-hidden">
-        {primaryImage ? (
-          <img
-            src={isHovered && secondaryImage ? secondaryImage : primaryImage}
-            alt={product.name}
-            className="shein-product-img w-100 h-100 d-block"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/images/hero-basket.png";
-            }}
-          />
-        ) : (
-          <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
-            <i className="bi bi-image fs-1" />
-          </div>
-        )}
+        <Link href={`/products/${product.slug}`} className="d-block w-100 h-100">
+          {primaryImage ? (
+            <img
+              src={isHovered && secondaryImage ? secondaryImage : primaryImage}
+              alt={product.name}
+              className="shein-product-img w-100 h-100 d-block"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/images/hero-basket.png";
+              }}
+            />
+          ) : (
+            <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
+              <i className="bi bi-image fs-1" />
+            </div>
+          )}
+        </Link>
 
         {/* ── SHEIN BADGES (TOP-LEFT) ── */}
         <div className="shein-badges-container position-absolute top-0 start-0 p-2 d-flex flex-column gap-1">
@@ -53,9 +76,36 @@ export default function ProductCard({ product }: ProductCardProps) {
             <span className="shein-badge shein-badge-custom">Customizable</span>
           ) : null}
         </div>
+
+        {/* ── IN-LINE ACTIONS AT BOTTOM OF IMAGE: QUICK VIEW & ADD CART ICON ── */}
+        <div className="shein-image-actions position-absolute bottom-0 start-0 w-100 p-2 d-flex align-items-center gap-2">
+          <button
+            type="button"
+            className="shein-quick-view-btn flex-grow-1"
+            onClick={handleQuickViewClick}
+            aria-label={`Quick View ${product.name}`}
+          >
+            <i className="bi bi-eye me-1" />
+            Quick View
+          </button>
+          <button
+            type="button"
+            className={`shein-bag-btn flex-shrink-0 ${addedAnim ? "added" : ""} ${isOutOfStock ? "disabled" : ""}`}
+            onClick={handleBagClick}
+            disabled={isOutOfStock}
+            aria-label={`Add ${product.name} to cart`}
+            title={isOutOfStock ? "Out of Stock" : "Quick Add to Cart"}
+          >
+            {addedAnim ? (
+              <i className="bi bi-check-lg" />
+            ) : (
+              <i className="bi bi-bag-plus" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* ── PRODUCT DETAILS (SHEIN STYLE CLEAN BOTTOM SECTION) ── */}
+      {/* ── PRODUCT DETAILS (CLEAN BOTTOM SECTION - NO BUTTONS, NO RATINGS) ── */}
       <div className="shein-info-wrap p-2 p-sm-3 d-flex flex-column flex-grow-1 justify-content-between">
         <div>
           {/* Category / Material Tag */}
@@ -68,9 +118,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Product Title */}
-          <h3 className="shein-product-title mb-1" title={product.name}>
-            {product.name}
-          </h3>
+          <Link
+            href={`/products/${product.slug}`}
+            className="text-decoration-none text-dark d-block"
+          >
+            <h3 className="shein-product-title mb-1" title={product.name}>
+              {product.name}
+            </h3>
+          </Link>
         </div>
 
         {/* Price & Stock Status */}
@@ -83,6 +138,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

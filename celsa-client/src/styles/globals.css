@@ -201,6 +201,93 @@ body {
   color: #ffffff;
 }
 
+/* In-Line Image Actions (Quick View & Add to Cart Bag Icon) */
+.shein-image-actions {
+  z-index: 3;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.shein-card:hover .shein-image-actions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* On touch/mobile devices, actions remain comfortably accessible */
+@media (hover: none), (max-width: 768px) {
+  .shein-image-actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+.shein-quick-view-btn {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #111111;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 20px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  height: 38px;
+}
+
+.shein-quick-view-btn:hover {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+.shein-bag-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  color: #111111;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.shein-bag-btn:hover:not(.disabled) {
+  background: #198754;
+  color: #ffffff;
+  border-color: #198754;
+  transform: scale(1.08);
+  box-shadow: 0 5px 14px rgba(25, 135, 84, 0.35);
+}
+
+.shein-bag-btn.added {
+  background: #198754;
+  color: #ffffff;
+  border-color: #198754;
+  transform: scale(1.08);
+}
+
+.shein-bag-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0;
+  color: #999999;
+}
+
 /* Details Section */
 .shein-info-wrap {
   background: #ffffff;
