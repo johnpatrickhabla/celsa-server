@@ -405,7 +405,7 @@ export default function AuthModal({
 
                       <button
                         type="submit"
-                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm mb-2"
+                        className="btn btn-success w-100 rounded-3 py-2 fw-bold shadow-sm"
                         disabled={loading}
                       >
                         {loading ? (
@@ -417,22 +417,6 @@ export default function AuthModal({
                           "Send Verification Code"
                         )}
                       </button>
-
-                      <div className="text-center mt-3 pt-2 border-top">
-                        <button
-                          type="button"
-                          className="btn btn-link p-0 text-success fw-semibold text-decoration-none small"
-                          onClick={() => {
-                            setTab("login");
-                            setForgotStep("request");
-                            setError(null);
-                            setSuccessMsg(null);
-                          }}
-                        >
-                          <i className="bi bi-arrow-left me-1" />
-                          Back to Log In
-                        </button>
-                      </div>
                     </form>
                   </>
                 ) : forgotStep === "code" ? (
