@@ -7,12 +7,12 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 
 interface Props {
   items: NavItem[];
-  variant: "admin" | "staff";
-  userName: string;
-  userSubtitle: string;
+  variant?: "admin" | "staff";
+  userName?: string;
+  userSubtitle?: string;
 }
 
-export default function DashboardSidebar({ items, variant, userName, userSubtitle }: Props) {
+export default function DashboardSidebar({ items }: Props) {
   const pathname = usePathname();
   const { isOpen } = useSidebarStore();
 
@@ -36,32 +36,10 @@ export default function DashboardSidebar({ items, variant, userName, userSubtitl
     >
       <div style={{ width: 250 }}>
         {/* Brand Header */}
-        <div className="brand-link px-4 py-3 d-flex align-items-center gap-2 border-bottom border-secondary border-opacity-25">
-          <i className="bi bi-flower1 fs-3 text-warning" />
-          <div>
-            <span className="brand-text fw-bold fs-5 text-uppercase" style={{ letterSpacing: 1 }}>
-              CELSA
-            </span>
-            <span className="d-block text-muted" style={{ fontSize: "0.65rem", marginTop: "-3px" }}>
-              {variant === "admin" ? "Admin Portal" : "Staff Operations"}
-            </span>
-          </div>
-        </div>
-
-        {/* Sidebar User Panel */}
-        <div className="user-panel px-3 py-3 d-flex align-items-center gap-3 border-bottom border-secondary border-opacity-25">
-          <div
-            className="rounded-circle bg-success bg-opacity-25 text-success d-flex align-items-center justify-content-center fw-bold"
-            style={{ width: 38, height: 38, fontSize: "0.9rem" }}
-          >
-            {userName.charAt(0).toUpperCase()}
-          </div>
-          <div className="info overflow-hidden">
-            <span className="d-block fw-semibold text-truncate small mb-0 text-white">{userName}</span>
-            <small className="text-muted" style={{ fontSize: "0.7rem" }}>
-              {userSubtitle}
-            </small>
-          </div>
+        <div className="brand-link px-4 py-3 d-flex align-items-center border-bottom border-secondary border-opacity-25">
+          <span className="brand-text fw-bold fs-5 text-uppercase" style={{ letterSpacing: 1.5 }}>
+            CELSA
+          </span>
         </div>
 
         {/* Sidebar Navigation */}

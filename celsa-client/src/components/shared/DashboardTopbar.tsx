@@ -28,9 +28,6 @@ export default function DashboardTopbar({ title, roleLabel }: Props) {
             <i className="bi bi-list fs-5 text-dark" />
           </button>
           <h5 className="mb-0 fw-bold text-dark">{title}</h5>
-          <span className="badge bg-success bg-opacity-10 text-success fw-normal px-2.5 py-1 rounded-pill" style={{ fontSize: "0.7rem" }}>
-            {roleLabel} Panel
-          </span>
         </div>
 
         {/* Right side icons & user menu */}
