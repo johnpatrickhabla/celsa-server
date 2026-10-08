@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "node --watch server.js",
     "start": "node server.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "reset-products": "node scripts/reset-products.js",
+    "reset-all": "node scripts/reset-all.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
