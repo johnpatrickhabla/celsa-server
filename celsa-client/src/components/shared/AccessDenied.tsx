@@ -105,13 +105,31 @@ export default function AccessDenied({
 
         {/* Action Buttons */}
         <div className="d-flex flex-column flex-sm-row gap-2 justify-content-center">
-          <Link
-            href="/"
-            className="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold small shadow-sm"
-          >
-            <i className="bi bi-house-door me-1.5" />
-            Back to Store
-          </Link>
+          {isAuthenticated && user?.role === "admin" ? (
+            <Link
+              href="/admin/dashboard"
+              className="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold small shadow-sm"
+            >
+              <i className="bi bi-speedometer2 me-1.5" />
+              Go to Admin Dashboard
+            </Link>
+          ) : isAuthenticated && user?.role === "staff" ? (
+            <Link
+              href="/staff/dashboard"
+              className="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold small shadow-sm"
+            >
+              <i className="bi bi-speedometer2 me-1.5" />
+              Go to Staff Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/"
+              className="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold small shadow-sm"
+            >
+              <i className="bi bi-house-door me-1.5" />
+              Back to Store
+            </Link>
+          )}
 
           {isAuthenticated ? (
             <button

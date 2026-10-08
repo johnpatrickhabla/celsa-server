@@ -798,20 +798,6 @@ export default function CustomerNavbar() {
                         <i className="bi bi-gear me-2" />Account Settings
                       </Link>
                     </li>
-                    {(user.role === "admin" || user.role === "staff") && (
-                      <>
-                        <li><hr className="dropdown-divider" /></li>
-                        <li>
-                          <Link
-                            className="dropdown-item small"
-                            href={user.role === "admin" ? "/admin/dashboard" : "/staff/dashboard"}
-                            onClick={() => setDropdownOpen(false)}
-                          >
-                            <i className="bi bi-speedometer2 me-2" />Dashboard
-                          </Link>
-                        </li>
-                      </>
-                    )}
                     <li><hr className="dropdown-divider" /></li>
                     <li>
                       <button
