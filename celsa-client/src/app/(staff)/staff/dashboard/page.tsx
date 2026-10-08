@@ -65,54 +65,6 @@ export default function StaffDashboardPage() {
     <>
       <DashboardTopbar title="Operational Command Center" roleLabel="Staff" />
       <div className="container-fluid px-4 py-4">
-        {/* Operational Command Center Header Container */}
-        <div
-          className="rounded-4 p-4 mb-4 shadow-sm position-relative overflow-hidden"
-          style={{
-            backgroundColor: "#fcfaf6",
-            border: "1px solid #ebdcc5",
-          }}
-        >
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div className="d-flex align-items-center gap-3">
-              <div
-                className="rounded-3 d-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
-                style={{
-                  width: 52,
-                  height: 52,
-                  backgroundColor: "#6b3a20",
-                  color: "#d4af37",
-                }}
-              >
-                <i className="bi bi-speedometer2 fs-4" />
-              </div>
-              <div>
-                <div className="d-flex align-items-center gap-2 flex-wrap">
-                  <h4 className="fw-bold text-dark mb-0">Operational Command Center</h4>
-                  <span
-                    className="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1 text-uppercase"
-                    style={{ fontSize: "0.68rem", letterSpacing: "0.5px" }}
-                  >
-                    Staff Panel
-                  </span>
-                </div>
-                <p className="text-muted small mb-0 mt-1">
-                  Active crafting queue, assigned order tasks, and daily handicraft production progress
-                </p>
-              </div>
-            </div>
-            <div className="d-flex align-items-center gap-2 flex-shrink-0">
-              <span
-                className="badge rounded-pill px-3 py-2 text-success border border-success border-opacity-25 bg-success bg-opacity-10 d-flex align-items-center gap-1.5"
-                style={{ fontSize: "0.78rem" }}
-              >
-                <span className="rounded-circle bg-success" style={{ width: 7, height: 7, display: "inline-block" }} />
-                Shift Active
-              </span>
-            </div>
-          </div>
-        </div>
-
         {loading ? (
           <LoadingSkeleton variant="dashboard" />
         ) : (
