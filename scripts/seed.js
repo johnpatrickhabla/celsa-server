@@ -45,6 +45,7 @@ const CATEGORIES = [
   { name: "Trays", description: "Decorative and functional handicraft trays" },
   { name: "Home Decor", description: "Handmade home decoration items" },
   { name: "Accessories", description: "Handcrafted personal accessories and small items" },
+  { name: "Hats", description: "Traditional native handwoven hats crafted from local natural fibers" },
 ];
 
 async function seed() {
