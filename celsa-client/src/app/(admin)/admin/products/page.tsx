@@ -152,11 +152,15 @@ export default function AdminProductsPage() {
                       </td>
                       <td>
                         <button
-                          className={`btn btn-sm ${p.isActive ? "btn-outline-success" : "btn-outline-secondary"}`}
-                          style={{ fontSize: "0.7rem", padding: "0.15rem 0.5rem" }}
+                          className={`btn btn-sm rounded-pill fw-semibold ${
+                            p.isActive ? "btn-success text-white" : "btn-secondary text-white"
+                          }`}
+                          style={{ fontSize: "0.72rem", padding: "0.2rem 0.65rem" }}
                           onClick={() => toggleActive(p)}
+                          title="Click to toggle visibility on storefront"
                         >
-                          {p.isActive ? "Active" : "Inactive"}
+                          <i className={`bi ${p.isActive ? "bi-check-circle-fill" : "bi-eye-slash"} me-1`} />
+                          {p.isActive ? "Live" : "Hidden"}
                         </button>
                       </td>
                       <td className="text-end">

@@ -153,6 +153,7 @@ exports.create = async (req, res) => {
       stock: stock || 0,
       lowStockThreshold: lowStockThreshold || 5,
       isFeatured: isFeatured || false,
+      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
       customizationOptions: customizationOptions || [],
       images: images || [],
     });

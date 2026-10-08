@@ -171,6 +171,7 @@ export default function NewProductPage() {
         stock: parseInt(form.stock) || 0,
         lowStockThreshold: parseInt(form.lowStockThreshold) || 5,
         isFeatured: form.isFeatured,
+        isActive: true,
         images: finalImageUrl ? [{ url: finalImageUrl }] : [],
         customizationOptions: options,
       };
