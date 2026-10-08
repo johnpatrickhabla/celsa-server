@@ -203,37 +203,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* 3. Quick Action Shortcuts */}
-            <div className="celsa-stat-card bg-white p-3 mb-4 rounded-4 shadow-sm border">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h6 className="fw-bold mb-0 text-dark small text-uppercase">
-                  <i className="bi bi-lightning-charge text-warning me-1" /> Quick Management Actions
-                </h6>
-                <span className="text-muted" style={{ fontSize: "0.75rem" }}>
-                  Fast administrative shortcuts
-                </span>
-              </div>
-              <div className="d-flex gap-2 flex-wrap">
-                <Link href="/admin/products/new" className="btn btn-sm btn-success rounded-3 px-3 py-2 fw-semibold">
-                  <i className="bi bi-plus-circle me-1" /> Add New Product
-                </Link>
-                <Link href="/admin/customization" className="btn btn-sm btn-outline-secondary rounded-3 px-3 py-2">
-                  <i className="bi bi-palette me-1 text-purple" /> Review Custom Requests
-                </Link>
-                <Link href="/admin/orders" className="btn btn-sm btn-outline-secondary rounded-3 px-3 py-2">
-                  <i className="bi bi-truck me-1 text-primary" /> Fulfill &amp; Track Shipments
-                </Link>
-                <Link href="/admin/production" className="btn btn-sm btn-outline-secondary rounded-3 px-3 py-2">
-                  <i className="bi bi-person-check me-1 text-info" /> Assign Staff to Tasks
-                </Link>
-                <Link href="/admin/inventory" className="btn btn-sm btn-outline-secondary rounded-3 px-3 py-2">
-                  <i className="bi bi-clipboard-data me-1 text-danger" /> Update Stock Levels
-                </Link>
-                <Link href="/admin/reports" className="btn btn-sm btn-outline-dark rounded-3 px-3 py-2 ms-auto">
-                  <i className="bi bi-bar-chart me-1" /> View Full Analytics →
-                </Link>
-              </div>
-            </div>
 
             {/* 4. Main Operational Feed */}
             <div className="row g-4">
