@@ -9,7 +9,9 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("celsa_access_token");
+    const token =
+      sessionStorage.getItem("celsa_access_token") ||
+      localStorage.getItem("celsa_access_token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -63,7 +65,16 @@ api.interceptors.response.use(
         const newToken = res.data?.accessToken;
 
         if (newToken) {
-          localStorage.setItem("celsa_access_token", newToken);
+          const wasInSession =
+            typeof window !== "undefined" &&
+            !!sessionStorage.getItem("celsa_access_token");
+
+          if (wasInSession) {
+            sessionStorage.setItem("celsa_access_token", newToken);
+          } else {
+            localStorage.setItem("celsa_access_token", newToken);
+          }
+
           api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
           originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
           processQueue(null);
@@ -71,8 +82,9 @@ api.interceptors.response.use(
         }
       } catch (refreshErr) {
         processQueue(refreshErr);
-        // Session expired (e.g. 1 day exceeded) -> clean up auth state
+        // Session expired -> clean up auth state
         if (typeof window !== "undefined") {
+          sessionStorage.removeItem("celsa_access_token");
           localStorage.removeItem("celsa_access_token");
           document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
         }

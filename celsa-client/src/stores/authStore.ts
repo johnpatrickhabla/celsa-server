@@ -30,8 +30,13 @@ interface AuthState {
 }
 
 function setClientCookie(token: string, role?: string) {
-  const maxAge = role === "customer" ? 86400 : 7 * 86400; // 1 day for customer, 7 days for staff/admin
-  document.cookie = `celsa_token=${token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  if (role === "admin" || role === "staff") {
+    // Session-only cookie for admin/staff: no max-age so browser discards it on exit
+    document.cookie = `celsa_token=${token}; path=/; SameSite=Lax`;
+  } else {
+    // Persistent cookie for customers (1 day)
+    document.cookie = `celsa_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+  }
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -41,12 +46,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setUser: (user) => set({ user }),
 
   hydrate: async () => {
-    const token = localStorage.getItem("celsa_access_token");
+    if (typeof window === "undefined") return;
+
+    const sessionToken = sessionStorage.getItem("celsa_access_token");
+    const localToken = localStorage.getItem("celsa_access_token");
+    const pathname = window.location.pathname;
+    const isAdminOrStaffRoute = pathname.startsWith("/admin") || pathname.startsWith("/staff");
+
+    // If visiting admin/staff and no tab session token exists, the previous tab was closed!
+    // Admin/staff sessions must NEVER survive a closed tab.
+    if (isAdminOrStaffRoute && !sessionToken) {
+      localStorage.removeItem("celsa_access_token");
+      document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+      set({ user: null, accessToken: null, isAuthenticated: false });
+      return;
+    }
+
+    const token = sessionToken || localToken;
     if (token) {
       try {
         const payload = jwtDecode<CelsaJwtPayload>(token);
         // Check expiration
         if (payload.exp && payload.exp * 1000 > Date.now()) {
+          // If the token belongs to admin or staff, ensure it was strictly stored in sessionStorage
+          if ((payload.role === "admin" || payload.role === "staff") && !sessionToken) {
+            localStorage.removeItem("celsa_access_token");
+            document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+            set({ user: null, accessToken: null, isAuthenticated: false });
+            return;
+          }
+
           set({
             user: {
               _id: payload.sub,
@@ -64,7 +93,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     }
 
-    // Token missing or expired — try refresh token cookie quietly
+    // If on admin or staff route and token is missing or expired, do not quietly refresh
+    if (isAdminOrStaffRoute) {
+      localStorage.removeItem("celsa_access_token");
+      sessionStorage.removeItem("celsa_access_token");
+      document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+      set({ user: null, accessToken: null, isAuthenticated: false });
+      return;
+    }
+
+    // For customer storefront: Token missing or expired — try refresh token cookie quietly
     await get().refresh();
   },
 
@@ -72,7 +110,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const res = await api.post("/auth/login", { email, password });
     const { accessToken, user } = res.data;
 
-    localStorage.setItem("celsa_access_token", accessToken);
+    if (user?.role === "admin" || user?.role === "staff") {
+      sessionStorage.setItem("celsa_access_token", accessToken);
+      localStorage.removeItem("celsa_access_token");
+    } else {
+      localStorage.setItem("celsa_access_token", accessToken);
+      sessionStorage.removeItem("celsa_access_token");
+    }
     setClientCookie(accessToken, user?.role);
 
     set({
@@ -88,6 +132,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (accessToken) {
       localStorage.setItem("celsa_access_token", accessToken);
+      sessionStorage.removeItem("celsa_access_token");
       setClientCookie(accessToken, user?.role);
 
       set({
@@ -105,8 +150,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch {
       // ignore network errors
     }
-    localStorage.removeItem("celsa_access_token");
-    document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("celsa_access_token");
+      sessionStorage.removeItem("celsa_access_token");
+      document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+    }
     set({ user: null, accessToken: null, isAuthenticated: false });
     if (shouldRedirect && typeof window !== "undefined") {
       window.location.href = "/";
@@ -119,7 +167,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { accessToken } = res.data;
       const payload = jwtDecode<CelsaJwtPayload>(accessToken);
 
-      localStorage.setItem("celsa_access_token", accessToken);
+      if (payload.role === "admin" || payload.role === "staff") {
+        sessionStorage.setItem("celsa_access_token", accessToken);
+        localStorage.removeItem("celsa_access_token");
+      } else {
+        localStorage.setItem("celsa_access_token", accessToken);
+        sessionStorage.removeItem("celsa_access_token");
+      }
       setClientCookie(accessToken, payload.role);
 
       set({
@@ -134,8 +188,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       return true;
     } catch {
-      localStorage.removeItem("celsa_access_token");
-      document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("celsa_access_token");
+        sessionStorage.removeItem("celsa_access_token");
+        document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+      }
       set({ user: null, accessToken: null, isAuthenticated: false });
       return false;
     }

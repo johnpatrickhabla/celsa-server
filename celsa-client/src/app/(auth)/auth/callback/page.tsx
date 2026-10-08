@@ -2,6 +2,7 @@
 
 import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "@/stores/authStore";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
@@ -21,8 +22,21 @@ function AuthCallbackContent() {
       }
 
       if (token) {
-        localStorage.setItem("celsa_access_token", token);
-        document.cookie = `celsa_token=${token}; path=/; SameSite=Lax`;
+        try {
+          const payload = jwtDecode<{ role?: string }>(token);
+          if (payload?.role === "admin" || payload?.role === "staff") {
+            sessionStorage.setItem("celsa_access_token", token);
+            localStorage.removeItem("celsa_access_token");
+            document.cookie = `celsa_token=${token}; path=/; SameSite=Lax`;
+          } else {
+            localStorage.setItem("celsa_access_token", token);
+            sessionStorage.removeItem("celsa_access_token");
+            document.cookie = `celsa_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+          }
+        } catch {
+          localStorage.setItem("celsa_access_token", token);
+          document.cookie = `celsa_token=${token}; path=/; SameSite=Lax`;
+        }
         await hydrate();
 
         const user = useAuthStore.getState().user;

@@ -73,6 +73,7 @@ export default function IdleTimeoutHandler() {
       if (typeof window !== "undefined") {
         try {
           localStorage.removeItem(STORAGE_KEY);
+          sessionStorage.removeItem("celsa_access_token");
         } catch {}
       }
       isLoggingOutRef.current = false;

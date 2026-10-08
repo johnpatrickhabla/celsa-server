@@ -17,11 +17,11 @@ function generateTokens(user) {
     expiresIn: process.env.JWT_EXPIRES_IN || "15m",
   });
 
-  // Customer sessions expire in 1 day; staff/admin default to 7 days
+  // Customer sessions expire in 1 day; staff/admin session token
   const isCustomer = user.role === "customer";
   const refreshExpiresIn = isCustomer
     ? process.env.JWT_CUSTOMER_REFRESH_EXPIRES_IN || "1d"
-    : process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+    : process.env.JWT_REFRESH_EXPIRES_IN || "8h";
 
   const refreshToken = jwt.sign(
     { sub: user._id, role: user.role },
@@ -34,22 +34,25 @@ function generateTokens(user) {
 
 /**
  * Get cookie configuration options based on environment and user role.
- * Customers receive a 1-day cookie; staff/admin receive 7 days.
+ * Customers receive a 1-day cookie; staff/admin receive session cookie (no maxAge).
  */
 function getCookieOptions(role) {
   const isProd = process.env.NODE_ENV === "production";
   const isCustomer = role === "customer";
-  const maxAge = isCustomer
-    ? 24 * 60 * 60 * 1000 // 1 day for customer portal
-    : 7 * 24 * 60 * 60 * 1000; // 7 days for staff/admin
 
-  return {
+  const options = {
     httpOnly: true,
     secure: isProd,
     sameSite: process.env.COOKIE_SAME_SITE || (isProd ? "none" : "lax"),
-    maxAge,
     path: "/",
   };
+
+  if (isCustomer) {
+    options.maxAge = 24 * 60 * 60 * 1000; // 1 day for customer portal
+  }
+  // For staff/admin: maxAge is omitted so cookie is deleted when browser session ends
+
+  return options;
 }
 
 /**
