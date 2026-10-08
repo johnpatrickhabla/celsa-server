@@ -11,17 +11,17 @@ const router = express.Router();
 router.get("/", categoryController.list);
 router.get("/:id", categoryController.getById);
 
-// Admin only
+// Admin & Staff
 router.post(
   "/",
   verifyToken,
-  requireRole("admin"),
+  requireRole("admin", "staff"),
   [body("name").trim().notEmpty().withMessage("Category name is required")],
   validate,
   categoryController.create
 );
 
-router.put("/:id", verifyToken, requireRole("admin"), categoryController.update);
-router.delete("/:id", verifyToken, requireRole("admin"), categoryController.remove);
+router.put("/:id", verifyToken, requireRole("admin", "staff"), categoryController.update);
+router.delete("/:id", verifyToken, requireRole("admin", "staff"), categoryController.remove);
 
 module.exports = router;

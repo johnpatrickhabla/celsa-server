@@ -11,14 +11,14 @@ const router = express.Router();
 router.get("/", productController.list);
 router.get("/:slug", productController.getBySlug);
 
-// Admin routes
-router.get("/admin/all", verifyToken, requireRole("admin"), productController.listAll);
-router.get("/id/:id", verifyToken, requireRole("admin"), productController.getById);
+// Admin & Staff routes
+router.get("/admin/all", verifyToken, requireRole("admin", "staff"), productController.listAll);
+router.get("/id/:id", verifyToken, requireRole("admin", "staff"), productController.getById);
 
 router.post(
   "/",
   verifyToken,
-  requireRole("admin"),
+  requireRole("admin", "staff"),
   [
     body("name").trim().notEmpty().withMessage("Product name is required"),
     body("category").notEmpty().withMessage("Category is required"),
@@ -30,7 +30,7 @@ router.post(
   productController.create
 );
 
-router.put("/:id", verifyToken, requireRole("admin"), productController.update);
-router.delete("/:id", verifyToken, requireRole("admin"), productController.remove);
+router.put("/:id", verifyToken, requireRole("admin", "staff"), productController.update);
+router.delete("/:id", verifyToken, requireRole("admin", "staff"), productController.remove);
 
 module.exports = router;
