@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decodeToken } from "@/lib/auth";
 
-/**
- * Frontend-side RBAC gate. This only controls page access/navigation —
- * it is NOT the security boundary. Every Express API route re-checks
- * role via its own middleware, since a token can be replayed directly
- * against the API without ever loading these pages.
- */
 const ADMIN_ONLY = ["/admin/reports", "/admin/users"];
 const ADMIN_AND_STAFF_PREFIXES = ["/admin", "/staff"];
 
@@ -15,28 +9,33 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("celsa_token")?.value;
   const user = decodeToken(token);
 
-  const isProtected = ADMIN_AND_STAFF_PREFIXES.some((p) => pathname.startsWith(p));
+  const isProtected = ADMIN_AND_STAFF_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
   if (!isProtected) return NextResponse.next();
 
-  // Not logged in at all -> send to login, preserve intended destination
+  // If user is not authenticated: show unauthorized error instead of generic login
   if (!user) {
-    const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    const unauthorizedUrl = new URL("/unauthorized", req.url);
+    unauthorizedUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(unauthorizedUrl);
   }
 
-  // Customers can never reach /admin or /staff
+  // Customers can NEVER access /admin or /staff — redirect to unauthorized 403 error page
   if (user.role === "customer") {
-    return NextResponse.redirect(new URL("/", req.url));
+    const unauthorizedUrl = new URL("/unauthorized", req.url);
+    unauthorizedUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(unauthorizedUrl);
   }
 
-  // Staff can reach /staff freely, but not /admin at all
-  if (user.role === "staff" && pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/staff/dashboard", req.url));
+  // Staff can access /staff freely, but can never access /admin
+  if (user.role === "staff" && (pathname === "/admin" || pathname.startsWith("/admin/"))) {
+    const unauthorizedUrl = new URL("/unauthorized", req.url);
+    unauthorizedUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(unauthorizedUrl);
   }
 
-  // Admin-only sub-sections (Reports, Users/Staff account management),
-  // per the RBAC table: Staff has no access to Reports or Staff Account Management
+  // Admin-only sub-sections (Reports, Users/Staff account management) for staff
   if (user.role === "staff" && ADMIN_ONLY.some((p) => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL("/staff/dashboard", req.url));
   }
@@ -45,5 +44,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/staff/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/staff", "/staff/:path*"],
 };

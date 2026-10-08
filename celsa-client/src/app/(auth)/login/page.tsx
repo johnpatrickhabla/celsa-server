@@ -25,13 +25,18 @@ function LoginPageContent() {
 
   useEffect(() => {
     if (isAuthenticated && user && !justLoggedIn) {
-      const destination =
-        user.role === "admin"
-          ? "/admin/dashboard"
-          : user.role === "staff"
-          ? "/staff/dashboard"
-          : nextPath || "/my-orders";
-      router.push(destination);
+      if (user.role === "admin") {
+        router.push("/admin/dashboard");
+      } else if (user.role === "staff") {
+        router.push("/staff/dashboard");
+      } else {
+        // Customer
+        if (nextPath?.startsWith("/admin") || nextPath?.startsWith("/staff")) {
+          router.push(`/unauthorized?from=${encodeURIComponent(nextPath)}`);
+        } else {
+          router.push(nextPath || "/my-orders");
+        }
+      }
     }
   }, [isAuthenticated, user, nextPath, router, justLoggedIn]);
 
@@ -73,14 +78,20 @@ function LoginPageContent() {
           onSuccess={() => {
             setJustLoggedIn(true);
             const currentUser = useAuthStore.getState().user;
-            const destination =
-              nextPath ||
-              (currentUser?.role === "admin"
-                ? "/admin/dashboard"
-                : currentUser?.role === "staff"
-                ? "/staff/dashboard"
-                : "/my-orders");
-            router.push(destination);
+            if (!currentUser) return;
+
+            if (currentUser.role === "admin") {
+              router.push("/admin/dashboard");
+            } else if (currentUser.role === "staff") {
+              router.push("/staff/dashboard");
+            } else {
+              // Customer: strictly disallow redirection to admin/staff
+              if (nextPath?.startsWith("/admin") || nextPath?.startsWith("/staff")) {
+                router.push(`/unauthorized?from=${encodeURIComponent(nextPath)}`);
+              } else {
+                router.push(nextPath || "/my-orders");
+              }
+            }
           }}
         />
       )}
