@@ -116,13 +116,13 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
           {/* Body */}
           <div className="modal-body p-4">
             <div className="row g-4">
-              {/* Left Column: Gallery + Product Info Below Picture */}
+              {/* Left Column: Product Gallery */}
               <div className="col-md-6 d-flex flex-column">
                 {/* Product Image */}
                 <div
                   className="rounded-3 d-flex align-items-center justify-content-center overflow-hidden mb-3"
                   style={{
-                    height: 280,
+                    height: 360,
                     backgroundColor: "#ffffff",
                     border: "1px solid #ebdcc5",
                   }}
@@ -141,7 +141,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
 
                 {/* Thumbnail list */}
                 {product.images.length > 1 && (
-                  <div className="d-flex gap-2 flex-wrap mb-3">
+                  <div className="d-flex gap-2 flex-wrap mb-2">
                     {product.images.map((img, i) => (
                       <button
                         key={i}
@@ -149,8 +149,8 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                           i === selectedImage ? "border-success border-2 shadow-sm" : "border"
                         }`}
                         style={{
-                          width: 50,
-                          height: 50,
+                          width: 56,
+                          height: 56,
                           cursor: "pointer",
                           borderColor: i === selectedImage ? "#198754" : "#ebdcc5",
                         }}
@@ -165,9 +165,11 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                     ))}
                   </div>
                 )}
+              </div>
 
-                {/* ── Product Info Below Picture ── */}
-                <div className="mt-1">
+              {/* Right Column: Product Info & Actions */}
+              <div className="col-md-6 d-flex flex-column justify-content-between">
+                <div>
                   {categoryName && (
                     <span
                       className="badge rounded-pill mb-2 px-3 py-1"
@@ -193,12 +195,8 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                     )}
                   </div>
 
-                  <p className="text-muted small mb-3" style={{ lineHeight: 1.6 }}>
-                    {product.description}
-                  </p>
-
                   {/* Stock Status */}
-                  <div>
+                  <div className="mb-2">
                     {product.stock > 0 ? (
                       <span className="text-success small fw-medium">
                         <i className="bi bi-check-circle me-1" />
@@ -211,12 +209,11 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                       </span>
                     )}
                   </div>
-                </div>
-              </div>
 
-              {/* Right Column: Customize Your Order (at top), Qty, Total Amount, Add to Cart */}
-              <div className="col-md-6 d-flex flex-column justify-content-between">
-                <div>
+                  <p className="text-muted small mb-3" style={{ lineHeight: 1.6 }}>
+                    {product.description}
+                  </p>
+
                   {/* Customization Options */}
                   {product.customizationOptions.length > 0 ? (
                     <div className="mb-4">
