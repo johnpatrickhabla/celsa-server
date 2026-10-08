@@ -13,7 +13,10 @@ export default function DashboardTopbar({ title, roleLabel }: Props) {
   const { toggleSidebar, isOpen } = useSidebarStore();
 
   return (
-    <nav className="app-header navbar navbar-expand bg-body shadow-sm px-4 py-2 border-bottom">
+    <nav
+      className="app-header navbar navbar-expand shadow-sm px-4 py-2 border-bottom"
+      style={{ backgroundColor: "#fdfbf7", borderColor: "#ebdcc5" }}
+    >
       <div className="container-fluid p-0 d-flex align-items-center justify-content-between">
         {/* Left side: Hamburger Toggle Button, Page Title & Breadcrumb */}
         <div className="d-flex align-items-center gap-3">

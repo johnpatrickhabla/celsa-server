@@ -7,7 +7,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
     <StaffGuard>
       <div className="d-flex">
         <DashboardSidebar items={STAFF_NAV} variant="staff" />
-        <div className="flex-grow-1 bg-light" style={{ minHeight: "100vh" }}>
+        <div className="flex-grow-1" style={{ minHeight: "100vh", backgroundColor: "#f9f6f0" }}>
           {children}
         </div>
       </div>
