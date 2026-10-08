@@ -12,9 +12,10 @@ interface Props {
   userSubtitle?: string;
 }
 
-export default function DashboardSidebar({ items }: Props) {
+export default function DashboardSidebar({ items, variant }: Props) {
   const pathname = usePathname();
   const { isOpen } = useSidebarStore();
+  const panelType = variant || (pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/staff") ? "staff" : undefined);
 
   return (
     <aside
@@ -36,10 +37,41 @@ export default function DashboardSidebar({ items }: Props) {
     >
       <div style={{ width: 250 }}>
         {/* Brand Header */}
-        <div className="brand-link px-4 py-3 d-flex align-items-center border-bottom border-secondary border-opacity-25">
-          <span className="brand-text fw-bold fs-5 text-uppercase" style={{ letterSpacing: 1.5 }}>
-            CELSA
-          </span>
+        <div className="brand-link px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25">
+          <Link
+            href={panelType === "staff" ? "/staff" : "/admin"}
+            className="text-decoration-none d-flex flex-column"
+          >
+            <span className="brand-text fw-bold fs-5 text-white lh-1" style={{ letterSpacing: 1.5 }}>
+              CELSA
+            </span>
+            <span
+              className="text-uppercase fw-semibold"
+              style={{
+                letterSpacing: "2.5px",
+                fontSize: "0.62rem",
+                color: "#d4af37",
+                marginTop: "4px",
+              }}
+            >
+              Handicrafts
+            </span>
+          </Link>
+          {panelType && (
+            <span
+              className="badge rounded-pill fw-semibold text-uppercase"
+              style={{
+                fontSize: "0.62rem",
+                letterSpacing: "0.8px",
+                padding: "4px 8px",
+                backgroundColor: panelType === "admin" ? "rgba(239, 68, 68, 0.18)" : "rgba(14, 165, 233, 0.18)",
+                color: panelType === "admin" ? "#fca5a5" : "#7dd3fc",
+                border: `1px solid ${panelType === "admin" ? "rgba(239, 68, 68, 0.35)" : "rgba(14, 165, 233, 0.35)"}`,
+              }}
+            >
+              {panelType === "admin" ? "Admin" : "Staff"}
+            </span>
+          )}
         </div>
 
         {/* Sidebar Navigation */}
