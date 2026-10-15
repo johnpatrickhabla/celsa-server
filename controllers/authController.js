@@ -212,7 +212,9 @@ exports.updateMe = async (req, res) => {
     }
 
     await user.save();
-    res.json({ message: "Profile updated successfully", user: user.toJSON() });
+    const tokens = generateTokens(user);
+    res.cookie("celsa_refresh", tokens.refreshToken, getCookieOptions(user.role));
+    res.json({ message: "Profile updated successfully", user: user.toJSON(), accessToken: tokens.accessToken });
   } catch (err) {
     console.error("Update profile error:", err);
     res.status(500).json({ error: "Failed to update profile" });

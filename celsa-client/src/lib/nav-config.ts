@@ -28,6 +28,7 @@ export const STAFF_NAV: NavItem[] = [
   { label: "Production", href: "/staff/production", icon: "bi-gear" },
   { label: "Inventory", href: "/staff/inventory", icon: "bi-clipboard-data" },
   { label: "Hero Slides", href: "/staff/hero-slides", icon: "bi-film" },
+  { label: "Settings", href: "/staff/settings", icon: "bi-sliders" },
 ];
 
 export const CUSTOMER_NAV: NavItem[] = [

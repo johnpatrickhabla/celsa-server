@@ -61,6 +61,22 @@ router.post("/logout", authController.logout);
 // GET /api/auth/me — current user profile (requires access token)
 router.get("/me", verifyToken, authController.me);
 
+// PUT /api/auth/me — update current user profile (name, phone, address)
+router.put("/me", verifyToken, authController.updateMe);
+
+// PUT /api/auth/change-password — change current user password
+router.put(
+  "/change-password",
+  verifyToken,
+  [
+    body("newPassword")
+      .isLength({ min: 8 })
+      .withMessage("New password must be at least 8 characters long"),
+  ],
+  validate,
+  authController.changePassword
+);
+
 // POST /api/auth/forgot-password — password reset request
 router.post(
   "/forgot-password",
