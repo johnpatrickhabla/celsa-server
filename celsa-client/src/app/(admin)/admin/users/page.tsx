@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import DashboardTopbar from "@/components/shared/DashboardTopbar";
-import api from "@/lib/api";
+import api, { getApiError } from "@/lib/api";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import { useAuthStore } from "@/stores/authStore";
 import type { User } from "@/lib/types";
 
 export default function AdminUsersPage() {
@@ -18,6 +20,72 @@ export default function AdminUsersPage() {
   const [role, setRole] = useState<"staff" | "admin">("staff");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Edit modal state
+  const currentUserId = useAuthStore((s) => s.user?._id);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editRole, setEditRole] = useState<"staff" | "admin">("staff");
+  const [editError, setEditError] = useState<string | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const editingSelf = editingUser?._id === currentUserId;
+
+  function openEdit(u: User) {
+    setEditingUser(u);
+    setEditName(u.name || "");
+    setEditEmail(u.email || "");
+    setEditPhone(u.phone || "");
+    setEditRole(u.role === "admin" ? "admin" : "staff");
+    setEditError(null);
+  }
+
+  function closeEdit() {
+    if (savingEdit) return;
+    setEditingUser(null);
+    setEditError(null);
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingUser) return;
+    setEditError(null);
+    setSavingEdit(true);
+
+    // Only send fields that changed; self email/role are locked
+    const payload: Record<string, string> = {};
+    if (editName.trim() !== editingUser.name) payload.name = editName.trim();
+    if (editPhone.trim() !== (editingUser.phone || "")) payload.phone = editPhone.trim();
+    if (!editingSelf) {
+      const normalizedEmail = editEmail.trim().toLowerCase();
+      if (normalizedEmail !== editingUser.email) payload.email = normalizedEmail;
+      if (editRole !== editingUser.role) payload.role = editRole;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      setSavingEdit(false);
+      setEditingUser(null);
+      return;
+    }
+
+    try {
+      await api.put(`/users/${editingUser._id}`, payload);
+      setSuccess(
+        payload.email
+          ? `Updated ${editName.trim()}. They must now log in with ${payload.email}.`
+          : `Updated ${editName.trim()}'s account.`
+      );
+      setError(null);
+      setEditingUser(null);
+      fetchStaffUsers();
+    } catch (err) {
+      setEditError(getApiError(err, "Failed to update account."));
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   async function fetchStaffUsers() {
     setLoading(true);
@@ -192,13 +260,26 @@ export default function AdminUsersPage() {
                           </span>
                         </td>
                         <td className="text-end">
-                          <button
-                            className={`btn btn-sm ${u.isActive ? "btn-outline-danger" : "btn-outline-success"}`}
-                            style={{ fontSize: "0.7rem" }}
-                            onClick={() => toggleUserActive(u)}
-                          >
-                            {u.isActive ? "Deactivate" : "Activate"}
-                          </button>
+                          <div className="d-inline-flex gap-1">
+                            <button
+                              className="btn btn-sm btn-outline-secondary"
+                              style={{ fontSize: "0.7rem" }}
+                              onClick={() => openEdit(u)}
+                              aria-label={`Edit ${u.name}`}
+                            >
+                              <i className="bi bi-pencil me-1" />
+                              Edit
+                            </button>
+                            {u._id !== currentUserId && (
+                              <button
+                                className={`btn btn-sm ${u.isActive ? "btn-outline-danger" : "btn-outline-success"}`}
+                                style={{ fontSize: "0.7rem" }}
+                                onClick={() => toggleUserActive(u)}
+                              >
+                                {u.isActive ? "Deactivate" : "Activate"}
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -209,6 +290,127 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Account Modal */}
+      {editingUser && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+          style={{ backgroundColor: "rgba(15, 23, 42, 0.55)", zIndex: 1080 }}
+          onClick={closeEdit}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-user-title"
+        >
+          <div
+            className="bg-white rounded-4 shadow-lg p-4 w-100"
+            style={{ maxWidth: 520 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="d-flex align-items-start justify-content-between mb-3">
+              <div>
+                <h6 id="edit-user-title" className="fw-bold mb-0">Edit Account</h6>
+                <small className="text-muted">{editingUser.email}</small>
+              </div>
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Close"
+                onClick={closeEdit}
+                disabled={savingEdit}
+              />
+            </div>
+
+            {editError && <div className="alert alert-danger py-2 small">{editError}</div>}
+
+            <form onSubmit={handleSaveEdit}>
+              <div className="mb-3">
+                <label htmlFor="edit-name" className="form-label small">Full Name *</label>
+                <input
+                  id="edit-name"
+                  className="form-control form-control-sm"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="edit-email" className="form-label small">Email Address (login) *</label>
+                <input
+                  id="edit-email"
+                  type="email"
+                  className="form-control form-control-sm"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  disabled={editingSelf}
+                  required
+                />
+                {editingSelf ? (
+                  <div className="form-text small">
+                    To change your own email, use{" "}
+                    <Link href="/admin/settings">Account Settings</Link> (requires your password).
+                  </div>
+                ) : (
+                  editEmail.trim().toLowerCase() !== editingUser.email && (
+                    <div className="form-text small text-warning-emphasis">
+                      <i className="bi bi-exclamation-triangle me-1" />
+                      This user will need to log in with the new email.
+                    </div>
+                  )
+                )}
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="edit-phone" className="form-label small">Phone Number</label>
+                <input
+                  id="edit-phone"
+                  className="form-control form-control-sm"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="edit-role" className="form-label small">Role *</label>
+                <select
+                  id="edit-role"
+                  className="form-select form-select-sm"
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value as "staff" | "admin")}
+                  disabled={editingSelf}
+                >
+                  <option value="staff">Production Staff</option>
+                  <option value="admin">Super Administrator</option>
+                </select>
+                {editingSelf && (
+                  <div className="form-text small">You can&apos;t change your own role.</div>
+                )}
+              </div>
+
+              <div className="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-light border"
+                  onClick={closeEdit}
+                  disabled={savingEdit}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-sm btn-success px-3" disabled={savingEdit}>
+                  {savingEdit ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Saving…
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

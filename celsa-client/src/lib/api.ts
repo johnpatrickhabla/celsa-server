@@ -98,4 +98,14 @@ api.interceptors.response.use(
   }
 );
 
+/**
+ * Extracts a human-readable error message from an API error.
+ * Prefers the first express-validator detail message over the generic "Validation failed".
+ */
+export function getApiError(err: unknown, fallback: string): string {
+  const data = (err as { response?: { data?: { error?: string; details?: Array<{ message?: string }> } } })
+    ?.response?.data;
+  return data?.details?.[0]?.message || data?.error || fallback;
+}
+
 export default api;

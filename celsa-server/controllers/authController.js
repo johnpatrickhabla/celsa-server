@@ -255,6 +255,67 @@ exports.changePassword = async (req, res) => {
 };
 
 /**
+ * PUT /api/auth/change-email
+ * Changes the logged-in user's email (login ID). Requires the current password.
+ * Reissues tokens so the new email is reflected immediately in the session.
+ */
+exports.changeEmail = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { newEmail, currentPassword } = req.body;
+    const normalizedEmail = String(newEmail || "").toLowerCase().trim();
+
+    if (!normalizedEmail) {
+      return res.status(400).json({ error: "New email address is required." });
+    }
+    if (normalizedEmail === user.email) {
+      return res.status(400).json({ error: "New email must be different from your current email." });
+    }
+
+    // Google-only accounts have no password to verify ownership with
+    if (!user.passwordHash) {
+      return res.status(400).json({
+        error: "This account uses Google Sign-In. Please contact an administrator to change the email.",
+      });
+    }
+
+    if (!currentPassword) {
+      return res.status(400).json({ error: "Current password is required." });
+    }
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current password is incorrect." });
+    }
+
+    const existing = await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } });
+    if (existing) {
+      return res.status(409).json({ error: "That email address is already in use." });
+    }
+
+    user.email = normalizedEmail;
+    await user.save();
+
+    const tokens = generateTokens(user);
+    res.cookie("celsa_refresh", tokens.refreshToken, getCookieOptions(user.role));
+    res.json({
+      message: "Email address updated successfully!",
+      user: user.toJSON(),
+      accessToken: tokens.accessToken,
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ error: "That email address is already in use." });
+    }
+    console.error("Change email error:", err);
+    res.status(500).json({ error: "Failed to update email address." });
+  }
+};
+
+/**
  * POST /api/auth/forgot-password
  * Generates a 6-digit verification code for password reset.
  */

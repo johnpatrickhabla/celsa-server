@@ -77,6 +77,18 @@ router.put(
   authController.changePassword
 );
 
+// PUT /api/auth/change-email — change current user's email (requires current password)
+router.put(
+  "/change-email",
+  verifyToken,
+  [
+    body("newEmail").isEmail().withMessage("Please enter a valid email address"),
+    body("currentPassword").notEmpty().withMessage("Current password is required"),
+  ],
+  validate,
+  authController.changeEmail
+);
+
 // POST /api/auth/forgot-password — password reset request
 router.post(
   "/forgot-password",

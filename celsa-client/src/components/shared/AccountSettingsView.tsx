@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
+import api, { getApiError } from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
 import PasswordStrengthIndicator from "@/components/auth/PasswordStrengthIndicator";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
@@ -49,6 +49,15 @@ export default function AccountSettingsView({
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Change Email state
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [showEmailPassword, setShowEmailPassword] = useState(false);
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
   // System & Store Settings (Admin only)
   const [storeName, setStoreName] = useState("Celsa Handicrafts");
   const [storeEmail, setStoreEmail] = useState("celsahandicrafts@gmail.com");
@@ -84,6 +93,14 @@ export default function AccountSettingsView({
     fetchMe();
   }, [user]);
 
+  /** Store a freshly issued access token (admin/staff sessions are tab-scoped). */
+  function applyNewAccessToken(token?: string) {
+    if (!token || typeof window === "undefined") return;
+    sessionStorage.setItem("celsa_access_token", token);
+    localStorage.removeItem("celsa_access_token");
+    document.cookie = `celsa_token=${token}; path=/; SameSite=Lax`;
+  }
+
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSavingProfile(true);
@@ -93,20 +110,61 @@ export default function AccountSettingsView({
     try {
       const res = await api.put("/auth/me", { name, phone });
       const updated = res.data.user;
+      applyNewAccessToken(res.data.accessToken);
       setProfile(updated);
       setUser(updated);
 
-      // If new access token was issued, keep session token up-to-date
-      if (res.data.accessToken && typeof window !== "undefined") {
-        sessionStorage.setItem("celsa_access_token", res.data.accessToken);
-      }
-
       setProfileSuccess("Profile information updated successfully!");
       setTimeout(() => setProfileSuccess(null), 4000);
-    } catch (err: any) {
-      setProfileError(err.response?.data?.error || "Failed to update profile. Please try again.");
+    } catch (err) {
+      setProfileError(getApiError(err, "Failed to update profile. Please try again."));
     } finally {
       setSavingProfile(false);
+    }
+  }
+
+  function closeEmailForm() {
+    setShowEmailForm(false);
+    setNewEmail("");
+    setEmailPassword("");
+    setShowEmailPassword(false);
+    setEmailError(null);
+  }
+
+  async function handleChangeEmail(e: React.FormEvent) {
+    e.preventDefault();
+    setEmailSuccess(null);
+    setEmailError(null);
+
+    const trimmed = newEmail.trim().toLowerCase();
+    if (!trimmed) {
+      setEmailError("Please enter your new email address.");
+      return;
+    }
+    if (trimmed === (profile?.email || "").toLowerCase()) {
+      setEmailError("New email must be different from your current email.");
+      return;
+    }
+
+    setSavingEmail(true);
+    try {
+      const res = await api.put("/auth/change-email", {
+        newEmail: trimmed,
+        currentPassword: emailPassword,
+      });
+      const updated = res.data.user;
+      applyNewAccessToken(res.data.accessToken);
+      setProfile(updated);
+      setUser(updated);
+      closeEmailForm();
+      setEmailSuccess(
+        `Email updated. Use ${updated.email} the next time you log in.`
+      );
+      setTimeout(() => setEmailSuccess(null), 6000);
+    } catch (err) {
+      setEmailError(getApiError(err, "Failed to update email. Please try again."));
+    } finally {
+      setSavingEmail(false);
     }
   }
 
@@ -337,15 +395,21 @@ export default function AccountSettingsView({
                     type="email"
                     className="form-control rounded-start-3 bg-light text-muted"
                     value={profile?.email || ""}
-                    disabled
+                    readOnly
                   />
-                  <span className="input-group-text bg-light text-muted small border-start-0 rounded-end-3">
-                    <i className="bi bi-lock-fill me-1" />
-                    Locked ID
-                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-outline-success rounded-end-3 px-3 fw-semibold small"
+                    onClick={() => (showEmailForm ? closeEmailForm() : setShowEmailForm(true))}
+                    aria-expanded={showEmailForm}
+                    aria-controls="change-email-panel"
+                  >
+                    <i className={`bi ${showEmailForm ? "bi-x-lg" : "bi-pencil"} me-1`} />
+                    {showEmailForm ? "Cancel" : "Change"}
+                  </button>
                 </div>
                 <div className="form-text small" style={{ fontSize: "0.73rem" }}>
-                  Account login identifier. Contact primary system administrator to modify.
+                  This is your login email. Changing it requires your current password.
                 </div>
               </div>
 
@@ -391,6 +455,110 @@ export default function AccountSettingsView({
               </button>
             </div>
           </form>
+
+          {emailSuccess && (
+            <div className="alert alert-success py-2.5 px-3 small rounded-3 mt-3 mb-0 d-flex align-items-center gap-2">
+              <i className="bi bi-envelope-check-fill fs-6 text-success flex-shrink-0" />
+              <span>{emailSuccess}</span>
+            </div>
+          )}
+
+          {showEmailForm && (
+            <div
+              id="change-email-panel"
+              className="rounded-4 p-3 p-md-4 mt-4"
+              style={{ backgroundColor: "#fcfaf6", border: "1px dashed #d9c7a8" }}
+            >
+              <h6 className="fw-bold text-dark mb-1">
+                <i className="bi bi-envelope-at me-2 text-success" />
+                Change Login Email
+              </h6>
+              <p className="text-muted small mb-3">
+                After this change you&apos;ll sign in with the new email. Your password stays the same.
+              </p>
+
+              {emailError && (
+                <div className="alert alert-danger py-2.5 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                  <i className="bi bi-exclamation-circle fs-6 text-danger flex-shrink-0" />
+                  <span>{emailError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleChangeEmail}>
+                <div className="row g-3 mb-3">
+                  <div className="col-md-6">
+                    <label htmlFor="new-email-input" className="form-label small fw-semibold text-dark">
+                      New Email Address <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      id="new-email-input"
+                      type="email"
+                      className="form-control rounded-3"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      autoComplete="email"
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="email-password-input" className="form-label small fw-semibold text-dark">
+                      Current Password <span className="text-danger">*</span>
+                    </label>
+                    <div className="input-group">
+                      <input
+                        id="email-password-input"
+                        type={showEmailPassword ? "text" : "password"}
+                        className="form-control rounded-start-3"
+                        value={emailPassword}
+                        onChange={(e) => setEmailPassword(e.target.value)}
+                        placeholder="Confirm it's you"
+                        autoComplete="current-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary rounded-end-3 px-3 bg-white border-start-0"
+                        onClick={() => setShowEmailPassword(!showEmailPassword)}
+                        title={showEmailPassword ? "Hide password" : "Show password"}
+                      >
+                        <i className={`bi ${showEmailPassword ? "bi-eye-slash" : "bi-eye"} text-muted`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-end gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-light border rounded-pill px-3 fw-semibold"
+                    onClick={closeEmailForm}
+                    disabled={savingEmail}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-success rounded-pill px-4 fw-semibold shadow-sm"
+                    disabled={savingEmail}
+                  >
+                    {savingEmail ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        Updating Email…
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-envelope-check me-1.5" />
+                        Update Email
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       )}
 

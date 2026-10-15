@@ -107,11 +107,33 @@ exports.update = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const { name, email, role, phone, password, isActive } = req.body;
+    const isSelf = user._id.toString() === req.user.id;
 
-    if (name !== undefined) user.name = name;
-    if (email !== undefined) user.email = email;
+    // Prevent admins from locking themselves out
+    if (isSelf && role !== undefined && role !== user.role) {
+      return res.status(400).json({ error: "You cannot change your own role." });
+    }
+    if (isSelf && isActive === false) {
+      return res.status(400).json({ error: "You cannot deactivate your own account." });
+    }
+
+    if (name !== undefined) {
+      const trimmedName = String(name).trim();
+      if (!trimmedName) return res.status(400).json({ error: "Name cannot be empty." });
+      user.name = trimmedName;
+    }
+    if (email !== undefined) {
+      const normalizedEmail = String(email).toLowerCase().trim();
+      if (normalizedEmail !== user.email) {
+        const existing = await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } });
+        if (existing) {
+          return res.status(409).json({ error: "That email address is already in use." });
+        }
+        user.email = normalizedEmail;
+      }
+    }
     if (role !== undefined) user.role = role;
-    if (phone !== undefined) user.phone = phone;
+    if (phone !== undefined) user.phone = String(phone).trim();
     if (isActive !== undefined) user.isActive = isActive;
     const passwordChanged = Boolean(password);
     if (password) user.passwordHash = password; // pre-save hook re-hashes

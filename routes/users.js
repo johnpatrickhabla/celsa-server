@@ -34,7 +34,23 @@ router.post(
 );
 
 // PUT /api/users/:id
-router.put("/:id", userController.update);
+router.put(
+  "/:id",
+  [
+    body("email").optional().isEmail().withMessage("Valid email is required"),
+    body("name").optional().trim().notEmpty().withMessage("Name cannot be empty"),
+    body("role")
+      .optional()
+      .isIn(["staff", "admin", "customer"])
+      .withMessage("Invalid role"),
+    body("password")
+      .optional({ values: "falsy" })
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters"),
+  ],
+  validate,
+  userController.update
+);
 
 // DELETE /api/users/:id — soft-delete (deactivate)
 router.delete("/:id", userController.remove);
