@@ -38,7 +38,10 @@ export default function ProductCard({
   }
 
   const primaryImage = product.images?.[0]?.url;
-  const secondaryImage = product.images?.[1]?.url || primaryImage;
+  const hasSecondaryImage = Boolean(
+    product.images?.[1]?.url && product.images[1].url !== primaryImage
+  );
+  const secondaryImage = hasSecondaryImage ? product.images![1].url : null;
 
   return (
     <div
@@ -48,22 +51,39 @@ export default function ProductCard({
     >
       {/* ── IMAGE WRAPPER (SHEIN 3:4 ASPECT RATIO) ── */}
       <div className="shein-media-wrap position-relative overflow-hidden">
-        <div className="w-100 h-100">
-          {primaryImage ? (
+        {primaryImage ? (
+          <>
+            {/* Primary (First) Image */}
             <img
-              src={isHovered && secondaryImage ? secondaryImage : primaryImage}
+              src={primaryImage}
               alt={product.name}
-              className="shein-product-img w-100 h-100 d-block"
+              className={`shein-product-img shein-primary-img ${
+                hasSecondaryImage ? "has-secondary" : ""
+              } ${hasSecondaryImage && isHovered ? "is-faded" : ""}`}
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "/images/hero-basket.png";
               }}
             />
-          ) : (
-            <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
-              <i className="bi bi-image fs-1" />
-            </div>
-          )}
-        </div>
+
+            {/* Secondary (Second) Image with fading effect on hover */}
+            {hasSecondaryImage && secondaryImage && (
+              <img
+                src={secondaryImage}
+                alt={`${product.name} preview`}
+                className={`shein-product-img shein-secondary-img ${
+                  isHovered ? "is-active" : ""
+                }`}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            )}
+          </>
+        ) : (
+          <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
+            <i className="bi bi-image fs-1" />
+          </div>
+        )}
 
         {/* ── SHEIN BADGES (TOP-LEFT) ── */}
         <div className="shein-badges-container position-absolute top-0 start-0 p-2 d-flex flex-column gap-1">

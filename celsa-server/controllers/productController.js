@@ -218,17 +218,29 @@ exports.update = async (req, res) => {
 };
 
 /**
- * DELETE /api/products/:id — admin only (soft-delete)
+ * DELETE /api/products/:id — admin only (permanent delete)
  */
 exports.remove = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
 
-    product.isActive = false;
-    await product.save();
-    res.json({ message: "Product deactivated" });
+    // Clean up images from Cloudinary if publicIds exist
+    if (product.images && product.images.length > 0) {
+      const { deleteImage } = require("../utils/cloudinary");
+      for (const img of product.images) {
+        if (img.publicId) {
+          deleteImage(img.publicId).catch((err) =>
+            console.error("Failed to delete Cloudinary image:", err.message)
+          );
+        }
+      }
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: "Product permanently deleted" });
   } catch (err) {
+    console.error("Delete product error:", err);
     res.status(500).json({ error: "Failed to delete product" });
   }
 };
@@ -239,8 +251,12 @@ exports.remove = async (req, res) => {
  */
 exports.listAll = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search } = req.query;
+    const { page = 1, limit = 20, search, category } = req.query;
     const filter = {};
+
+    if (category && category !== "all") {
+      filter.category = category;
+    }
 
     if (search && search.trim()) {
       const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

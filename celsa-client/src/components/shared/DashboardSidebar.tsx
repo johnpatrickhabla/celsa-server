@@ -19,12 +19,13 @@ export default function DashboardSidebar({ items, variant }: Props) {
 
   return (
     <aside
-      className="app-sidebar shadow bg-dark text-white"
+      className="app-sidebar shadow bg-dark text-white d-flex flex-column position-sticky top-0"
       style={{
         width: isOpen ? 250 : 0,
         minWidth: isOpen ? 250 : 0,
         maxWidth: isOpen ? 250 : 0,
-        minHeight: "100vh",
+        height: "100vh",
+        maxHeight: "100vh",
         backgroundColor: "#1e293b",
         borderRight: isOpen ? "1px solid rgba(255,255,255,0.08)" : "none",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -35,9 +36,9 @@ export default function DashboardSidebar({ items, variant }: Props) {
       }}
       data-bs-theme="dark"
     >
-      <div style={{ width: 250 }}>
+      <div className="d-flex flex-column h-100" style={{ width: 250 }}>
         {/* Brand Header */}
-        <div className="brand-link px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25">
+        <div className="brand-link px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25 flex-shrink-0">
           <Link
             href={panelType === "staff" ? "/staff" : "/admin"}
             className="text-decoration-none d-flex flex-column"
@@ -57,25 +58,10 @@ export default function DashboardSidebar({ items, variant }: Props) {
               Handicrafts
             </span>
           </Link>
-          {panelType && (
-            <span
-              className="badge rounded-pill fw-semibold text-uppercase"
-              style={{
-                fontSize: "0.62rem",
-                letterSpacing: "0.8px",
-                padding: "4px 8px",
-                backgroundColor: panelType === "admin" ? "rgba(239, 68, 68, 0.18)" : "rgba(14, 165, 233, 0.18)",
-                color: panelType === "admin" ? "#fca5a5" : "#7dd3fc",
-                border: `1px solid ${panelType === "admin" ? "rgba(239, 68, 68, 0.35)" : "rgba(14, 165, 233, 0.35)"}`,
-              }}
-            >
-              {panelType === "admin" ? "Admin" : "Staff"}
-            </span>
-          )}
         </div>
 
         {/* Sidebar Navigation */}
-        <div className="sidebar-wrapper p-2 flex-grow-1">
+        <div className="sidebar-wrapper p-2 flex-grow-1 overflow-y-auto">
           <nav className="mt-2">
             <ul className="nav nav-pills flex-column gap-1">
               <li className="nav-header text-uppercase px-3 py-1 text-muted fw-bold" style={{ fontSize: "0.65rem" }}>
@@ -105,6 +91,72 @@ export default function DashboardSidebar({ items, variant }: Props) {
             </ul>
           </nav>
         </div>
+
+        {/* Bottom Indicator */}
+        {panelType && (
+          <div className="p-3 border-top border-secondary border-opacity-25 flex-shrink-0 bg-dark bg-opacity-50">
+            <div
+              className="d-flex align-items-center justify-content-between px-3 py-2 rounded-3"
+              style={{
+                backgroundColor:
+                  panelType === "admin"
+                    ? "rgba(239, 68, 68, 0.1)"
+                    : "rgba(14, 165, 233, 0.1)",
+                border: `1px solid ${
+                  panelType === "admin"
+                    ? "rgba(239, 68, 68, 0.25)"
+                    : "rgba(14, 165, 233, 0.25)"
+                }`,
+              }}
+            >
+              <div className="d-flex align-items-center gap-2">
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center"
+                  style={{
+                    width: 24,
+                    height: 24,
+                    backgroundColor:
+                      panelType === "admin"
+                        ? "rgba(239, 68, 68, 0.2)"
+                        : "rgba(14, 165, 233, 0.2)",
+                    color: panelType === "admin" ? "#fca5a5" : "#7dd3fc",
+                  }}
+                >
+                  <i
+                    className={`bi ${panelType === "admin" ? "bi-shield-check" : "bi-person-badge"}`}
+                    style={{ fontSize: "0.75rem" }}
+                  />
+                </div>
+                <span
+                  className="small text-muted fw-medium"
+                  style={{ fontSize: "0.75rem" }}
+                >
+                  Role
+                </span>
+              </div>
+              <span
+                className="badge rounded-pill fw-semibold text-uppercase"
+                style={{
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.8px",
+                  padding: "4px 9px",
+                  backgroundColor:
+                    panelType === "admin"
+                      ? "rgba(239, 68, 68, 0.2)"
+                      : "rgba(14, 165, 233, 0.2)",
+                  color: panelType === "admin" ? "#fca5a5" : "#7dd3fc",
+                  border: `1px solid ${
+                    panelType === "admin"
+                      ? "rgba(239, 68, 68, 0.35)"
+                      : "rgba(14, 165, 233, 0.35)"
+                  }`,
+                }}
+              >
+                {panelType === "admin" ? "Admin" : "Staff"}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

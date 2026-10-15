@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 
@@ -60,15 +59,6 @@ export default function DashboardTopbar({ title, roleLabel }: Props) {
               <li className="dropdown-header px-3 py-2">
                 <div className="fw-bold text-dark">{user?.name || roleLabel}</div>
                 <small className="text-muted">{user?.email || `${roleLabel.toLowerCase()}@celsa.com`}</small>
-              </li>
-              <li><hr className="dropdown-divider my-1" /></li>
-              <li>
-                <Link
-                  href={roleLabel === "Admin" ? "/admin/settings" : "/staff/settings"}
-                  className="dropdown-item px-3 py-2 small d-flex align-items-center gap-2 text-dark"
-                >
-                  <i className="bi bi-person-gear text-secondary" /> Account Settings
-                </Link>
               </li>
               <li><hr className="dropdown-divider my-1" /></li>
               <li>

@@ -8,7 +8,6 @@ export interface NavItem {
 export const ADMIN_NAV: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: "bi-grid-1x2" },
   { label: "Products", href: "/admin/products", icon: "bi-box-seam" },
-  { label: "Categories", href: "/admin/categories", icon: "bi-tags" },
   { label: "Inventory", href: "/admin/inventory", icon: "bi-clipboard-data" },
   { label: "Orders", href: "/admin/orders", icon: "bi-receipt" },
   { label: "Customization", href: "/admin/customization", icon: "bi-palette" },

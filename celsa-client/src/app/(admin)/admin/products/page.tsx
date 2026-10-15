@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardTopbar from "@/components/shared/DashboardTopbar";
 import CreateProductModal from "@/components/admin/CreateProductModal";
+import CreateCategoryModal from "@/components/admin/CreateCategoryModal";
 import api from "@/lib/api";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
-import type { Product, PaginationInfo } from "@/lib/types";
+import type { Product, PaginationInfo, Category } from "@/lib/types";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,8 +15,10 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [createSuccessMessage, setCreateSuccessMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   async function fetchProducts() {
     setLoading(true);
@@ -39,19 +42,52 @@ export default function AdminProductsPage() {
   // Open create modal if URL includes ?new=true
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.search.includes("new=true")) {
-      setIsCreateModalOpen(true);
+      setProductToEdit(null);
+      setIsModalOpen(true);
       window.history.replaceState({}, "", "/admin/products");
     }
   }, []);
 
-  function handleProductCreated(newProduct?: Product) {
-    setCreateSuccessMessage(
-      newProduct?.name
-        ? `Product "${newProduct.name}" created successfully!`
-        : "New product created successfully!"
+  function handleOpenCreateModal() {
+    setProductToEdit(null);
+    setIsModalOpen(true);
+  }
+
+  function handleOpenEditModal(product: Product) {
+    setProductToEdit(product);
+    setIsModalOpen(true);
+  }
+
+  function handleProductSaved(savedProduct?: Product) {
+    const wasEditing = Boolean(productToEdit);
+    setSuccessMessage(
+      savedProduct?.name
+        ? `Product "${savedProduct.name}" ${wasEditing ? "updated" : "created"} successfully!`
+        : `Product ${wasEditing ? "updated" : "created"} successfully!`
+    );
+    setProductToEdit(null);
+    fetchProducts();
+    setTimeout(() => setSuccessMessage(null), 5000);
+  }
+
+  function handleCategoryCreated(newCategory?: Category) {
+    setSuccessMessage(
+      newCategory?.name
+        ? `Category "${newCategory.name}" created successfully!`
+        : "Category created successfully!"
     );
     fetchProducts();
-    setTimeout(() => setCreateSuccessMessage(null), 5000);
+    setTimeout(() => setSuccessMessage(null), 5000);
+  }
+
+  function handleCategoryRemoved(removedCategory?: Category) {
+    setSuccessMessage(
+      removedCategory?.name
+        ? `Category "${removedCategory.name}" removed successfully.`
+        : "Category removed successfully."
+    );
+    fetchProducts();
+    setTimeout(() => setSuccessMessage(null), 5000);
   }
 
   async function toggleActive(product: Product) {
@@ -65,10 +101,18 @@ export default function AdminProductsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Are you sure you want to deactivate this product?")) return;
+  async function handleDelete(product: Product) {
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete "${product.name}"? This action cannot be undone and will remove all product data and images.`
+      )
+    ) {
+      return;
+    }
     try {
-      await api.delete(`/products/${id}`);
+      await api.delete(`/products/${product._id}`);
+      setProducts((prev) => prev.filter((p) => p._id !== product._id));
+      setSuccessMessage(`Product "${product.name}" permanently deleted.`);
       fetchProducts();
     } catch (err) {
       console.error("Failed to delete product:", err);
@@ -79,17 +123,17 @@ export default function AdminProductsPage() {
     <>
       <DashboardTopbar title="Product Management" roleLabel="Admin" />
       <div className="p-4">
-        {createSuccessMessage && (
+        {successMessage && (
           <div className="alert alert-success py-2.5 px-3 small rounded-3 mb-3 d-flex align-items-center justify-content-between shadow-sm">
             <div className="d-flex align-items-center gap-2">
               <i className="bi bi-check-circle-fill fs-6 text-success flex-shrink-0" />
-              <span>{createSuccessMessage}</span>
+              <span>{successMessage}</span>
             </div>
             <button
               type="button"
               className="btn-close btn-close-sm"
               aria-label="Close"
-              onClick={() => setCreateSuccessMessage(null)}
+              onClick={() => setSuccessMessage(null)}
             />
           </div>
         )}
@@ -110,13 +154,23 @@ export default function AdminProductsPage() {
             </button>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-sm btn-success rounded-pill px-3 shadow-sm fw-semibold"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <i className="bi bi-plus-lg me-1" /> Add New Product
-          </button>
+          <div className="d-flex align-items-center gap-2">
+            <button
+              type="button"
+              className="btn btn-sm btn-success rounded-pill px-3 shadow-sm fw-semibold"
+              onClick={() => setIsCategoryModalOpen(true)}
+            >
+              <i className="bi bi-plus-lg me-1" /> Add New Category
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-sm btn-success rounded-pill px-3 shadow-sm fw-semibold"
+              onClick={handleOpenCreateModal}
+            >
+              <i className="bi bi-plus-lg me-1" /> Add New Product
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -128,25 +182,26 @@ export default function AdminProductsPage() {
             <button
               type="button"
               className="btn btn-sm btn-success rounded-pill px-3 fw-semibold shadow-sm"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={handleOpenCreateModal}
             >
               <i className="bi bi-plus-lg me-1" /> Create First Product
             </button>
           </div>
         ) : (
           <div className="celsa-stat-card bg-white p-3">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="text-muted small border-bottom">
-                <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Base Price</th>
-                  <th>Stock</th>
-                  <th>Customizable</th>
-                  <th>Status</th>
-                  <th className="text-end">Actions</th>
-                </tr>
-              </thead>
+            <div className="table-responsive">
+              <table className="table table-bordered table-hover align-middle mb-0">
+                <thead className="table-light text-muted small">
+                  <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Base Price</th>
+                    <th>Stock</th>
+                    <th>Customizable</th>
+                    <th>Status</th>
+                    <th className="text-end">Actions</th>
+                  </tr>
+                </thead>
               <tbody>
                 {products.map((p) => {
                   const catName = typeof p.category === "object" ? p.category.name : "Uncategorized";
@@ -209,17 +264,21 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end gap-1">
-                          <Link
-                            href={`/admin/products/${p._id}/edit`}
+                          <button
+                            type="button"
                             className="btn btn-sm btn-light border"
-                            title="Edit"
+                            title="Edit Product"
+                            onClick={() => handleOpenEditModal(p)}
+                            aria-label={`Edit ${p.name}`}
                           >
                             <i className="bi bi-pencil" />
-                          </Link>
+                          </button>
                           <button
+                            type="button"
                             className="btn btn-sm btn-light border text-danger"
-                            title="Deactivate"
-                            onClick={() => handleDelete(p._id)}
+                            title="Delete Product"
+                            onClick={() => handleDelete(p)}
+                            aria-label={`Delete ${p.name}`}
                           >
                             <i className="bi bi-trash" />
                           </button>
@@ -230,6 +289,7 @@ export default function AdminProductsPage() {
                 })}
               </tbody>
             </table>
+          </div>
 
             {pagination && pagination.pages > 1 && (
               <div className="d-flex justify-content-center mt-3">
@@ -259,9 +319,20 @@ export default function AdminProductsPage() {
       </div>
 
       <CreateProductModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={handleProductCreated}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setProductToEdit(null);
+        }}
+        onSuccess={handleProductSaved}
+        productToEdit={productToEdit}
+      />
+
+      <CreateCategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onSuccess={handleCategoryCreated}
+        onCategoryRemoved={handleCategoryRemoved}
       />
     </>
   );

@@ -67,16 +67,24 @@ exports.update = async (req, res) => {
   }
 };
 
-/** DELETE /api/categories/:id — admin only (soft-delete) */
+/** DELETE /api/categories/:id — admin only */
 exports.remove = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ error: "Category not found" });
 
-    category.isActive = false;
-    await category.save();
-    res.json({ message: "Category deactivated" });
+    const Product = require("../models/Product");
+    const productsCount = await Product.countDocuments({ category: req.params.id });
+    if (productsCount > 0) {
+      return res.status(400).json({
+        error: `Cannot remove "${category.name}": ${productsCount} product(s) are currently assigned to this category.`,
+      });
+    }
+
+    await Category.findByIdAndDelete(req.params.id);
+    res.json({ message: `Category "${category.name}" removed successfully` });
   } catch (err) {
+    console.error("Delete category error:", err);
     res.status(500).json({ error: "Failed to delete category" });
   }
 };

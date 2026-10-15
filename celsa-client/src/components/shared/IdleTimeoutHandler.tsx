@@ -59,9 +59,15 @@ export default function IdleTimeoutHandler() {
     setShowWarning(false);
   };
 
+  const isAdminOrStaff =
+    user?.role === "admin" ||
+    user?.role === "staff" ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/staff");
+
   // Perform logout due to inactivity
   const handleIdleLogout = useCallback(async () => {
-    if (isLoggingOutRef.current) return;
+    if (isLoggingOutRef.current || isAdminOrStaff) return;
     isLoggingOutRef.current = true;
     setShowWarning(false);
 
@@ -79,11 +85,12 @@ export default function IdleTimeoutHandler() {
       isLoggingOutRef.current = false;
       router.push("/login?reason=idle_timeout");
     }
-  }, [logout, router]);
+  }, [logout, router, isAdminOrStaff]);
 
   useEffect(() => {
-    // Only track idle timeout for logged-in users (especially customers)
-    if (!isAuthenticated || !user) {
+    // Only track idle timeout for logged-in regular customers.
+    // Admin and staff dashboard users are permanently exempt from inactivity timeouts.
+    if (!isAuthenticated || !user || isAdminOrStaff) {
       setShowWarning(false);
       return;
     }
@@ -162,9 +169,9 @@ export default function IdleTimeoutHandler() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearInterval(interval);
     };
-  }, [isAuthenticated, user, recordActivity, handleIdleLogout, pathname]);
+  }, [isAuthenticated, user, recordActivity, handleIdleLogout, pathname, isAdminOrStaff]);
 
-  if (!showWarning || !isAuthenticated) {
+  if (!showWarning || !isAuthenticated || isAdminOrStaff) {
     return null;
   }
 
