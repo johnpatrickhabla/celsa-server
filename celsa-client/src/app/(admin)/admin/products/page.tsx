@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardTopbar from "@/components/shared/DashboardTopbar";
+import CreateProductModal from "@/components/admin/CreateProductModal";
 import api from "@/lib/api";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import type { Product, PaginationInfo } from "@/lib/types";
@@ -13,6 +14,8 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createSuccessMessage, setCreateSuccessMessage] = useState<string | null>(null);
 
   async function fetchProducts() {
     setLoading(true);
@@ -32,6 +35,24 @@ export default function AdminProductsPage() {
   useEffect(() => {
     fetchProducts();
   }, [page, search]);
+
+  // Open create modal if URL includes ?new=true
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("new=true")) {
+      setIsCreateModalOpen(true);
+      window.history.replaceState({}, "", "/admin/products");
+    }
+  }, []);
+
+  function handleProductCreated(newProduct?: Product) {
+    setCreateSuccessMessage(
+      newProduct?.name
+        ? `Product "${newProduct.name}" created successfully!`
+        : "New product created successfully!"
+    );
+    fetchProducts();
+    setTimeout(() => setCreateSuccessMessage(null), 5000);
+  }
 
   async function toggleActive(product: Product) {
     try {
@@ -58,6 +79,21 @@ export default function AdminProductsPage() {
     <>
       <DashboardTopbar title="Product Management" roleLabel="Admin" />
       <div className="p-4">
+        {createSuccessMessage && (
+          <div className="alert alert-success py-2.5 px-3 small rounded-3 mb-3 d-flex align-items-center justify-content-between shadow-sm">
+            <div className="d-flex align-items-center gap-2">
+              <i className="bi bi-check-circle-fill fs-6 text-success flex-shrink-0" />
+              <span>{createSuccessMessage}</span>
+            </div>
+            <button
+              type="button"
+              className="btn-close btn-close-sm"
+              aria-label="Close"
+              onClick={() => setCreateSuccessMessage(null)}
+            />
+          </div>
+        )}
+
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div className="input-group" style={{ maxWidth: 320 }}>
             <input
@@ -74,9 +110,13 @@ export default function AdminProductsPage() {
             </button>
           </div>
 
-          <Link href="/admin/products/new" className="btn btn-sm btn-success">
+          <button
+            type="button"
+            className="btn btn-sm btn-success rounded-pill px-3 shadow-sm fw-semibold"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <i className="bi bi-plus-lg me-1" /> Add New Product
-          </Link>
+          </button>
         </div>
 
         {loading ? (
@@ -85,9 +125,13 @@ export default function AdminProductsPage() {
           <div className="celsa-stat-card bg-white p-5 text-center text-muted">
             <i className="bi bi-box-seam fs-1 d-block mb-2" />
             <p>No products found in catalog.</p>
-            <Link href="/admin/products/new" className="btn btn-sm btn-success">
-              Create First Product
-            </Link>
+            <button
+              type="button"
+              className="btn btn-sm btn-success rounded-pill px-3 fw-semibold shadow-sm"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <i className="bi bi-plus-lg me-1" /> Create First Product
+            </button>
           </div>
         ) : (
           <div className="celsa-stat-card bg-white p-3">
@@ -213,6 +257,12 @@ export default function AdminProductsPage() {
           </div>
         )}
       </div>
+
+      <CreateProductModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleProductCreated}
+      />
     </>
   );
 }
