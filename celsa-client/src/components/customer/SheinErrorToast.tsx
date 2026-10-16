@@ -48,22 +48,38 @@ function SheinErrorToastContent() {
       }}
     >
       <div
-        className="text-center shadow-lg rounded-pill"
+        className="d-flex align-items-center shadow-lg rounded-pill"
         style={{
           backgroundColor: "rgba(0, 0, 0, 0.88)",
           color: "#ffffff",
           backdropFilter: "blur(12px)",
-          padding: "14px 36px",
+          padding: "13px 30px",
           border: "1px solid rgba(255, 255, 255, 0.12)",
           boxShadow: "0 12px 32px rgba(0, 0, 0, 0.35)",
+          gap: "14px",
         }}
       >
+        {/* Warning Icon Badge */}
+        <span
+          className="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+          style={{
+            width: 22,
+            height: 22,
+            backgroundColor: "#f59f00",
+            color: "#ffffff",
+            fontSize: "0.85rem",
+          }}
+        >
+          <i className="bi bi-exclamation" style={{ fontWeight: 900 }} />
+        </span>
+
+        {/* Message Text */}
         <span
           style={{
             fontSize: "0.9rem",
             fontWeight: 500,
-            letterSpacing: "0.3px",
-            lineHeight: 1.5,
+            letterSpacing: "0.25px",
+            lineHeight: 1.4,
             display: "inline-block",
           }}
         >
