@@ -11,6 +11,12 @@ interface ProductDetailsModalProps {
 }
 
 const DEFAULT_SIZES = ["S", "M", "L", "XL"] as const;
+const SIZE_PRICE_MODIFIERS: Record<string, number> = {
+  S: 0,
+  M: 3,
+  L: 5,
+  XL: 8,
+};
 
 export default function ProductDetailsModal({ product, isOpen, onClose }: ProductDetailsModalProps) {
   const addItem = useCartStore((s) => s.addItem);
@@ -63,11 +69,11 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
       }
     }
   }
-  const currentPrice = basePrice + totalModifier;
-
   // Show the default S/M/L/XL picker only if the product has no size option of its own
   const hasOwnSizeOption = product.customizationOptions.some((o) => o.type === "size");
   const showDefaultSizes = !hasOwnSizeOption;
+  const sizeModifier = showDefaultSizes && selectedSize ? (SIZE_PRICE_MODIFIERS[selectedSize] || 0) : 0;
+  const currentPrice = basePrice + totalModifier + sizeModifier;
 
   function handleAddToCart() {
     if (!product) return;
@@ -77,7 +83,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
     }
     const cartCustomizations = showDefaultSizes
       ? [
-          { type: "size", label: "Size", selectedValue: selectedSize, priceModifier: 0 },
+          { type: "size", label: "Size", selectedValue: selectedSize, priceModifier: sizeModifier },
           ...customizationsForCart,
         ]
       : customizationsForCart;
@@ -202,6 +208,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                     <div className="d-flex gap-2" role="radiogroup" aria-label="Select size">
                       {DEFAULT_SIZES.map((size) => {
                         const isSelected = selectedSize === size;
+                        const modifier = SIZE_PRICE_MODIFIERS[size];
                         return (
                           <button
                             key={size}
@@ -209,12 +216,12 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                             type="button"
                             role="radio"
                             aria-checked={isSelected}
-                            className={`btn btn-sm fw-semibold flex-fill ${
+                            className={`btn btn-sm fw-semibold flex-fill position-relative d-flex align-items-center justify-content-center ${
                               isSelected ? "btn-success shadow-sm" : "btn-outline-secondary bg-white text-dark"
                             }`}
                             style={{
-                              height: 38,
-                              fontSize: "0.85rem",
+                              height: 42,
+                              fontSize: "0.9rem",
                               borderColor: isSelected ? "#198754" : sizeError ? "#dc3545" : "#ebdcc5",
                               transition: "all 0.15s ease",
                             }}
@@ -223,7 +230,25 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                               setSizeError(false);
                             }}
                           >
-                            {size}
+                            <span>{size}</span>
+                            {modifier > 0 && (
+                              <span
+                                className="position-absolute"
+                                style={{
+                                  top: "2px",
+                                  right: "4px",
+                                  fontSize: "0.62rem",
+                                  fontWeight: 700,
+                                  color: isSelected ? "#ffffff" : "#8c6b2d",
+                                  backgroundColor: isSelected ? "rgba(255,255,255,0.25)" : "#f8f3ea",
+                                  padding: "1px 4px",
+                                  borderRadius: "3px",
+                                  lineHeight: 1,
+                                }}
+                              >
+                                +{modifier}
+                              </span>
+                            )}
                           </button>
                         );
                       })}

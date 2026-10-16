@@ -116,12 +116,15 @@ exports.create = async (req, res) => {
             cust.type === "size" &&
             ["S", "M", "L", "XL"].includes(cust.selectedValue)
           ) {
-            // Default storefront size picker (S/M/L/XL) — no price modifier
+            // Default storefront size picker (S/M/L/XL) with size price modifiers
+            const sizeModifiers = { S: 0, M: 3, L: 5, XL: 8 };
+            const modifier = sizeModifiers[cust.selectedValue] || 0;
+            unitPrice += modifier;
             customizations.push({
               type: "size",
               label: "Size",
               selectedValue: cust.selectedValue,
-              priceModifier: 0,
+              priceModifier: modifier,
             });
           }
         }
