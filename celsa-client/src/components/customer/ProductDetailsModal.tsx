@@ -185,6 +185,57 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                     ))}
                   </div>
                 )}
+
+                {/* Size Selector below the pictures */}
+                {showDefaultSizes && (
+                  <div className="mt-3 p-3 rounded-3 bg-white border" style={{ borderColor: "#ebdcc5" }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <label className="form-label small fw-semibold text-muted mb-0" style={{ fontSize: "0.8rem" }}>
+                        Size<span className="text-danger ms-1">*</span>
+                      </label>
+                      {selectedSize && (
+                        <span className="small fw-semibold" style={{ color: "#8c6b2d", fontSize: "0.78rem" }}>
+                          Selected: <span className="badge bg-success text-white px-2 py-1">{selectedSize}</span>
+                        </span>
+                      )}
+                    </div>
+                    <div className="d-flex gap-2" role="radiogroup" aria-label="Select size">
+                      {DEFAULT_SIZES.map((size) => {
+                        const isSelected = selectedSize === size;
+                        return (
+                          <button
+                            key={size}
+                            id={`quickview-size-${size.toLowerCase()}`}
+                            type="button"
+                            role="radio"
+                            aria-checked={isSelected}
+                            className={`btn btn-sm fw-semibold flex-fill ${
+                              isSelected ? "btn-success shadow-sm" : "btn-outline-secondary bg-white text-dark"
+                            }`}
+                            style={{
+                              height: 38,
+                              fontSize: "0.85rem",
+                              borderColor: isSelected ? "#198754" : sizeError ? "#dc3545" : "#ebdcc5",
+                              transition: "all 0.15s ease",
+                            }}
+                            onClick={() => {
+                              setSelectedSize(size);
+                              setSizeError(false);
+                            }}
+                          >
+                            {size}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {sizeError && (
+                      <div className="text-danger small mt-2 d-flex align-items-center" style={{ fontSize: "0.78rem" }}>
+                        <i className="bi bi-exclamation-circle me-1" />
+                        Please select a size.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Right Column: Product Info & Actions */}
@@ -233,58 +284,6 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                   <p className="text-muted small mb-3" style={{ lineHeight: 1.6 }}>
                     {product.description}
                   </p>
-
-                  {/* Size Selector (default S / M / L / XL) */}
-                  {showDefaultSizes && (
-                    <div className="mb-3">
-                      <div className="d-flex justify-content-between align-items-center mb-1">
-                        <label className="form-label small fw-semibold text-muted mb-0" style={{ fontSize: "0.8rem" }}>
-                          Size<span className="text-danger ms-1">*</span>
-                        </label>
-                        {selectedSize && (
-                          <span className="small" style={{ color: "#8c6b2d", fontSize: "0.78rem" }}>
-                            Selected: <strong>{selectedSize}</strong>
-                          </span>
-                        )}
-                      </div>
-                      <div className="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select size">
-                        {DEFAULT_SIZES.map((size) => {
-                          const isSelected = selectedSize === size;
-                          return (
-                            <button
-                              key={size}
-                              id={`quickview-size-${size.toLowerCase()}`}
-                              type="button"
-                              role="radio"
-                              aria-checked={isSelected}
-                              className={`btn btn-sm fw-semibold ${
-                                isSelected ? "btn-success shadow-sm" : "btn-outline-secondary bg-white text-dark"
-                              }`}
-                              style={{
-                                minWidth: 48,
-                                height: 40,
-                                fontSize: "0.85rem",
-                                borderColor: isSelected ? "#198754" : sizeError ? "#dc3545" : "#ebdcc5",
-                                transition: "all 0.15s ease",
-                              }}
-                              onClick={() => {
-                                setSelectedSize(size);
-                                setSizeError(false);
-                              }}
-                            >
-                              {size}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {sizeError && (
-                        <div className="text-danger small mt-1" style={{ fontSize: "0.78rem" }}>
-                          <i className="bi bi-exclamation-circle me-1" />
-                          Please select a size.
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {/* Customization Options */}
                   {product.customizationOptions.length > 0 ? (
