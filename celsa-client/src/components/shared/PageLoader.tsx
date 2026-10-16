@@ -9,13 +9,10 @@ interface PageLoaderProps {
 
 export default function PageLoader({
   message = "CELSA HANDICRAFTS",
-  submessage = "Loading...",
+  submessage,
   minHeight = "65vh",
   fullScreen = false,
 }: PageLoaderProps) {
-  // Extract dots if already part of submessage or provide animated dots
-  const cleanSub = (submessage || "Loading").replace(/\.+$/, "");
-
   return (
     <div
       className={`celsa-page-loader-wrapper ${fullScreen ? "celsa-page-loader-fullscreen" : ""}`}
@@ -25,17 +22,18 @@ export default function PageLoader({
       aria-label="Loading page content"
     >
       {/* Brand Title */}
-      <div className="celsa-loader-brand">{message}</div>
+      {message && <div className="celsa-loader-brand">{message}</div>}
 
-      {/* Clean Animated Loading Text */}
-      <div className="celsa-loader-caption d-inline-flex align-items-center">
-        <span>{cleanSub}</span>
-        <span className="celsa-loading-dots ms-1">
-          <span className="dot dot-1">.</span>
-          <span className="dot dot-2">.</span>
-          <span className="dot dot-3">.</span>
-        </span>
+      {/* Circling Spinner with "Loading" word inside the circle */}
+      <div className="celsa-circling-loader">
+        <div className="celsa-circling-ring" />
+        <span className="celsa-circling-text">Loading</span>
       </div>
+
+      {/* Contextual Subtitle (if distinct from "Loading") */}
+      {submessage && submessage.toLowerCase().trim() !== "loading" && submessage.toLowerCase().trim() !== "loading..." && (
+        <div className="celsa-loader-caption mt-1">{submessage}</div>
+      )}
     </div>
   );
 }

@@ -402,6 +402,52 @@ input::-ms-clear {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Circling Loader with "Loading" inside the circle */
+.celsa-circling-loader {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.celsa-circling-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3.5px solid rgba(184, 134, 59, 0.16);
+  border-top-color: #b8863b;
+  border-right-color: #198754;
+  animation: celsa-spin 1s linear infinite;
+  box-shadow: 0 0 16px rgba(184, 134, 59, 0.2);
+}
+
+.celsa-circling-text {
+  position: relative;
+  z-index: 2;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2c251e;
+  text-align: center;
+  animation: celsa-text-pulse 2s ease-in-out infinite;
+  user-select: none;
+}
+
+@keyframes celsa-text-pulse {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
 /* Typography */
 .celsa-loader-brand {
   font-size: 0.95rem;
