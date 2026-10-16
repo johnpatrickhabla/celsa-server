@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 import "@/styles/globals.css";
 import BootstrapClient from "@/components/shared/BootstrapClient";
 import IdleTimeoutHandler from "@/components/shared/IdleTimeoutHandler";
-import TopLoader from "@/components/shared/TopLoader";
 
 export const metadata: Metadata = {
   title: "Celsa Handicrafts",
@@ -23,9 +21,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <Suspense fallback={null}>
-          <TopLoader />
-        </Suspense>
         <BootstrapClient />
         <IdleTimeoutHandler />
         {children}

@@ -9,10 +9,13 @@ interface PageLoaderProps {
 
 export default function PageLoader({
   message = "CELSA HANDICRAFTS",
-  submessage = "Loading handcrafted experience...",
+  submessage = "Loading...",
   minHeight = "65vh",
   fullScreen = false,
 }: PageLoaderProps) {
+  // Extract dots if already part of submessage or provide animated dots
+  const cleanSub = (submessage || "Loading").replace(/\.+$/, "");
+
   return (
     <div
       className={`celsa-page-loader-wrapper ${fullScreen ? "celsa-page-loader-fullscreen" : ""}`}
@@ -21,24 +24,17 @@ export default function PageLoader({
       aria-live="polite"
       aria-label="Loading page content"
     >
-      {/* Animated Orb & Spinner Rings */}
-      <div className="celsa-loader-stage">
-        <div className="celsa-ring-outer" />
-        <div className="celsa-ring-inner" />
-        <div className="celsa-loader-emblem">
-          <i className="bi bi-gem" />
-        </div>
-      </div>
-
       {/* Brand Title */}
       <div className="celsa-loader-brand">{message}</div>
 
-      {/* Subtitle / Context Message */}
-      {submessage && <div className="celsa-loader-caption">{submessage}</div>}
-
-      {/* Glowing Animated Progress Bar */}
-      <div className="celsa-loader-progress-track">
-        <div className="celsa-loader-progress-bar" />
+      {/* Clean Animated Loading Text */}
+      <div className="celsa-loader-caption d-inline-flex align-items-center">
+        <span>{cleanSub}</span>
+        <span className="celsa-loading-dots ms-1">
+          <span className="dot dot-1">.</span>
+          <span className="dot dot-2">.</span>
+          <span className="dot dot-3">.</span>
+        </span>
       </div>
     </div>
   );
