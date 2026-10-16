@@ -1112,9 +1112,25 @@ input[type="search"]::-webkit-search-results-decoration {
   }
 }
 
+@keyframes sheinToastOut {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -18px) scale(0.94);
+  }
+}
+
 .shein-toast-banner {
   animation: sheinToastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+.shein-toast-banner.shein-toast-leaving {
+  animation: sheinToastOut 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 
 
 

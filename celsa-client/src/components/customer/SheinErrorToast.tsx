@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 function SheinErrorToastContent() {
   const searchParams = useSearchParams();
   const [visible, setVisible] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
   const [message, setMessage] = useState("");
+
+  const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const errorType = searchParams.get("shein_error");
@@ -16,7 +20,9 @@ function SheinErrorToastContent() {
       } else {
         setMessage("Access restricted. Returned to home page.");
       }
+
       setVisible(true);
+      setIsLeaving(false);
 
       // Clean the search parameter from the browser URL bar so user sees clean home URL
       if (typeof window !== "undefined") {
@@ -25,27 +31,55 @@ function SheinErrorToastContent() {
         window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
       }
 
-      // Auto-dismiss after 3.5 seconds
-      const timer = setTimeout(() => {
-        setVisible(false);
-      }, 3500);
+      // Clear any prior active timers
+      if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
 
-      return () => clearTimeout(timer);
+      // Start vanishing transition after 2.8 seconds
+      leaveTimerRef.current = setTimeout(() => {
+        setIsLeaving(true);
+      }, 2800);
+
+      // Completely remove from DOM after vanish animation finishes (3.15 seconds total)
+      hideTimerRef.current = setTimeout(() => {
+        setVisible(false);
+        setIsLeaving(false);
+      }, 3150);
     }
   }, [searchParams]);
+
+  // Clean up timers on component unmount
+  useEffect(() => {
+    return () => {
+      if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
+
+  const handleDismiss = () => {
+    setIsLeaving(true);
+    setTimeout(() => {
+      setVisible(false);
+      setIsLeaving(false);
+    }, 250);
+  };
 
   if (!visible) return null;
 
   return (
     <div
-      className="shein-toast-banner position-fixed start-50 translate-middle-x"
+      className={`shein-toast-banner position-fixed start-50 translate-middle-x ${
+        isLeaving ? "shein-toast-leaving" : ""
+      }`}
       style={{
         top: 32,
         zIndex: 999999,
         maxWidth: "90vw",
         width: "auto",
-        pointerEvents: "none",
+        cursor: "pointer",
       }}
+      onClick={handleDismiss}
+      title="Click to dismiss"
     >
       <div
         className="d-flex align-items-center shadow-lg rounded-pill"
