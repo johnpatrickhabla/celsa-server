@@ -99,8 +99,12 @@ exports.list = async (req, res) => {
  */
 exports.getBySlug = async (req, res) => {
   try {
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.slug);
     const product = await Product.findOne({
-      slug: req.params.slug,
+      $or: [
+        { slug: req.params.slug },
+        ...(isObjectId ? [{ _id: req.params.slug }] : []),
+      ],
       isActive: true,
     }).populate("category", "name slug");
 

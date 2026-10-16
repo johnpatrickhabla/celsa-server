@@ -4,16 +4,40 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/stores/cartStore";
 import PageLoader from "@/components/shared/PageLoader";
+import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
+import type { Product } from "@/lib/types";
+import api from "@/lib/api";
 
 export default function CartPage() {
   const [mounted, setMounted] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Product Quick View modal state
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
 
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQty = useCartStore((s) => s.updateQty);
   const clearCart = useCartStore((s) => s.clearCart);
   const totalPrice = useCartStore((s) => s.totalPrice);
+
+  async function handleOpenProductModal(item: (typeof items)[0]) {
+    try {
+      setLoadingProductId(item.productId);
+      const identifier = item.productSlug || item.productId;
+      const res = await api.get(`/products/${identifier}`);
+      if (res.data?.product) {
+        setSelectedProduct(res.data.product);
+        setModalOpen(true);
+      }
+    } catch (err) {
+      console.error("Failed to load product details for modal:", err);
+    } finally {
+      setLoadingProductId(null);
+    }
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -195,8 +219,21 @@ export default function CartPage() {
                     key={`${item.productId}-${index}`}
                     className="cart-item-card d-flex flex-column flex-sm-row gap-3 align-items-start"
                   >
-                    {/* Item Thumbnail */}
-                    <div className="cart-item-img-container">
+                    {/* Item Thumbnail - Clickable to open Quick View Modal */}
+                    <div
+                      className="cart-item-img-container"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleOpenProductModal(item)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleOpenProductModal(item);
+                        }
+                      }}
+                      style={{ cursor: "pointer" }}
+                      title={`View ${item.productName} details`}
+                    >
                       {item.productImage ? (
                         <img
                           src={item.productImage}
@@ -214,13 +251,24 @@ export default function CartPage() {
                     <div className="flex-grow-1 w-100">
                       <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
                         <div>
-                          <Link
-                            href={`/products/${item.productSlug}`}
-                            className="fw-bold text-dark text-decoration-none"
+                          {/* Product Name Button - opens Quick View modal */}
+                          <button
+                            type="button"
+                            className="btn btn-link text-dark text-decoration-none fw-bold p-0 text-start cart-product-title-btn d-inline-flex align-items-center gap-1.5"
                             style={{ fontSize: "1.05rem" }}
+                            onClick={() => handleOpenProductModal(item)}
+                            title={`View ${item.productName} details`}
                           >
-                            {item.productName}
-                          </Link>
+                            <span>{item.productName}</span>
+                            {loadingProductId === item.productId ? (
+                              <span
+                                className="spinner-border spinner-border-sm text-success ms-1"
+                                style={{ width: "0.85rem", height: "0.85rem" }}
+                              />
+                            ) : (
+                              <i className="bi bi-eye text-muted fs-6 opacity-50 view-eye-icon ms-1" />
+                            )}
+                          </button>
 
                           {/* Custom Order Flag */}
                           {item.isCustomOrder && (
@@ -444,6 +492,14 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Product Details Quick View Modal */}
+      <ProductDetailsModal
+        product={selectedProduct}
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   );
 }
+

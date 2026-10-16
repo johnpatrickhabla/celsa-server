@@ -102,7 +102,9 @@ export default function ProductDetailPage() {
   }
 
   const categoryName =
-    typeof product.category === "object" ? product.category.name : "";
+    typeof product.category === "object" && product.category !== null
+      ? (product.category as { name: string }).name
+      : "";
 
   return (
     <div className="container-fluid px-4 py-5">

@@ -1079,3 +1079,21 @@ input[type="search"]::-webkit-search-results-decoration {
   border: 1px solid #f0e9dc;
 }
 
+.cart-product-title-btn {
+  transition: color 0.2s ease;
+  font-family: inherit;
+  border: none;
+  background: transparent;
+}
+
+.cart-product-title-btn:hover {
+  color: var(--celsa-gold-dark) !important;
+  text-decoration: underline !important;
+}
+
+.cart-product-title-btn:hover .view-eye-icon {
+  opacity: 1 !important;
+  color: var(--celsa-gold-dark) !important;
+}
+
+
