@@ -532,7 +532,7 @@ async function sendPasswordChangedEmail(toEmail, recipientName = "Valued Custome
       `"CELSA Handicrafts" <${process.env.SMTP_USER || process.env.EMAIL_USER || "noreply@celsahandicrafts.com"}>`;
 
     const year = new Date().getFullYear();
-    const clientUrl = (process.env.CLIENT_URL || "https://celsa-client-gznj.vercel.app").split(",")[0].trim().replace(/\/+$/, "");
+    const clientUrl = (process.env.CLIENT_URL || "https://celsa-handicrafts.vercel.app").split(",")[0].trim().replace(/\/+$/, "");
     const loginUrl = `${clientUrl}/login`;
     const nowFormatted = new Date().toLocaleString("en-US", {
       timeZone: "Asia/Manila",

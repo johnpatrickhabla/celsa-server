@@ -484,7 +484,7 @@ exports.resetPassword = async (req, res) => {
  */
 exports.googleCallback = async (req, res) => {
   const getClientUrl = () => {
-    const raw = process.env.CLIENT_URL || "https://celsa-client-gznj.vercel.app";
+    const raw = process.env.CLIENT_URL || "https://celsa-handicrafts.vercel.app";
     return raw.split(",")[0].trim().replace(/\/+$/, "");
   };
 
