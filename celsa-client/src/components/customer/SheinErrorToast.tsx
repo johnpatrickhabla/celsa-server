@@ -25,10 +25,10 @@ function SheinErrorToastContent() {
         window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
       }
 
-      // Auto-dismiss after 4 seconds
+      // Auto-dismiss after 3.5 seconds
       const timer = setTimeout(() => {
         setVisible(false);
-      }, 4000);
+      }, 3500);
 
       return () => clearTimeout(timer);
     }
@@ -40,47 +40,35 @@ function SheinErrorToastContent() {
     <div
       className="shein-toast-banner position-fixed start-50 translate-middle-x"
       style={{
-        top: 24,
+        top: 32,
         zIndex: 999999,
-        maxWidth: "92vw",
+        maxWidth: "90vw",
         width: "auto",
-        pointerEvents: "auto",
+        pointerEvents: "none",
       }}
     >
       <div
-        className="d-flex align-items-center gap-2.5 px-3 py-2 rounded-pill shadow-lg"
+        className="text-center shadow-lg rounded-pill"
         style={{
-          backgroundColor: "rgba(18, 18, 18, 0.94)",
+          backgroundColor: "rgba(0, 0, 0, 0.88)",
           color: "#ffffff",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35)",
+          backdropFilter: "blur(12px)",
+          padding: "14px 36px",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
+          boxShadow: "0 12px 32px rgba(0, 0, 0, 0.35)",
         }}
       >
         <span
-          className="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
           style={{
-            width: 20,
-            height: 20,
-            backgroundColor: "#e03131",
-            color: "#ffffff",
-            fontSize: "0.75rem",
+            fontSize: "0.9rem",
+            fontWeight: 500,
+            letterSpacing: "0.3px",
+            lineHeight: 1.5,
+            display: "inline-block",
           }}
         >
-          <i className="bi bi-exclamation" style={{ fontWeight: 900 }} />
-        </span>
-
-        <span style={{ fontSize: "0.85rem", fontWeight: 500, letterSpacing: "0.2px" }}>
           {message}
         </span>
-
-        <button
-          type="button"
-          className="btn-close btn-close-white p-1 ms-2 flex-shrink-0"
-          style={{ fontSize: "0.65rem", opacity: 0.7 }}
-          onClick={() => setVisible(false)}
-          aria-label="Close error toast"
-        />
       </div>
     </div>
   );
