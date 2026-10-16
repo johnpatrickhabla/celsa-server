@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import AccessDenied from "@/components/shared/AccessDenied";
-import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import PageLoader from "@/components/shared/PageLoader";
 
 export default function StaffGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -22,14 +22,7 @@ export default function StaffGuard({ children }: { children: React.ReactNode }) 
   }, [hydrate]);
 
   if (checking) {
-    return (
-      <div
-        className="d-flex align-items-center justify-content-center"
-        style={{ minHeight: "100vh", backgroundColor: "#fcfaf6" }}
-      >
-        <LoadingSkeleton variant="spinner" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // Unauthenticated (e.g. closed tab or expired session) -> redirect to login

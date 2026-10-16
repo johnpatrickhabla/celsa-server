@@ -1,103 +1,144 @@
 "use client";
 
-import { useAuthStore } from "@/stores/authStore";
+import Link from "next/link";
 
 interface AccessDeniedProps {
   requiredRole?: "admin" | "staff";
   customMessage?: string;
+  title?: string;
 }
 
 export default function AccessDenied({
-  requiredRole = "admin",
-  customMessage,
+  title = "PAGE NOT FOUND",
+  customMessage = "Sorry! We couldn't find the page you're looking for. The link may be broken, or the page may have been moved or removed.",
 }: AccessDeniedProps) {
-  const { user, isAuthenticated } = useAuthStore();
-
-  const roleLabel = requiredRole === "admin" ? "Administrator" : "Staff";
-
   return (
     <div
-      className="d-flex align-items-center justify-content-center p-4"
+      className="shein-error-wrapper d-flex align-items-center justify-content-center px-3 py-5"
       style={{
         minHeight: "100vh",
-        backgroundColor: "#fcfaf6",
-        backgroundImage: "radial-gradient(#ebdcc5 1px, transparent 1px)",
-        backgroundSize: "24px 24px",
+        backgroundColor: "#ffffff",
       }}
     >
       <div
-        className="card border-0 shadow-lg rounded-4 text-center p-4 p-md-5 bg-white position-relative overflow-hidden"
+        className="text-center mx-auto"
         style={{
-          maxWidth: 520,
+          maxWidth: 580,
           width: "100%",
-          border: "1.5px solid #ebdcc5",
         }}
       >
-        {/* Top Accent Strip */}
-        <div
-          className="position-absolute top-0 start-0 w-100"
-          style={{ height: 5, backgroundColor: "#dc3545" }}
-        />
-
-        {/* Security Shield Icon */}
-        <div className="mb-3 d-inline-flex justify-content-center">
+        {/* SHEIN-style 404 Illustration / Graphic */}
+        <div className="position-relative d-inline-block mb-3">
           <div
-            className="rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            className="shein-404-number text-dark user-select-none"
             style={{
-              width: 80,
-              height: 80,
-              backgroundColor: "rgba(220, 53, 69, 0.1)",
-              color: "#dc3545",
+              fontSize: "clamp(5rem, 15vw, 8rem)",
+              lineHeight: 1,
+              letterSpacing: "-0.04em",
+              fontFamily: "var(--bs-font-sans-serif, system-ui)",
+              color: "#111111",
+              fontWeight: 900,
             }}
           >
-            <i className="bi bi-shield-lock-fill" style={{ fontSize: "2.5rem" }} />
+            4<span style={{ color: "var(--celsa-gold, #b8863b)" }}>0</span>4
+          </div>
+
+          <div
+            className="position-absolute bottom-0 end-0 translate-middle-y rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            style={{
+              width: 52,
+              height: 52,
+              backgroundColor: "#f5f3ee",
+              border: "2px solid #ffffff",
+              color: "#222222",
+            }}
+          >
+            <i className="bi bi-bag-x fs-4" />
           </div>
         </div>
 
-        {/* Status Badge */}
-        <div className="mb-2">
-          <span
-            className="badge rounded-pill px-3 py-1.5 fw-bold text-uppercase"
-            style={{
-              backgroundColor: "rgba(220, 53, 69, 0.12)",
-              color: "#dc3545",
-              letterSpacing: "1px",
-              fontSize: "0.75rem",
-            }}
-          >
-            403 • Access Forbidden
-          </span>
-        </div>
+        {/* Heading in SHEIN bold uppercase style */}
+        <h2
+          className="fw-bold text-dark text-uppercase mb-2"
+          style={{
+            fontSize: "clamp(1.2rem, 3.5vw, 1.6rem)",
+            letterSpacing: "1.5px",
+          }}
+        >
+          {title}
+        </h2>
 
-        {/* Main Heading */}
-        <h3 className="fw-bold text-dark mb-2">Access Denied</h3>
-
-        {/* Informative Explanation */}
-        <p className="text-muted small mb-0 px-2" style={{ lineHeight: 1.6 }}>
-          {customMessage ||
-            `This section is restricted to authorized Celsa ${roleLabel} accounts only. You do not have sufficient permissions to view or interact with this portal.`}
+        {/* Subtitle description */}
+        <p
+          className="text-muted mx-auto mb-4"
+          style={{
+            maxWidth: 440,
+            fontSize: "0.92rem",
+            lineHeight: 1.6,
+          }}
+        >
+          {customMessage}
         </p>
 
-        {/* Current Account Details (if logged in as non-authorized user) */}
-        {isAuthenticated && user && (
-          <div
-            className="p-3 rounded-3 text-start mt-4 border"
-            style={{ backgroundColor: "#fdf8f4", borderColor: "#f3e1ce" }}
+        {/* SHEIN-style Action Buttons */}
+        <div className="d-flex flex-column flex-sm-row justify-content-center gap-2.5 mb-4 pb-2">
+          <Link
+            href="/products"
+            className="btn btn-dark fw-bold text-uppercase px-4 py-2.5 rounded-1 shadow-sm d-inline-flex align-items-center justify-content-center gap-2"
+            style={{
+              backgroundColor: "#111111",
+              borderColor: "#111111",
+              fontSize: "0.85rem",
+              letterSpacing: "1px",
+            }}
           >
-            <div className="d-flex align-items-center gap-2 mb-1">
-              <i className="bi bi-person-circle text-muted" />
-              <span className="small fw-semibold text-dark">
-                Signed in as: <strong>{user.name}</strong>
-              </span>
-            </div>
-            <div className="small text-muted mb-1 ms-4">{user.email}</div>
-            <div className="ms-4">
-              <span className="badge bg-secondary text-uppercase" style={{ fontSize: "0.68rem" }}>
-                Role: {user.role}
-              </span>
-            </div>
+            <i className="bi bi-bag me-1" />
+            Continue Shopping
+          </Link>
+          <Link
+            href="/"
+            className="btn btn-outline-dark fw-bold text-uppercase px-4 py-2.5 rounded-1 d-inline-flex align-items-center justify-content-center"
+            style={{
+              fontSize: "0.85rem",
+              letterSpacing: "1px",
+              borderWidth: "1.5px",
+            }}
+          >
+            Back to Home
+          </Link>
+        </div>
+
+        {/* Popular Categories / Trending Tags like SHEIN */}
+        <div className="pt-4 border-top" style={{ borderColor: "#eee" }}>
+          <div
+            className="text-muted text-uppercase fw-semibold mb-2.5"
+            style={{ fontSize: "0.72rem", letterSpacing: "1.2px" }}
+          >
+            Popular Categories
           </div>
-        )}
+          <div className="d-flex flex-wrap justify-content-center gap-2">
+            {[
+              { label: "Woven Bags", href: "/products" },
+              { label: "Baskets & Planters", href: "/products" },
+              { label: "Home Decor", href: "/products" },
+              { label: "Tabletop Crafts", href: "/products" },
+              { label: "Native Gifts", href: "/products" },
+            ].map((cat, i) => (
+              <Link
+                key={i}
+                href={cat.href}
+                className="badge bg-light text-dark border text-decoration-none py-2 px-3 fw-medium rounded-pill"
+                style={{
+                  fontSize: "0.78rem",
+                  borderColor: "#e5ded3",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {cat.label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
