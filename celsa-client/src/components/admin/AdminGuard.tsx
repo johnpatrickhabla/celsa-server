@@ -35,7 +35,10 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   // Strictly block anyone who is logged in but not an admin (e.g. customer or staff)
   if (user.role !== "admin") {
-    return <AccessDenied requiredRole="admin" />;
+    if (typeof window !== "undefined") {
+      router.replace("/?shein_error=not_found");
+    }
+    return null;
   }
 
   return <>{children}</>;

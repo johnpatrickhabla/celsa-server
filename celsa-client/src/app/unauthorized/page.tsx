@@ -1,5 +1,14 @@
-import AccessDenied from "@/components/shared/AccessDenied";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function UnauthorizedPage() {
-  return <AccessDenied requiredRole="admin" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/?shein_error=not_found");
+  }, [router]);
+
+  return null;
 }

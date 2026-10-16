@@ -35,7 +35,10 @@ export default function StaffGuard({ children }: { children: React.ReactNode }) 
 
   // Strictly block anyone who is not staff or admin
   if (user.role !== "staff" && user.role !== "admin") {
-    return <AccessDenied requiredRole="staff" />;
+    if (typeof window !== "undefined") {
+      router.replace("/?shein_error=not_found");
+    }
+    return null;
   }
 
   return <>{children}</>;

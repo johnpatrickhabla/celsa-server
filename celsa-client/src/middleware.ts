@@ -15,25 +15,25 @@ export function middleware(req: NextRequest) {
   );
 
   if (isProtectedAdminOrStaff) {
-    // Unauthenticated visitors trying to enter admin/staff
+    // Unauthenticated visitors trying to enter admin/staff -> stay on home page
     if (!user) {
-      const unauthorizedUrl = new URL("/unauthorized", req.url);
-      unauthorizedUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(unauthorizedUrl);
+      const homeUrl = new URL("/", req.url);
+      homeUrl.searchParams.set("shein_error", "not_found");
+      return NextResponse.redirect(homeUrl);
     }
 
-    // Customers can NEVER access /admin or /staff
+    // Customers can NEVER access /admin or /staff -> stay on home page
     if (user.role === "customer") {
-      const unauthorizedUrl = new URL("/unauthorized", req.url);
-      unauthorizedUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(unauthorizedUrl);
+      const homeUrl = new URL("/", req.url);
+      homeUrl.searchParams.set("shein_error", "not_found");
+      return NextResponse.redirect(homeUrl);
     }
 
-    // Staff cannot access /admin
+    // Staff cannot access /admin -> redirect to staff dashboard
     if (user.role === "staff" && (pathname === "/admin" || pathname.startsWith("/admin/"))) {
-      const unauthorizedUrl = new URL("/unauthorized", req.url);
-      unauthorizedUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(unauthorizedUrl);
+      const homeUrl = new URL("/", req.url);
+      homeUrl.searchParams.set("shein_error", "not_found");
+      return NextResponse.redirect(homeUrl);
     }
 
     // Admin-only sub-sections for staff
@@ -44,9 +44,14 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Allow auth endpoints & unauthorized page
+  // 2. Allow auth endpoints & redirect unauthorized to home
+  if (pathname === "/unauthorized") {
+    const homeUrl = new URL("/", req.url);
+    homeUrl.searchParams.set("shein_error", "not_found");
+    return NextResponse.redirect(homeUrl);
+  }
+
   if (
-    pathname === "/unauthorized" ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
     pathname.startsWith("/auth")
