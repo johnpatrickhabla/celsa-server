@@ -7,8 +7,9 @@ import { useCartStore } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useEffect, useState, useRef } from "react";
 import AuthModal from "@/components/auth/AuthModal";
+import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
 import api from "@/lib/api";
-import type { Notification, Category } from "@/lib/types";
+import type { Notification, Category, Product } from "@/lib/types";
 
 export default function CustomerNavbar() {
   const pathname = usePathname();
@@ -31,6 +32,23 @@ export default function CustomerNavbar() {
   const [navVisible, setNavVisible] = useState(true);
   const lastScrollY = useRef(0);
   const [navSearch, setNavSearch] = useState("");
+
+  // Product Details Modal state
+  const [modalProduct, setModalProduct] = useState<Product | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  async function handleOpenProductModal(slugOrId: string) {
+    try {
+      const res = await api.get(`/products/${slugOrId}`);
+      if (res.data?.product) {
+        setModalProduct(res.data.product);
+        setModalOpen(true);
+        setCartOpen(false);
+      }
+    } catch (err) {
+      console.error("Failed to load product modal:", err);
+    }
+  }
 
   // Product Categories Popover State
   const [categories, setCategories] = useState<Category[]>([]);
@@ -479,10 +497,14 @@ export default function CustomerNavbar() {
                             key={`${item.productId}-${index}`}
                             className="list-group-item p-3 border-0 border-bottom d-flex gap-2.5 align-items-center"
                           >
-                            {/* Product Thumbnail */}
+                            {/* Product Thumbnail - clickable to open modal */}
                             <div
                               className="bg-light rounded-3 d-flex align-items-center justify-content-center overflow-hidden flex-shrink-0 border"
-                              style={{ width: 50, height: 50 }}
+                              style={{ width: 50, height: 50, cursor: "pointer" }}
+                              onClick={() => handleOpenProductModal(item.productSlug || item.productId)}
+                              role="button"
+                              tabIndex={0}
+                              title={`View ${item.productName}`}
                             >
                               {item.productImage ? (
                                 <img
@@ -498,14 +520,14 @@ export default function CustomerNavbar() {
                             {/* Details */}
                             <div className="flex-grow-1 overflow-hidden pe-1">
                               <div className="d-flex justify-content-between align-items-start gap-1">
-                                <Link
-                                  href={`/products/${item.productSlug}`}
-                                  className="text-dark text-decoration-none fw-semibold small text-truncate d-block"
-                                  title={item.productName}
-                                  onClick={() => setCartOpen(false)}
+                                <button
+                                  type="button"
+                                  className="btn btn-link text-dark text-decoration-none fw-semibold small text-truncate d-block p-0 border-0 text-start"
+                                  title={`View ${item.productName}`}
+                                  onClick={() => handleOpenProductModal(item.productSlug || item.productId)}
                                 >
                                   {item.productName}
-                                </Link>
+                                </button>
                                 <button
                                   type="button"
                                   className="btn btn-link text-muted p-0 border-0 flex-shrink-0"
@@ -980,6 +1002,13 @@ export default function CustomerNavbar() {
         isOpen={authModal.isOpen}
         initialTab={authModal.tab}
         onClose={() => setAuthModal({ isOpen: false, tab: "login" })}
+      />
+
+      {/* Product Quick View Modal triggered from Cart Popover */}
+      <ProductDetailsModal
+        product={modalProduct}
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
       />
     </>
   );
