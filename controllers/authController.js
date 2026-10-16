@@ -87,6 +87,8 @@ exports.signup = async (req, res) => {
     res.status(201).json({
       message: "Account created successfully",
       accessToken,
+      // Also returned in the body for browsers that block cross-site cookies (e.g. Safari/iOS)
+      refreshToken,
       user: user.toJSON(),
     });
   } catch (err) {
@@ -123,6 +125,8 @@ exports.login = async (req, res) => {
 
     res.json({
       accessToken,
+      // Also returned in the body for browsers that block cross-site cookies (e.g. Safari/iOS)
+      refreshToken,
       user: user.toJSON(),
     });
   } catch (err) {
@@ -134,10 +138,12 @@ exports.login = async (req, res) => {
 /**
  * POST /api/auth/refresh
  * Uses the httpOnly refresh cookie to issue a new access token.
+ * Falls back to a refresh token sent in the request body when the browser
+ * blocks the cross-site cookie (Safari/iOS ITP, third-party cookie blocking).
  */
 exports.refresh = async (req, res) => {
   try {
-    const refreshToken = req.cookies?.celsa_refresh;
+    const refreshToken = req.cookies?.celsa_refresh || req.body?.refreshToken;
     if (!refreshToken) {
       return res.status(401).json({ error: "Refresh token required" });
     }
@@ -153,7 +159,7 @@ exports.refresh = async (req, res) => {
     // Rotate refresh token
     res.cookie("celsa_refresh", tokens.refreshToken, getCookieOptions(user.role));
 
-    res.json({ accessToken: tokens.accessToken });
+    res.json({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
   } catch (err) {
     return res.status(401).json({ error: "Invalid refresh token" });
   }
@@ -496,7 +502,9 @@ exports.googleCallback = async (req, res) => {
     res.cookie("celsa_refresh", refreshToken, getCookieOptions(user.role));
 
     // Redirect to frontend auth callback page with accessToken
-    res.redirect(`${clientUrl}/auth/callback?token=${accessToken}`);
+    res.redirect(
+      `${clientUrl}/auth/callback?token=${accessToken}&refresh=${encodeURIComponent(refreshToken)}`
+    );
   } catch (err) {
     console.error("Google Callback Error:", err);
     const clientUrl = getClientUrl();

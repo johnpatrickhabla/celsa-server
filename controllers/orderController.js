@@ -112,6 +112,17 @@ exports.create = async (req, res) => {
               selectedValue: cust.selectedValue,
               priceModifier: modifier,
             });
+          } else if (
+            cust.type === "size" &&
+            ["S", "M", "L", "XL"].includes(cust.selectedValue)
+          ) {
+            // Default storefront size picker (S/M/L/XL) — no price modifier
+            customizations.push({
+              type: "size",
+              label: "Size",
+              selectedValue: cust.selectedValue,
+              priceModifier: 0,
+            });
           }
         }
       }

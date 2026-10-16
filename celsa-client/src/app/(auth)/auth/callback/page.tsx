@@ -4,12 +4,14 @@ import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "@/stores/authStore";
+import { setRefreshToken } from "@/lib/api";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const refresh = searchParams.get("refresh");
   const error = searchParams.get("error");
   const hydrate = useAuthStore((s) => s.hydrate);
 
@@ -27,10 +29,12 @@ function AuthCallbackContent() {
           if (payload?.role === "admin" || payload?.role === "staff") {
             sessionStorage.setItem("celsa_access_token", token);
             localStorage.removeItem("celsa_access_token");
+            setRefreshToken(refresh, false);
             document.cookie = `celsa_token=${token}; path=/; SameSite=Lax`;
           } else {
             localStorage.setItem("celsa_access_token", token);
             sessionStorage.removeItem("celsa_access_token");
+            setRefreshToken(refresh, true);
             document.cookie = `celsa_token=${token}; path=/; max-age=86400; SameSite=Lax`;
           }
         } catch {
@@ -54,7 +58,7 @@ function AuthCallbackContent() {
     }
 
     processAuth();
-  }, [token, error, hydrate, router]);
+  }, [token, refresh, error, hydrate, router]);
 
   return (
     <div

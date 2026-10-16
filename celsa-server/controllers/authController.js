@@ -17,11 +17,11 @@ function generateTokens(user) {
     expiresIn: process.env.JWT_EXPIRES_IN || "15m",
   });
 
-  // Customer sessions expire in 1 day; staff/admin default to 7 days
+  // Customer sessions expire in 1 day; staff/admin session token
   const isCustomer = user.role === "customer";
   const refreshExpiresIn = isCustomer
     ? process.env.JWT_CUSTOMER_REFRESH_EXPIRES_IN || "1d"
-    : process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+    : process.env.JWT_REFRESH_EXPIRES_IN || "8h";
 
   const refreshToken = jwt.sign(
     { sub: user._id, role: user.role },
@@ -34,22 +34,25 @@ function generateTokens(user) {
 
 /**
  * Get cookie configuration options based on environment and user role.
- * Customers receive a 1-day cookie; staff/admin receive 7 days.
+ * Customers receive a 1-day cookie; staff/admin receive session cookie (no maxAge).
  */
 function getCookieOptions(role) {
   const isProd = process.env.NODE_ENV === "production";
   const isCustomer = role === "customer";
-  const maxAge = isCustomer
-    ? 24 * 60 * 60 * 1000 // 1 day for customer portal
-    : 7 * 24 * 60 * 60 * 1000; // 7 days for staff/admin
 
-  return {
+  const options = {
     httpOnly: true,
     secure: isProd,
     sameSite: process.env.COOKIE_SAME_SITE || (isProd ? "none" : "lax"),
-    maxAge,
     path: "/",
   };
+
+  if (isCustomer) {
+    options.maxAge = 24 * 60 * 60 * 1000; // 1 day for customer portal
+  }
+  // For staff/admin: maxAge is omitted so cookie is deleted when browser session ends
+
+  return options;
 }
 
 /**
@@ -84,6 +87,8 @@ exports.signup = async (req, res) => {
     res.status(201).json({
       message: "Account created successfully",
       accessToken,
+      // Also returned in the body for browsers that block cross-site cookies (e.g. Safari/iOS)
+      refreshToken,
       user: user.toJSON(),
     });
   } catch (err) {
@@ -120,6 +125,8 @@ exports.login = async (req, res) => {
 
     res.json({
       accessToken,
+      // Also returned in the body for browsers that block cross-site cookies (e.g. Safari/iOS)
+      refreshToken,
       user: user.toJSON(),
     });
   } catch (err) {
@@ -131,10 +138,12 @@ exports.login = async (req, res) => {
 /**
  * POST /api/auth/refresh
  * Uses the httpOnly refresh cookie to issue a new access token.
+ * Falls back to a refresh token sent in the request body when the browser
+ * blocks the cross-site cookie (Safari/iOS ITP, third-party cookie blocking).
  */
 exports.refresh = async (req, res) => {
   try {
-    const refreshToken = req.cookies?.celsa_refresh;
+    const refreshToken = req.cookies?.celsa_refresh || req.body?.refreshToken;
     if (!refreshToken) {
       return res.status(401).json({ error: "Refresh token required" });
     }
@@ -150,7 +159,7 @@ exports.refresh = async (req, res) => {
     // Rotate refresh token
     res.cookie("celsa_refresh", tokens.refreshToken, getCookieOptions(user.role));
 
-    res.json({ accessToken: tokens.accessToken });
+    res.json({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
   } catch (err) {
     return res.status(401).json({ error: "Invalid refresh token" });
   }
@@ -493,7 +502,9 @@ exports.googleCallback = async (req, res) => {
     res.cookie("celsa_refresh", refreshToken, getCookieOptions(user.role));
 
     // Redirect to frontend auth callback page with accessToken
-    res.redirect(`${clientUrl}/auth/callback?token=${accessToken}`);
+    res.redirect(
+      `${clientUrl}/auth/callback?token=${accessToken}&refresh=${encodeURIComponent(refreshToken)}`
+    );
   } catch (err) {
     console.error("Google Callback Error:", err);
     const clientUrl = getClientUrl();

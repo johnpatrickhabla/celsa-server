@@ -88,6 +88,11 @@ export default function CustomOrdersPage() {
       setReferenceImageUrl(res.data.url);
     } catch (err: unknown) {
       console.error("Image upload failed:", err);
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 401) {
+        setUploadError("Your session has expired. Please log in again to upload an image.");
+        return;
+      }
       const msg =
         err && typeof err === "object" && "response" in err
           ? (err as { response: { data: { error: string } } }).response?.data?.error

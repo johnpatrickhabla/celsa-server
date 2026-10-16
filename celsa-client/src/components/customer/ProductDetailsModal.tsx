@@ -10,12 +10,16 @@ interface ProductDetailsModalProps {
   onClose: () => void;
 }
 
+const DEFAULT_SIZES = ["S", "M", "L", "XL"] as const;
+
 export default function ProductDetailsModal({ product, isOpen, onClose }: ProductDetailsModalProps) {
   const addItem = useCartStore((s) => s.addItem);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [selections, setSelections] = useState<Record<string, string>>({});
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [sizeError, setSizeError] = useState(false);
 
   // Reset local state when product changes or modal opens
   useEffect(() => {
@@ -23,6 +27,8 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
       setSelectedImage(0);
       setQuantity(1);
       setAddedToCart(false);
+      setSelectedSize("");
+      setSizeError(false);
 
       // Initialize selections with first choice for required options
       const initialSelections: Record<string, string> = {};
@@ -59,15 +65,29 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
   }
   const currentPrice = basePrice + totalModifier;
 
+  // Show the default S/M/L/XL picker only if the product has no size option of its own
+  const hasOwnSizeOption = product.customizationOptions.some((o) => o.type === "size");
+  const showDefaultSizes = !hasOwnSizeOption;
+
   function handleAddToCart() {
     if (!product) return;
+    if (showDefaultSizes && !selectedSize) {
+      setSizeError(true);
+      return;
+    }
+    const cartCustomizations = showDefaultSizes
+      ? [
+          { type: "size", label: "Size", selectedValue: selectedSize, priceModifier: 0 },
+          ...customizationsForCart,
+        ]
+      : customizationsForCart;
     addItem({
       productId: product._id,
       productName: product.name,
       productSlug: product.slug,
       productImage: product.images.length > 0 ? product.images[0].url : "",
       basePrice: product.basePrice,
-      customizations: customizationsForCart,
+      customizations: cartCustomizations,
       quantity,
     });
     setAddedToCart(true);
@@ -213,6 +233,58 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                   <p className="text-muted small mb-3" style={{ lineHeight: 1.6 }}>
                     {product.description}
                   </p>
+
+                  {/* Size Selector (default S / M / L / XL) */}
+                  {showDefaultSizes && (
+                    <div className="mb-3">
+                      <div className="d-flex justify-content-between align-items-center mb-1">
+                        <label className="form-label small fw-semibold text-muted mb-0" style={{ fontSize: "0.8rem" }}>
+                          Size<span className="text-danger ms-1">*</span>
+                        </label>
+                        {selectedSize && (
+                          <span className="small" style={{ color: "#8c6b2d", fontSize: "0.78rem" }}>
+                            Selected: <strong>{selectedSize}</strong>
+                          </span>
+                        )}
+                      </div>
+                      <div className="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select size">
+                        {DEFAULT_SIZES.map((size) => {
+                          const isSelected = selectedSize === size;
+                          return (
+                            <button
+                              key={size}
+                              id={`quickview-size-${size.toLowerCase()}`}
+                              type="button"
+                              role="radio"
+                              aria-checked={isSelected}
+                              className={`btn btn-sm fw-semibold ${
+                                isSelected ? "btn-success shadow-sm" : "btn-outline-secondary bg-white text-dark"
+                              }`}
+                              style={{
+                                minWidth: 48,
+                                height: 40,
+                                fontSize: "0.85rem",
+                                borderColor: isSelected ? "#198754" : sizeError ? "#dc3545" : "#ebdcc5",
+                                transition: "all 0.15s ease",
+                              }}
+                              onClick={() => {
+                                setSelectedSize(size);
+                                setSizeError(false);
+                              }}
+                            >
+                              {size}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {sizeError && (
+                        <div className="text-danger small mt-1" style={{ fontSize: "0.78rem" }}>
+                          <i className="bi bi-exclamation-circle me-1" />
+                          Please select a size.
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Customization Options */}
                   {product.customizationOptions.length > 0 ? (

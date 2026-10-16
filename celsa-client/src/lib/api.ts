@@ -17,6 +17,39 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ── Refresh token fallback storage ──────────────────────────────────────────
+// The API lives on a different site than the client, so some browsers
+// (Safari/iOS ITP, Brave, Chrome w/ third-party cookies blocked) never send
+// the httpOnly `celsa_refresh` cookie. We keep a copy of the refresh token in
+// the same storage as the access token and send it in the refresh body.
+export const REFRESH_TOKEN_KEY = "celsa_refresh_token";
+
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return (
+    sessionStorage.getItem(REFRESH_TOKEN_KEY) ||
+    localStorage.getItem(REFRESH_TOKEN_KEY)
+  );
+}
+
+/** persistent=true → localStorage (customers); false → sessionStorage (admin/staff) */
+export function setRefreshToken(token: string | null | undefined, persistent: boolean) {
+  if (typeof window === "undefined" || !token) return;
+  if (persistent) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  } else {
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, token);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
+}
+
+export function clearRefreshToken() {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
 // Auto-refresh token on 401 Unauthorized
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -61,7 +94,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await api.post("/auth/refresh");
+        const res = await api.post("/auth/refresh", { refreshToken: getRefreshToken() });
         const newToken = res.data?.accessToken;
 
         if (newToken) {
@@ -74,6 +107,7 @@ api.interceptors.response.use(
           } else {
             localStorage.setItem("celsa_access_token", newToken);
           }
+          setRefreshToken(res.data?.refreshToken, !wasInSession);
 
           api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
           originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
@@ -86,6 +120,7 @@ api.interceptors.response.use(
         if (typeof window !== "undefined") {
           sessionStorage.removeItem("celsa_access_token");
           localStorage.removeItem("celsa_access_token");
+          clearRefreshToken();
           document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
         }
         return Promise.reject(refreshErr);

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { jwtDecode } from "jwt-decode";
-import api from "@/lib/api";
+import api, { getRefreshToken, setRefreshToken, clearRefreshToken } from "@/lib/api";
 
 export interface UserPayload {
   _id: string;
@@ -57,6 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Admin/staff sessions must NEVER survive a closed tab.
     if (isAdminOrStaffRoute && !sessionToken) {
       localStorage.removeItem("celsa_access_token");
+      clearRefreshToken();
       document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
       set({ user: null, accessToken: null, isAuthenticated: false });
       return;
@@ -71,6 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           // If the token belongs to admin or staff, ensure it was strictly stored in sessionStorage
           if ((payload.role === "admin" || payload.role === "staff") && !sessionToken) {
             localStorage.removeItem("celsa_access_token");
+            clearRefreshToken();
             document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
             set({ user: null, accessToken: null, isAuthenticated: false });
             return;
@@ -97,6 +99,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (isAdminOrStaffRoute) {
       localStorage.removeItem("celsa_access_token");
       sessionStorage.removeItem("celsa_access_token");
+      clearRefreshToken();
       document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
       set({ user: null, accessToken: null, isAuthenticated: false });
       return;
@@ -108,7 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
-    const { accessToken, user } = res.data;
+    const { accessToken, refreshToken, user } = res.data;
 
     if (user?.role === "admin" || user?.role === "staff") {
       sessionStorage.setItem("celsa_access_token", accessToken);
@@ -117,6 +120,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       localStorage.setItem("celsa_access_token", accessToken);
       sessionStorage.removeItem("celsa_access_token");
     }
+    setRefreshToken(refreshToken, !(user?.role === "admin" || user?.role === "staff"));
     setClientCookie(accessToken, user?.role);
 
     set({
@@ -128,11 +132,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signup: async (name, email, password) => {
     const res = await api.post("/auth/signup", { name, email, password });
-    const { accessToken, user } = res.data;
+    const { accessToken, refreshToken, user } = res.data;
 
     if (accessToken) {
       localStorage.setItem("celsa_access_token", accessToken);
       sessionStorage.removeItem("celsa_access_token");
+      setRefreshToken(refreshToken, true);
       setClientCookie(accessToken, user?.role);
 
       set({
@@ -153,6 +158,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (typeof window !== "undefined") {
       localStorage.removeItem("celsa_access_token");
       sessionStorage.removeItem("celsa_access_token");
+      clearRefreshToken();
       document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
     }
     set({ user: null, accessToken: null, isAuthenticated: false });
@@ -163,8 +169,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refresh: async () => {
     try {
-      const res = await api.post("/auth/refresh");
-      const { accessToken } = res.data;
+      const res = await api.post("/auth/refresh", { refreshToken: getRefreshToken() });
+      const { accessToken, refreshToken } = res.data;
       const payload = jwtDecode<CelsaJwtPayload>(accessToken);
 
       if (payload.role === "admin" || payload.role === "staff") {
@@ -174,6 +180,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.setItem("celsa_access_token", accessToken);
         sessionStorage.removeItem("celsa_access_token");
       }
+      setRefreshToken(refreshToken, !(payload.role === "admin" || payload.role === "staff"));
       setClientCookie(accessToken, payload.role);
 
       set({
@@ -191,6 +198,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (typeof window !== "undefined") {
         localStorage.removeItem("celsa_access_token");
         sessionStorage.removeItem("celsa_access_token");
+        clearRefreshToken();
         document.cookie = "celsa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
       }
       set({ user: null, accessToken: null, isAuthenticated: false });
