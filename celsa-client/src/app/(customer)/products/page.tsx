@@ -9,6 +9,7 @@ import { useCartStore } from "@/stores/cartStore";
 import ProductDetailsModal from "@/components/customer/ProductDetailsModal";
 import ProductCard from "@/components/customer/ProductCard";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import PageLoader from "@/components/shared/PageLoader";
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -73,16 +74,12 @@ function ProductsContent() {
       >
         {/* Product Grid */}
         {loading ? (
-          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 g-md-3">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div className="col" key={i}>
-                <div className="border rounded p-3 h-100 bg-white shadow-sm">
-                  <div className="celsa-skeleton" style={{ height: 180, borderRadius: "0.4rem", marginBottom: "0.5rem" }} />
-                  <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
-                  <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
-                </div>
-              </div>
-            ))}
+          <div className="py-4">
+            <PageLoader
+              message="CELSA CATALOG"
+              submessage="Curating handcrafted collection..."
+              minHeight="380px"
+            />
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-5 text-muted">
@@ -152,7 +149,15 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<LoadingSkeleton variant="productGrid" />}>
+    <Suspense
+      fallback={
+        <PageLoader
+          message="CELSA CATALOG"
+          submessage="Curating handcrafted collection..."
+          minHeight="60vh"
+        />
+      }
+    >
       <ProductsContent />
     </Suspense>
   );

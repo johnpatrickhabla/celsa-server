@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import api from "@/lib/api";
+import PageLoader from "@/components/shared/PageLoader";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { useCartStore } from "@/stores/cartStore";
 import type { Product, HeroSlide } from "@/lib/types";
@@ -224,18 +225,17 @@ export default function HomePage() {
               View All
             </Link>
           </div>
-          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 g-md-3">
-            {loading
-              ? Array.from({ length: 5 }).map((_, i) => (
-                <div className="col" key={i}>
-                  <div className="border rounded p-3 h-100 bg-white shadow-sm">
-                    <div className="celsa-skeleton" style={{ height: 180, borderRadius: "0.5rem", marginBottom: "0.75rem" }} />
-                    <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "70%" }} />
-                    <div className="celsa-skeleton celsa-skeleton-line" style={{ width: "40%" }} />
-                  </div>
-                </div>
-              ))
-              : featured.map((p) => (
+          {loading ? (
+            <div className="w-100 py-3">
+              <PageLoader
+                message="FEATURED COLLECTION"
+                submessage="Loading popular handcrafted items..."
+                minHeight="240px"
+              />
+            </div>
+          ) : (
+            <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 g-md-3">
+              {featured.map((p) => (
                 <div className="col" key={p._id}>
                   <ProductCard
                     product={p}
@@ -247,7 +247,8 @@ export default function HomePage() {
                   />
                 </div>
               ))}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 

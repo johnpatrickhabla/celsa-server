@@ -37,15 +37,12 @@ const SkeletonCard = ({ height = "120px" }: { height?: string }) => (
   <Skeleton className="celsa-skeleton-card" style={{ height }} />
 );
 
+import PageLoader from "./PageLoader";
+
 /* ---------- composed variants ---------- */
 
-function Spinner() {
-  return (
-    <div className="celsa-loading-wrapper">
-      <div className="celsa-spinner" />
-      <span className="celsa-loading-text">Loading…</span>
-    </div>
-  );
+function Spinner({ message, submessage }: { message?: string; submessage?: string }) {
+  return <PageLoader message={message} submessage={submessage} />;
 }
 
 function DashboardSkeleton() {
@@ -241,22 +238,29 @@ export type LoadingVariant =
 
 interface LoadingSkeletonProps {
   variant?: LoadingVariant;
+  message?: string;
+  submessage?: string;
 }
 
-export default function LoadingSkeleton({ variant = "spinner" }: LoadingSkeletonProps) {
-  switch (variant) {
-    case "dashboard":     return <DashboardSkeleton />;
-    case "table":         return <TableSkeleton />;
-    case "cardGrid":      return <CardGridSkeleton />;
-    case "productGrid":   return <ProductGridSkeleton />;
-    case "productDetail": return <ProductDetailSkeleton />;
-    case "contentBlock":  return <ContentBlockSkeleton />;
-    case "formCard":      return <FormCardSkeleton />;
-    case "cartLayout":    return <CartSkeleton />;
-    case "checkoutLayout":return <CheckoutSkeleton />;
-    case "orderList":     return <OrderListSkeleton />;
-    case "customOrders":  return <CustomOrdersSkeleton />;
-    case "formRows":      return <FormRowsSkeleton />;
-    default:              return <Spinner />;
-  }
+export default function LoadingSkeleton({
+  variant = "spinner",
+  message,
+  submessage,
+}: LoadingSkeletonProps) {
+  let defaultSub = "Loading handcrafted experience...";
+  if (variant === "dashboard") defaultSub = "Loading dashboard analytics...";
+  else if (variant === "table" || variant === "orderList") defaultSub = "Loading records & data...";
+  else if (variant === "productGrid" || variant === "productDetail") defaultSub = "Loading handcrafted collection...";
+  else if (variant === "customOrders") defaultSub = "Loading custom order studio...";
+  else if (variant === "cartLayout") defaultSub = "Loading shopping cart...";
+  else if (variant === "checkoutLayout") defaultSub = "Preparing secure checkout...";
+  else if (variant === "formCard" || variant === "formRows") defaultSub = "Loading information...";
+
+  return (
+    <PageLoader
+      message={message || "CELSA HANDICRAFTS"}
+      submessage={submessage || defaultSub}
+      minHeight={variant === "table" || variant === "formRows" ? "50vh" : "65vh"}
+    />
+  );
 }
